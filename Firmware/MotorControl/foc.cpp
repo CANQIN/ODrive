@@ -32,7 +32,8 @@ Motor::Error AlphaBetaFrameController::get_output(
         return Motor::ERROR_MODULATION_IS_NAN;
     }
 
-    auto [tA, tB, tC, success] = SVM(mod_alpha_beta->first, mod_alpha_beta->second);
+    float tA, tB, tC;
+    bool success = SVM(mod_alpha_beta->first, mod_alpha_beta->second, &tA, &tB, &tC);
     if (!success) {
         return Motor::ERROR_MODULATION_MAGNITUDE;
     }

@@ -23,7 +23,7 @@ __attribute__((section(".ccmram")))
 uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
 uint32_t _reboot_cookie __attribute__ ((section (".noinit")));
-extern char _estack; // provided by the linker script
+// extern char _estack; // provided by the linker script
 
 
 ODrive odrv{};
@@ -622,7 +622,7 @@ extern "C" void early_start_checks(void) {
     to function correctly. Therefore it's easier to just reset the entire chip. */
     if(_reboot_cookie == 0xDEADBEEF) {
         _reboot_cookie = 0xCAFEFEED;  //Reset bootloader trigger
-        __set_MSP((uintptr_t)&_estack);
+        // __set_MSP((uintptr_t)&_estack);
         // http://www.st.com/content/ccc/resource/technical/document/application_note/6a/17/92/02/58/98/45/0c/CD00264379.pdf/files/CD00264379.pdf
         void (*builtin_bootloader)(void) = (void (*)(void))(*((uint32_t *)0x1FFF0004));
         builtin_bootloader();

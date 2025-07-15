@@ -54,6 +54,10 @@ public:
         float spinout_electrical_power_threshold = 10.0f; // [W] electrical power threshold for spinout detection
         float spinout_mechanical_power_threshold = -10.0f; // [W] mechanical power threshold for spinout detection
 
+        float duty_gain;
+        float duty_integrator_gain;
+        float duty_ramp_rate;
+
         // custom setters
         Controller* parent;
         void set_input_filter_bandwidth(float value) { input_filter_bandwidth = value; parent->update_filter_gains(); }
@@ -125,6 +129,9 @@ public:
     bool anticogging_valid_ = false;
     float mechanical_power_ = 0.0f; // [W]
     float electrical_power_ = 0.0f; // [W]
+
+    float input_duty_;
+    float duty_setpoint_;
 
     // Outputs
     OutputPort<float> torque_output_ = 0.0f;

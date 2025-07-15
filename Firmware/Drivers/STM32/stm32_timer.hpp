@@ -58,8 +58,10 @@ private:
             htim->Instance->CNT = counters[i];
         }
 
-        register volatile uint32_t* cr_addr[I];
-        register uint32_t cr_val[I];
+        // register volatile uint32_t* cr_addr[I];
+        // register uint32_t cr_val[I];
+        volatile uint32_t* cr_addr[I];
+        uint32_t cr_val[I];
         for (size_t i = 0; i < I; ++i) {
             cr_addr[i] = &timers[i]->Instance->CR1;
             cr_val[i] = timers[i]->Instance->CR1 | TIM_CR1_CEN;

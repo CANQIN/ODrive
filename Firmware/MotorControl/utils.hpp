@@ -64,7 +64,7 @@ constexpr float two_by_sqrt3 = 1.15470053838f;
 constexpr float sqrt3_by_2 = 0.86602540378f;
 
 // Function prototypes for implementations in utils.cpp
-std::tuple<float, float, float, bool> SVM(float alpha, float beta);
+bool SVM(float alpha, float beta, float *_tA, float *_tB, float *_tC);
 float fast_atan2(float y, float x);
 uint32_t deadline_to_timeout(uint32_t deadline_ms);
 uint32_t timeout_to_deadline(uint32_t timeout_ms);
@@ -98,7 +98,7 @@ std::array<T, 1 + sizeof...(Tail)> make_array(T head, Tail... tail) {
 
 // To allow use of -ffast-math we need to have a special check for nan
 // that bypasses the "ignore nan" flag
-__attribute__((optimize("-fno-finite-math-only")))
+//__attribute__((optimize("-fno-finite-math-only")))
 inline bool is_nan(float x) {
     return __builtin_isnan(x);
 }
@@ -106,15 +106,15 @@ inline bool is_nan(float x) {
 // Round to integer
 // Default rounding mode: round to nearest
 inline int round_int(float x) {
-#ifdef __arm__
-    int res;
-    asm("vcvtr.s32.f32   %[res], %[x]"
-        : [res] "=X" (res)
-        : [x] "w" (x) );
-    return res;
-#else
+//#ifdef __arm__
+//    int res;
+//    asm("vcvtr.s32.f32   %[res], %[x]"
+//        : [res] "=X" (res)
+//        : [x] "w" (x) );
+//    return res;
+//#else
     return (int)nearbyint(x);
-#endif
+//#endif
 }
 
 // Wrap value to range.

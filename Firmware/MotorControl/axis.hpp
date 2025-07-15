@@ -184,6 +184,11 @@ public:
     Endstop& max_endstop_;
     MechanicalBrake& mechanical_brake_;
     TaskTimes task_times_;
+    
+    struct Test_t {
+        uint8_t test_type_;
+    };
+    Test_t test_;
 
     osThreadId thread_id_ = 0;
     const uint32_t stack_size_ = 2048; // Bytes

@@ -96,7 +96,7 @@ struct InductanceMeasurementControlLaw : AlphaBetaFrameController {
             uint32_t input_timestamp) final
     {
         if (!Ialpha_beta.has_value()) {
-            return {Motor::ERROR_UNKNOWN_CURRENT_MEASUREMENT};
+            return (Motor::ERROR_UNKNOWN_CURRENT_MEASUREMENT);
         }
 
         float Ialpha = Ialpha_beta->first;

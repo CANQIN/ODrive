@@ -1,0 +1,2238 @@
+	.text
+	.syntax unified
+	.eabi_attribute	67, "2.09"	@ Tag_conformance
+	.cpu	cortex-m4
+	.eabi_attribute	6, 13	@ Tag_CPU_arch
+	.eabi_attribute	7, 77	@ Tag_CPU_arch_profile
+	.eabi_attribute	8, 0	@ Tag_ARM_ISA_use
+	.eabi_attribute	9, 2	@ Tag_THUMB_ISA_use
+	.fpu	fpv4-sp-d16
+	.eabi_attribute	27, 1	@ Tag_ABI_HardFP_use
+	.eabi_attribute	36, 1	@ Tag_FP_HP_extension
+	.eabi_attribute	34, 1	@ Tag_CPU_unaligned_access
+	.eabi_attribute	17, 1	@ Tag_ABI_PCS_GOT_use
+	.eabi_attribute	20, 2	@ Tag_ABI_FP_denormal
+	.eabi_attribute	21, 0	@ Tag_ABI_FP_exceptions
+	.eabi_attribute	23, 1	@ Tag_ABI_FP_number_model
+	.eabi_attribute	24, 1	@ Tag_ABI_align_needed
+	.eabi_attribute	25, 1	@ Tag_ABI_align_preserved
+	.eabi_attribute	28, 1	@ Tag_ABI_VFP_args
+	.eabi_attribute	38, 1	@ Tag_ABI_FP_16bit_format
+	.eabi_attribute	18, 2	@ Tag_ABI_PCS_wchar_t
+	.eabi_attribute	26, 1	@ Tag_ABI_enum_size
+	.eabi_attribute	14, 0	@ Tag_ABI_PCS_R9_use
+	.file	"stm32f4xx_hal_rcc_ex.c"
+	.file	1 "D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" "../ThirdParty/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+	.file	2 "D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" "../ThirdParty/CMSIS/Device/ST/STM32F4xx/Include\\stm32f4xx.h"
+	.file	3 "D:\\Embed\\MDK\\MDK\\ARM\\ARMCompilerV621\\Bin\\..\\include" "stdint.h"
+	.file	4 "D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" "../ThirdParty/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h"
+	.section	.text.HAL_RCCEx_PeriphCLKConfig,"ax",%progbits
+	.hidden	HAL_RCCEx_PeriphCLKConfig       @ -- Begin function HAL_RCCEx_PeriphCLKConfig
+	.globl	HAL_RCCEx_PeriphCLKConfig
+	.p2align	2
+	.type	HAL_RCCEx_PeriphCLKConfig,%function
+	.code	16                              @ @HAL_RCCEx_PeriphCLKConfig
+	.thumb_func
+HAL_RCCEx_PeriphCLKConfig:
+.Lfunc_begin0:
+	.file	5 "D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" "../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c"
+	.loc	5 2520 0                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2520:0
+	.fnstart
+	.cfi_sections .debug_frame
+	.cfi_startproc
+@ %bb.0:
+	.save	{r7, lr}
+	push	{r7, lr}
+	.cfi_def_cfa_offset 8
+	.cfi_offset lr, -4
+	.cfi_offset r7, -8
+	.pad	#24
+	sub	sp, #24
+	.cfi_def_cfa_offset 32
+	str	r0, [sp, #16]
+	movs	r0, #0
+.Ltmp0:
+	.loc	5 2521 12 prologue_end          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2521:12
+	str	r0, [sp, #12]
+	.loc	5 2522 12                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2522:12
+	str	r0, [sp, #8]
+.Ltmp1:
+	.loc	5 2528 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2528:9
+	ldr	r0, [sp, #16]
+	.loc	5 2528 89 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2528:89
+	ldrb	r0, [r0]
+	lsls	r0, r0, #31
+	cbnz	r0, .LBB0_2
+	b	.LBB0_1
+.LBB0_1:
+	.loc	5 2529 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2529:9
+	ldr	r0, [sp, #16]
+.Ltmp2:
+	.loc	5 2528 6                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2528:6
+	ldrb	r0, [r0]
+	lsls	r0, r0, #29
+	cmp	r0, #0
+	bpl	.LBB0_13
+	b	.LBB0_2
+.LBB0_2:
+	.loc	5 0 6 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:6
+	movs	r1, #104
+	movt	r1, #16967
+	movs	r0, #0
+.Ltmp3:
+	.loc	5 2538 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2538:5
+	str	r0, [r1]
+	.loc	5 2540 17                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2540:17
+	bl	HAL_GetTick
+	.loc	5 2540 15 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2540:15
+	str	r0, [sp, #12]
+	.loc	5 2542 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2542:5
+	b	.LBB0_3
+.LBB0_3:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 2542 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2542:11
+	ldr	r0, [r0]
+	and	r1, r0, #134217728
+	movs	r0, #0
+	.loc	5 2542 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2542:5
+	cmp.w	r0, r1, lsr #27
+	beq	.LBB0_7
+	b	.LBB0_4
+.LBB0_4:                                @   in Loop: Header=BB0_3 Depth=1
+.Ltmp4:
+	.loc	5 2544 11 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2544:11
+	bl	HAL_GetTick
+	.loc	5 2544 27 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2544:27
+	ldr	r1, [sp, #12]
+	.loc	5 2544 25                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2544:25
+	subs	r0, r0, r1
+.Ltmp5:
+	.loc	5 2544 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2544:10
+	cmp	r0, #3
+	blo	.LBB0_6
+	b	.LBB0_5
+.LBB0_5:
+	.loc	5 0 10                          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:10
+	movs	r0, #3
+.Ltmp6:
+	.loc	5 2547 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2547:9
+	strb.w	r0, [sp, #23]
+	b	.LBB0_38
+.Ltmp7:
+.LBB0_6:                                @   in Loop: Header=BB0_3 Depth=1
+	.loc	5 2542 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2542:5
+	b	.LBB0_3
+.LBB0_7:
+	.loc	5 2560 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2560:5
+	ldr	r1, [sp, #16]
+	ldr	r0, [r1, #4]
+	ldr	r1, [r1, #8]
+	lsls	r0, r0, #6
+	orr.w	r0, r0, r1, lsl #28
+	movw	r1, #14468
+	movt	r1, #16386
+	str	r0, [r1]
+	movs	r1, #104
+	movt	r1, #16967
+	movs	r0, #1
+	.loc	5 2564 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2564:5
+	str	r0, [r1]
+	.loc	5 2566 17                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2566:17
+	bl	HAL_GetTick
+	.loc	5 2566 15 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2566:15
+	str	r0, [sp, #12]
+	.loc	5 2568 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2568:5
+	b	.LBB0_8
+.LBB0_8:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 2568 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2568:11
+	ldr	r0, [r0]
+	and	r1, r0, #134217728
+	movs	r0, #0
+	.loc	5 2568 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2568:5
+	cmp.w	r0, r1, lsr #27
+	bne	.LBB0_12
+	b	.LBB0_9
+.LBB0_9:                                @   in Loop: Header=BB0_8 Depth=1
+.Ltmp8:
+	.loc	5 2570 11 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2570:11
+	bl	HAL_GetTick
+	.loc	5 2570 27 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2570:27
+	ldr	r1, [sp, #12]
+	.loc	5 2570 25                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2570:25
+	subs	r0, r0, r1
+.Ltmp9:
+	.loc	5 2570 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2570:10
+	cmp	r0, #3
+	blo	.LBB0_11
+	b	.LBB0_10
+.LBB0_10:
+	.loc	5 0 10                          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:10
+	movs	r0, #3
+.Ltmp10:
+	.loc	5 2573 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2573:9
+	strb.w	r0, [sp, #23]
+	b	.LBB0_38
+.Ltmp11:
+.LBB0_11:                               @   in Loop: Header=BB0_8 Depth=1
+	.loc	5 2568 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2568:5
+	b	.LBB0_8
+.LBB0_12:
+	.loc	5 2576 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2576:3
+	b	.LBB0_13
+.Ltmp12:
+.LBB0_13:
+	.loc	5 2579 8                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2579:8
+	ldr	r0, [sp, #16]
+.Ltmp13:
+	.loc	5 2579 6 is_stmt 0              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2579:6
+	ldrb	r0, [r0]
+	lsls	r0, r0, #30
+	cmp	r0, #0
+	bpl.w	.LBB0_37
+	b	.LBB0_14
+.LBB0_14:
+.Ltmp14:
+	.loc	5 2585 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2585:5
+	b	.LBB0_15
+.LBB0_15:
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movs	r0, #0
+.Ltmp15:
+	.loc	5 2585 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2585:5
+	str	r0, [sp, #4]
+	movw	r0, #14400
+	movt	r0, #16386
+	ldr	r1, [r0]
+	orr	r1, r1, #268435456
+	str	r1, [r0]
+	ldr	r0, [r0]
+	and	r0, r0, #268435456
+	str	r0, [sp, #4]
+	ldr	r0, [sp, #4]
+	b	.LBB0_16
+.Ltmp16:
+.LBB0_16:
+	.loc	5 0 5                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r1, #28672
+	movt	r1, #16384
+	.loc	5 2588 13 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2588:13
+	ldr	r0, [r1]
+	orr	r0, r0, #256
+	str	r0, [r1]
+	.loc	5 2591 17                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2591:17
+	bl	HAL_GetTick
+	.loc	5 2591 15 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2591:15
+	str	r0, [sp, #12]
+	.loc	5 2593 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2593:5
+	b	.LBB0_17
+.LBB0_17:                               @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r0, #28672
+	movt	r0, #16384
+	.loc	5 2593 17                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2593:17
+	ldr	r0, [r0]
+	.loc	5 2593 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2593:5
+	lsls	r0, r0, #23
+	cmp	r0, #0
+	bmi	.LBB0_21
+	b	.LBB0_18
+.LBB0_18:                               @   in Loop: Header=BB0_17 Depth=1
+.Ltmp17:
+	.loc	5 2595 11 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2595:11
+	bl	HAL_GetTick
+	.loc	5 2595 27 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2595:27
+	ldr	r1, [sp, #12]
+	.loc	5 2595 25                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2595:25
+	subs	r0, r0, r1
+.Ltmp18:
+	.loc	5 2595 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2595:10
+	cmp	r0, #3
+	blo	.LBB0_20
+	b	.LBB0_19
+.LBB0_19:
+	.loc	5 0 10                          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:10
+	movs	r0, #3
+.Ltmp19:
+	.loc	5 2597 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2597:9
+	strb.w	r0, [sp, #23]
+	b	.LBB0_38
+.Ltmp20:
+.LBB0_20:                               @   in Loop: Header=BB0_17 Depth=1
+	.loc	5 2593 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2593:5
+	b	.LBB0_17
+.LBB0_21:
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r0, #14448
+	movt	r0, #16386
+	.loc	5 2601 21 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2601:21
+	ldr	r0, [r0]
+	.loc	5 2601 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2601:26
+	and	r0, r0, #768
+	.loc	5 2601 13                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2601:13
+	str	r0, [sp, #8]
+.Ltmp21:
+	.loc	5 2602 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:9
+	ldr	r0, [sp, #8]
+	.loc	5 2602 33 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:33
+	cmp	r0, #0
+	beq	.LBB0_31
+	b	.LBB0_22
+.LBB0_22:
+	.loc	5 2602 38                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:38
+	ldr	r0, [sp, #8]
+	.loc	5 2602 51                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:51
+	ldr	r1, [sp, #16]
+	.loc	5 2602 66                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:66
+	ldr	r1, [r1, #12]
+	.loc	5 2602 84                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:84
+	and	r1, r1, #768
+.Ltmp22:
+	.loc	5 2602 8                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2602:8
+	cmp	r0, r1
+	beq	.LBB0_31
+	b	.LBB0_23
+.LBB0_23:
+	.loc	5 0 8                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:8
+	movw	r0, #14448
+	movt	r0, #16386
+.Ltmp23:
+	.loc	5 2605 23 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2605:23
+	ldr	r1, [r0]
+	.loc	5 2605 28 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2605:28
+	bic	r1, r1, #768
+	.loc	5 2605 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2605:15
+	str	r1, [sp, #8]
+	movw	r2, #3648
+	movt	r2, #16967
+	movs	r1, #1
+	.loc	5 2607 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2607:7
+	str	r1, [r2]
+	movs	r1, #0
+	.loc	5 2608 7                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2608:7
+	str	r1, [r2]
+	.loc	5 2610 19                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2610:19
+	ldr	r1, [sp, #8]
+	.loc	5 2610 17 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2610:17
+	str	r1, [r0]
+.Ltmp24:
+	.loc	5 2613 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2613:10
+	ldr	r0, [r0]
+.Ltmp25:
+	.loc	5 2613 10 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2613:10
+	lsls	r0, r0, #31
+	cbz	r0, .LBB0_30
+	b	.LBB0_24
+.LBB0_24:
+.Ltmp26:
+	.loc	5 2616 21 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2616:21
+	bl	HAL_GetTick
+	.loc	5 2616 19 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2616:19
+	str	r0, [sp, #12]
+	.loc	5 2619 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2619:9
+	b	.LBB0_25
+.LBB0_25:                               @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 9 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movw	r0, #14448
+	movt	r0, #16386
+	.loc	5 2619 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2619:15
+	ldr	r0, [r0]
+	and	r1, r0, #2
+	movs	r0, #0
+	.loc	5 2619 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2619:9
+	cmp.w	r0, r1, lsr #1
+	bne	.LBB0_29
+	b	.LBB0_26
+.LBB0_26:                               @   in Loop: Header=BB0_25 Depth=1
+.Ltmp27:
+	.loc	5 2621 15 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2621:15
+	bl	HAL_GetTick
+	.loc	5 2621 31 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2621:31
+	ldr	r1, [sp, #12]
+	.loc	5 2621 29                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2621:29
+	subs	r0, r0, r1
+	movw	r1, #5001
+.Ltmp28:
+	.loc	5 2621 14                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2621:14
+	cmp	r0, r1
+	blo	.LBB0_28
+	b	.LBB0_27
+.LBB0_27:
+	.loc	5 0 14                          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:14
+	movs	r0, #3
+.Ltmp29:
+	.loc	5 2623 13 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2623:13
+	strb.w	r0, [sp, #23]
+	b	.LBB0_38
+.Ltmp30:
+.LBB0_28:                               @   in Loop: Header=BB0_25 Depth=1
+	.loc	5 2619 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2619:9
+	b	.LBB0_25
+.LBB0_29:
+	.loc	5 2626 7                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2626:7
+	b	.LBB0_30
+.Ltmp31:
+.LBB0_30:
+	.loc	5 2627 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2627:5
+	b	.LBB0_31
+.Ltmp32:
+.LBB0_31:
+	.loc	5 2628 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2628:5
+	b	.LBB0_32
+.LBB0_32:
+.Ltmp33:
+	.loc	5 2628 5 is_stmt 0              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2628:5
+	ldr	r0, [sp, #16]
+	ldr	r0, [r0, #12]
+	and	r0, r0, #768
+	cmp.w	r0, #768
+	bne	.LBB0_34
+	b	.LBB0_33
+.LBB0_33:
+	.loc	5 0 5                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r1, #14344
+	movt	r1, #16386
+	.loc	5 2628 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2628:5
+	ldr	r0, [r1]
+	bic	r0, r0, #2031616
+	ldr	r2, [sp, #16]
+	ldr	r2, [r2, #12]
+	movw	r3, #64767
+	movt	r3, #4095
+	ands	r2, r3
+	orrs	r0, r2
+                                        @ kill: def $r2 killed $r0
+	str	r0, [r1]
+	b	.LBB0_35
+.LBB0_34:
+	.loc	5 0 5                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movw	r1, #14344
+	movt	r1, #16386
+	.loc	5 2628 5                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2628:5
+	ldr	r0, [r1]
+	bic	r0, r0, #2031616
+                                        @ kill: def $r2 killed $r0
+	str	r0, [r1]
+	b	.LBB0_35
+.LBB0_35:
+	ldr	r0, [sp, #16]
+	ldr	r2, [r0, #12]
+	bfc	r2, #12, #20
+	movw	r1, #14448
+	movt	r1, #16386
+	ldr	r0, [r1]
+	orrs	r0, r2
+	str	r0, [r1]
+	b	.LBB0_36
+.Ltmp34:
+.LBB0_36:
+	.loc	5 2629 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2629:3
+	b	.LBB0_37
+.Ltmp35:
+.LBB0_37:
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movs	r0, #0
+	.loc	5 2637 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2637:3
+	strb.w	r0, [sp, #23]
+	b	.LBB0_38
+.LBB0_38:
+	.loc	5 2638 1                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2638:1
+	ldrb.w	r0, [sp, #23]
+	.loc	5 2638 1 epilogue_begin is_stmt 0 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2638:1
+	add	sp, #24
+	pop	{r7, pc}
+.Ltmp36:
+.Lfunc_end0:
+	.size	HAL_RCCEx_PeriphCLKConfig, .Lfunc_end0-HAL_RCCEx_PeriphCLKConfig
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.section	.text.HAL_RCCEx_GetPeriphCLKConfig,"ax",%progbits
+	.hidden	HAL_RCCEx_GetPeriphCLKConfig    @ -- Begin function HAL_RCCEx_GetPeriphCLKConfig
+	.globl	HAL_RCCEx_GetPeriphCLKConfig
+	.p2align	2
+	.type	HAL_RCCEx_GetPeriphCLKConfig,%function
+	.code	16                              @ @HAL_RCCEx_GetPeriphCLKConfig
+	.thumb_func
+HAL_RCCEx_GetPeriphCLKConfig:
+.Lfunc_begin1:
+	.loc	5 2648 0 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2648:0
+	.fnstart
+	.cfi_startproc
+@ %bb.0:
+	.pad	#8
+	sub	sp, #8
+	.cfi_def_cfa_offset 8
+	str	r0, [sp, #4]
+.Ltmp37:
+	.loc	5 2652 3 prologue_end           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2652:3
+	ldr	r1, [sp, #4]
+	movs	r0, #3
+	.loc	5 2652 39 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2652:39
+	str	r0, [r1]
+	movw	r0, #14468
+	movt	r0, #16386
+	.loc	5 2655 52 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2655:52
+	ldr	r1, [r0]
+	.loc	5 2655 89 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2655:89
+	ubfx	r1, r1, #6, #9
+	.loc	5 2655 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2655:3
+	ldr	r2, [sp, #4]
+	.loc	5 2655 33                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2655:33
+	str	r1, [r2, #4]
+	.loc	5 2656 52 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2656:52
+	ldr	r0, [r0]
+	.loc	5 2656 89 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2656:89
+	ubfx	r0, r0, #28, #3
+	.loc	5 2656 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2656:3
+	ldr	r1, [sp, #4]
+	.loc	5 2656 33                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2656:33
+	str	r0, [r1, #8]
+	movw	r0, #14344
+	movt	r0, #16386
+	.loc	5 2661 19 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2661:19
+	ldr	r0, [r0]
+	.loc	5 2661 24 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2661:24
+	and	r0, r0, #2031616
+	.loc	5 2661 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2661:11
+	str	r0, [sp]
+	.loc	5 2662 50 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:50
+	ldr	r0, [sp]
+	movw	r1, #14448
+	movt	r1, #16386
+	.loc	5 2662 67 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:67
+	ldr	r1, [r1]
+	.loc	5 2662 72                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:72
+	and	r1, r1, #768
+	.loc	5 2662 59                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:59
+	orrs	r0, r1
+	.loc	5 2662 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:3
+	ldr	r1, [sp, #4]
+	.loc	5 2662 36                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2662:36
+	str	r0, [r1, #12]
+	.loc	5 2675 1 epilogue_begin is_stmt 1 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2675:1
+	add	sp, #8
+	bx	lr
+.Ltmp38:
+.Lfunc_end1:
+	.size	HAL_RCCEx_GetPeriphCLKConfig, .Lfunc_end1-HAL_RCCEx_GetPeriphCLKConfig
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.section	.text.HAL_RCCEx_GetPeriphCLKFreq,"ax",%progbits
+	.hidden	HAL_RCCEx_GetPeriphCLKFreq      @ -- Begin function HAL_RCCEx_GetPeriphCLKFreq
+	.globl	HAL_RCCEx_GetPeriphCLKFreq
+	.p2align	2
+	.type	HAL_RCCEx_GetPeriphCLKFreq,%function
+	.code	16                              @ @HAL_RCCEx_GetPeriphCLKFreq
+	.thumb_func
+HAL_RCCEx_GetPeriphCLKFreq:
+.Lfunc_begin2:
+	.loc	5 2686 0                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2686:0
+	.fnstart
+	.cfi_startproc
+@ %bb.0:
+	.pad	#24
+	sub	sp, #24
+	.cfi_def_cfa_offset 24
+	str	r0, [sp, #20]
+	movs	r0, #0
+.Ltmp39:
+	.loc	5 2688 12 prologue_end          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2688:12
+	str	r0, [sp, #16]
+	.loc	5 2690 12                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2690:12
+	str	r0, [sp, #12]
+	.loc	5 2691 12                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2691:12
+	str	r0, [sp, #8]
+	.loc	5 2693 12                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2693:12
+	str	r0, [sp, #4]
+	.loc	5 2694 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2694:11
+	ldr	r0, [sp, #20]
+	.loc	5 2694 3 is_stmt 0              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2694:3
+	cmp	r0, #1
+	bne	.LBB2_10
+	b	.LBB2_1
+.LBB2_1:
+	.loc	5 0 3                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14344
+	movt	r0, #16386
+.Ltmp40:
+	.loc	5 2699 16 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2699:16
+	ldr	r0, [r0]
+	and	r0, r0, #8388608
+	.loc	5 2699 14 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2699:14
+	str	r0, [sp, #8]
+	.loc	5 2700 15 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2700:15
+	ldr	r0, [sp, #8]
+	.loc	5 2700 7 is_stmt 0              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2700:7
+	str	r0, [sp]                        @ 4-byte Spill
+	cbz	r0, .LBB2_4
+	b	.LBB2_2
+.LBB2_2:
+	ldr	r0, [sp]                        @ 4-byte Reload
+	cmp	r0, #1
+	bne	.LBB2_8
+	b	.LBB2_3
+.LBB2_3:
+	.loc	5 0 7                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:7
+	movw	r0, #32768
+	movt	r0, #187
+.Ltmp41:
+	.loc	5 2706 21 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2706:21
+	str	r0, [sp, #16]
+	.loc	5 2707 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2707:11
+	b	.LBB2_9
+.Ltmp42:
+.LBB2_4:
+	.loc	5 0 11 is_stmt 0                @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:11
+	movw	r0, #14340
+	movt	r0, #16386
+.Ltmp43:
+	.loc	5 2728 20 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2728:20
+	ldr	r0, [r0]
+.Ltmp44:
+	.loc	5 2728 14 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2728:14
+	lsls	r0, r0, #9
+	cmp	r0, #0
+	bpl	.LBB2_6
+	b	.LBB2_5
+.LBB2_5:
+	.loc	5 0 14                          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:14
+	movw	r0, #14340
+	movt	r0, #16386
+.Ltmp45:
+	.loc	5 2731 63 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2731:63
+	ldr	r0, [r0]
+	.loc	5 2731 71 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2731:71
+	and	r1, r0, #63
+	movw	r0, #4608
+	movt	r0, #122
+	.loc	5 2731 45                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2731:45
+	udiv	r0, r0, r1
+	.loc	5 2731 22                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2731:22
+	str	r0, [sp, #12]
+	.loc	5 2732 11 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2732:11
+	b	.LBB2_7
+.Ltmp46:
+.LBB2_6:
+	.loc	5 0 11 is_stmt 0                @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:11
+	movw	r0, #14340
+	movt	r0, #16386
+.Ltmp47:
+	.loc	5 2736 63 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2736:63
+	ldr	r0, [r0]
+	.loc	5 2736 71 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2736:71
+	and	r1, r0, #63
+	movw	r0, #9216
+	movt	r0, #244
+	.loc	5 2736 45                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2736:45
+	udiv	r0, r0, r1
+	.loc	5 2736 22                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2736:22
+	str	r0, [sp, #12]
+	b	.LBB2_7
+.Ltmp48:
+.LBB2_7:
+	.loc	5 2740 34 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2740:34
+	ldr	r0, [sp, #12]
+	movw	r1, #14468
+	movt	r1, #16386
+	.loc	5 2740 53 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2740:53
+	ldr	r2, [r1]
+	.loc	5 2740 90                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2740:90
+	ubfx	r2, r2, #6, #9
+	.loc	5 2740 43                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2740:43
+	muls	r0, r2, r0
+	.loc	5 2740 21                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2740:21
+	str	r0, [sp, #4]
+	.loc	5 2742 34 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2742:34
+	ldr	r0, [sp, #4]
+	.loc	5 2742 53 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2742:53
+	ldr	r1, [r1]
+	.loc	5 2742 90                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2742:90
+	ubfx	r1, r1, #28, #3
+	.loc	5 2742 44                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2742:44
+	udiv	r0, r0, r1
+	.loc	5 2742 21                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2742:21
+	str	r0, [sp, #16]
+	.loc	5 2743 11 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2743:11
+	b	.LBB2_9
+.Ltmp49:
+.LBB2_8:
+	.loc	5 0 11 is_stmt 0                @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:11
+	movs	r0, #0
+.Ltmp50:
+	.loc	5 2748 21 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2748:21
+	str	r0, [sp, #16]
+	.loc	5 2749 11                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2749:11
+	b	.LBB2_9
+.Ltmp51:
+.LBB2_9:
+	.loc	5 2752 7                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2752:7
+	b	.LBB2_10
+.Ltmp52:
+.LBB2_10:
+	.loc	5 2755 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2755:10
+	ldr	r0, [sp, #16]
+	.loc	5 2755 3 epilogue_begin is_stmt 0 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2755:3
+	add	sp, #24
+	bx	lr
+.Ltmp53:
+.Lfunc_end2:
+	.size	HAL_RCCEx_GetPeriphCLKFreq, .Lfunc_end2-HAL_RCCEx_GetPeriphCLKFreq
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.section	.text.HAL_RCCEx_EnablePLLI2S,"ax",%progbits
+	.hidden	HAL_RCCEx_EnablePLLI2S          @ -- Begin function HAL_RCCEx_EnablePLLI2S
+	.globl	HAL_RCCEx_EnablePLLI2S
+	.p2align	2
+	.type	HAL_RCCEx_EnablePLLI2S,%function
+	.code	16                              @ @HAL_RCCEx_EnablePLLI2S
+	.thumb_func
+HAL_RCCEx_EnablePLLI2S:
+.Lfunc_begin3:
+	.loc	5 2810 0 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2810:0
+	.fnstart
+	.cfi_startproc
+@ %bb.0:
+	.save	{r7, lr}
+	push	{r7, lr}
+	.cfi_def_cfa_offset 8
+	.cfi_offset lr, -4
+	.cfi_offset r7, -8
+	.pad	#16
+	sub	sp, #16
+	.cfi_def_cfa_offset 24
+	str	r0, [sp, #8]
+	movs	r1, #104
+	movt	r1, #16967
+	movs	r0, #0
+.Ltmp54:
+	.loc	5 2827 3 prologue_end           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2827:3
+	str	r0, [r1]
+	.loc	5 2830 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2830:15
+	bl	HAL_GetTick
+	.loc	5 2830 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2830:13
+	str	r0, [sp, #4]
+	.loc	5 2831 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2831:3
+	b	.LBB3_1
+.LBB3_1:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 2831 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2831:9
+	ldr	r0, [r0]
+	and	r1, r0, #134217728
+	movs	r0, #0
+	.loc	5 2831 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2831:3
+	cmp.w	r0, r1, lsr #27
+	beq	.LBB3_5
+	b	.LBB3_2
+.LBB3_2:                                @   in Loop: Header=BB3_1 Depth=1
+.Ltmp55:
+	.loc	5 2833 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2833:9
+	bl	HAL_GetTick
+	.loc	5 2833 25 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2833:25
+	ldr	r1, [sp, #4]
+	.loc	5 2833 23                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2833:23
+	subs	r0, r0, r1
+.Ltmp56:
+	.loc	5 2833 8                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2833:8
+	cmp	r0, #3
+	blo	.LBB3_4
+	b	.LBB3_3
+.LBB3_3:
+	.loc	5 0 8                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:8
+	movs	r0, #3
+.Ltmp57:
+	.loc	5 2836 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2836:7
+	strb.w	r0, [sp, #15]
+	b	.LBB3_11
+.Ltmp58:
+.LBB3_4:                                @   in Loop: Header=BB3_1 Depth=1
+	.loc	5 2831 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2831:3
+	b	.LBB3_1
+.LBB3_5:
+	.loc	5 2868 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2868:3
+	ldr	r1, [sp, #8]
+	ldr	r0, [r1]
+	ldr	r1, [r1, #4]
+	lsls	r0, r0, #6
+	orr.w	r0, r0, r1, lsl #28
+	movw	r1, #14468
+	movt	r1, #16386
+	str	r0, [r1]
+	movs	r1, #104
+	movt	r1, #16967
+	movs	r0, #1
+	.loc	5 2872 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2872:3
+	str	r0, [r1]
+	.loc	5 2875 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2875:15
+	bl	HAL_GetTick
+	.loc	5 2875 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2875:13
+	str	r0, [sp, #4]
+	.loc	5 2876 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2876:3
+	b	.LBB3_6
+.LBB3_6:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 2876 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2876:9
+	ldr	r0, [r0]
+	and	r1, r0, #134217728
+	movs	r0, #0
+	.loc	5 2876 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2876:3
+	cmp.w	r0, r1, lsr #27
+	bne	.LBB3_10
+	b	.LBB3_7
+.LBB3_7:                                @   in Loop: Header=BB3_6 Depth=1
+.Ltmp59:
+	.loc	5 2878 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2878:9
+	bl	HAL_GetTick
+	.loc	5 2878 25 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2878:25
+	ldr	r1, [sp, #4]
+	.loc	5 2878 23                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2878:23
+	subs	r0, r0, r1
+.Ltmp60:
+	.loc	5 2878 8                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2878:8
+	cmp	r0, #3
+	blo	.LBB3_9
+	b	.LBB3_8
+.LBB3_8:
+	.loc	5 0 8                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:8
+	movs	r0, #3
+.Ltmp61:
+	.loc	5 2881 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2881:7
+	strb.w	r0, [sp, #15]
+	b	.LBB3_11
+.Ltmp62:
+.LBB3_9:                                @   in Loop: Header=BB3_6 Depth=1
+	.loc	5 2876 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2876:3
+	b	.LBB3_6
+.LBB3_10:
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movs	r0, #0
+	.loc	5 2885 2 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2885:2
+	strb.w	r0, [sp, #15]
+	b	.LBB3_11
+.LBB3_11:
+	.loc	5 2886 1                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2886:1
+	ldrb.w	r0, [sp, #15]
+	.loc	5 2886 1 epilogue_begin is_stmt 0 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2886:1
+	add	sp, #16
+	pop	{r7, pc}
+.Ltmp63:
+.Lfunc_end3:
+	.size	HAL_RCCEx_EnablePLLI2S, .Lfunc_end3-HAL_RCCEx_EnablePLLI2S
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.section	.text.HAL_RCCEx_DisablePLLI2S,"ax",%progbits
+	.hidden	HAL_RCCEx_DisablePLLI2S         @ -- Begin function HAL_RCCEx_DisablePLLI2S
+	.globl	HAL_RCCEx_DisablePLLI2S
+	.p2align	2
+	.type	HAL_RCCEx_DisablePLLI2S,%function
+	.code	16                              @ @HAL_RCCEx_DisablePLLI2S
+	.thumb_func
+HAL_RCCEx_DisablePLLI2S:
+.Lfunc_begin4:
+	.loc	5 2893 0 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2893:0
+	.fnstart
+	.cfi_startproc
+@ %bb.0:
+	.save	{r7, lr}
+	push	{r7, lr}
+	.cfi_def_cfa_offset 8
+	.cfi_offset lr, -4
+	.cfi_offset r7, -8
+	.pad	#8
+	sub	sp, #8
+	.cfi_def_cfa_offset 16
+	movs	r1, #104
+	movt	r1, #16967
+	movs	r0, #0
+.Ltmp64:
+	.loc	5 2897 3 prologue_end           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2897:3
+	str	r0, [r1]
+	.loc	5 2900 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2900:15
+	bl	HAL_GetTick
+	.loc	5 2900 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2900:13
+	str	r0, [sp]
+	.loc	5 2901 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2901:3
+	b	.LBB4_1
+.LBB4_1:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 2901 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2901:9
+	ldr	r0, [r0]
+	.loc	5 2901 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2901:3
+	lsls	r0, r0, #4
+	cmp	r0, #0
+	bpl	.LBB4_5
+	b	.LBB4_2
+.LBB4_2:                                @   in Loop: Header=BB4_1 Depth=1
+.Ltmp65:
+	.loc	5 2903 9 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2903:9
+	bl	HAL_GetTick
+	.loc	5 2903 25 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2903:25
+	ldr	r1, [sp]
+	.loc	5 2903 23                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2903:23
+	subs	r0, r0, r1
+.Ltmp66:
+	.loc	5 2903 8                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2903:8
+	cmp	r0, #3
+	blo	.LBB4_4
+	b	.LBB4_3
+.LBB4_3:
+	.loc	5 0 8                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:8
+	movs	r0, #3
+.Ltmp67:
+	.loc	5 2906 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2906:7
+	strb.w	r0, [sp, #7]
+	b	.LBB4_6
+.Ltmp68:
+.LBB4_4:                                @   in Loop: Header=BB4_1 Depth=1
+	.loc	5 2901 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2901:3
+	b	.LBB4_1
+.LBB4_5:
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movs	r0, #0
+	.loc	5 2910 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2910:3
+	strb.w	r0, [sp, #7]
+	b	.LBB4_6
+.LBB4_6:
+	.loc	5 2911 1                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2911:1
+	ldrb.w	r0, [sp, #7]
+	.loc	5 2911 1 epilogue_begin is_stmt 0 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:2911:1
+	add	sp, #8
+	pop	{r7, pc}
+.Ltmp69:
+.Lfunc_end4:
+	.size	HAL_RCCEx_DisablePLLI2S, .Lfunc_end4-HAL_RCCEx_DisablePLLI2S
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.section	.text.HAL_RCC_DeInit,"ax",%progbits
+	.hidden	HAL_RCC_DeInit                  @ -- Begin function HAL_RCC_DeInit
+	.globl	HAL_RCC_DeInit
+	.p2align	2
+	.type	HAL_RCC_DeInit,%function
+	.code	16                              @ @HAL_RCC_DeInit
+	.thumb_func
+HAL_RCC_DeInit:
+.Lfunc_begin5:
+	.loc	5 3150 0 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3150:0
+	.fnstart
+	.cfi_startproc
+@ %bb.0:
+	.save	{r7, lr}
+	push	{r7, lr}
+	.cfi_def_cfa_offset 8
+	.cfi_offset lr, -4
+	.cfi_offset r7, -8
+	.pad	#16
+	sub	sp, #16
+	.cfi_def_cfa_offset 24
+.Ltmp70:
+	.loc	5 3154 15 prologue_end          @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3154:15
+	bl	HAL_GetTick
+	.loc	5 3154 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3154:13
+	str	r0, [sp, #8]
+	movw	r1, #14336
+	movt	r1, #16386
+	.loc	5 3157 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3157:3
+	ldr	r0, [r1]
+	orr	r0, r0, #1
+	str	r0, [r1]
+	.loc	5 3160 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3160:3
+	b	.LBB5_1
+.LBB5_1:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 3160 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3160:10
+	ldr	r0, [r0]
+	.loc	5 3160 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3160:3
+	lsls	r0, r0, #30
+	cmp	r0, #0
+	bmi	.LBB5_5
+	b	.LBB5_2
+.LBB5_2:                                @   in Loop: Header=BB5_1 Depth=1
+.Ltmp71:
+	.loc	5 3162 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3162:10
+	bl	HAL_GetTick
+	.loc	5 3162 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3162:26
+	ldr	r1, [sp, #8]
+	.loc	5 3162 24                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3162:24
+	subs	r0, r0, r1
+.Ltmp72:
+	.loc	5 3162 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3162:9
+	cmp	r0, #3
+	blo	.LBB5_4
+	b	.LBB5_3
+.LBB5_3:
+	.loc	5 0 9                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movs	r0, #3
+.Ltmp73:
+	.loc	5 3164 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3164:7
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp74:
+.LBB5_4:                                @   in Loop: Header=BB5_1 Depth=1
+	.loc	5 3160 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3160:3
+	b	.LBB5_1
+.LBB5_5:
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r1, #14336
+	movt	r1, #16386
+	.loc	5 3169 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3169:3
+	ldr	r0, [r1]
+	orr	r0, r0, #128
+	str	r0, [r1]
+	.loc	5 3172 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3172:15
+	bl	HAL_GetTick
+	.loc	5 3172 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3172:13
+	str	r0, [sp, #8]
+	movw	r1, #14344
+	movt	r1, #16386
+	movs	r0, #0
+	.loc	5 3175 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3175:3
+	str	r0, [r1]
+	.loc	5 3178 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3178:3
+	b	.LBB5_6
+.LBB5_6:                                @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14344
+	movt	r0, #16386
+	.loc	5 3178 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3178:10
+	ldr	r0, [r0]
+	.loc	5 3178 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3178:3
+	tst.w	r0, #12
+	beq	.LBB5_10
+	b	.LBB5_7
+.LBB5_7:                                @   in Loop: Header=BB5_6 Depth=1
+.Ltmp75:
+	.loc	5 3180 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3180:10
+	bl	HAL_GetTick
+	.loc	5 3180 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3180:26
+	ldr	r1, [sp, #8]
+	.loc	5 3180 24                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3180:24
+	subs	r0, r0, r1
+	movw	r1, #5001
+.Ltmp76:
+	.loc	5 3180 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3180:9
+	cmp	r0, r1
+	blo	.LBB5_9
+	b	.LBB5_8
+.LBB5_8:
+	.loc	5 0 9                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movs	r0, #3
+.Ltmp77:
+	.loc	5 3182 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3182:7
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp78:
+.LBB5_9:                                @   in Loop: Header=BB5_6 Depth=1
+	.loc	5 3178 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3178:3
+	b	.LBB5_6
+.LBB5_10:
+	.loc	5 3187 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3187:15
+	bl	HAL_GetTick
+	.loc	5 3187 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3187:13
+	str	r0, [sp, #8]
+	movw	r1, #14336
+	movt	r1, #16386
+	.loc	5 3190 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3190:3
+	ldr	r0, [r1]
+	bic	r0, r0, #851968
+	str	r0, [r1]
+	.loc	5 3193 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3193:3
+	b	.LBB5_11
+.LBB5_11:                               @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 3193 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3193:10
+	ldr	r0, [r0]
+	.loc	5 3193 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3193:3
+	lsls	r0, r0, #14
+	cmp	r0, #0
+	bpl	.LBB5_15
+	b	.LBB5_12
+.LBB5_12:                               @   in Loop: Header=BB5_11 Depth=1
+.Ltmp79:
+	.loc	5 3195 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3195:10
+	bl	HAL_GetTick
+	.loc	5 3195 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3195:26
+	ldr	r1, [sp, #8]
+	.loc	5 3195 24                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3195:24
+	subs	r0, r0, r1
+.Ltmp80:
+	.loc	5 3195 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3195:9
+	cmp	r0, #101
+	blo	.LBB5_14
+	b	.LBB5_13
+.LBB5_13:
+	.loc	5 0 9                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movs	r0, #3
+.Ltmp81:
+	.loc	5 3197 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3197:7
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp82:
+.LBB5_14:                               @   in Loop: Header=BB5_11 Depth=1
+	.loc	5 3193 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3193:3
+	b	.LBB5_11
+.LBB5_15:
+	.loc	5 3202 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3202:15
+	bl	HAL_GetTick
+	.loc	5 3202 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3202:13
+	str	r0, [sp, #8]
+	movw	r1, #14336
+	movt	r1, #16386
+	.loc	5 3205 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3205:3
+	ldr	r0, [r1]
+	bic	r0, r0, #16777216
+	str	r0, [r1]
+	.loc	5 3208 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3208:3
+	b	.LBB5_16
+.LBB5_16:                               @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 3208 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3208:10
+	ldr	r0, [r0]
+	.loc	5 3208 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3208:3
+	lsls	r0, r0, #6
+	cmp	r0, #0
+	bpl	.LBB5_20
+	b	.LBB5_17
+.LBB5_17:                               @   in Loop: Header=BB5_16 Depth=1
+.Ltmp83:
+	.loc	5 3210 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3210:10
+	bl	HAL_GetTick
+	.loc	5 3210 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3210:26
+	ldr	r1, [sp, #8]
+	.loc	5 3210 24                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3210:24
+	subs	r0, r0, r1
+.Ltmp84:
+	.loc	5 3210 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3210:9
+	cmp	r0, #3
+	blo	.LBB5_19
+	b	.LBB5_18
+.LBB5_18:
+	.loc	5 0 9                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movs	r0, #3
+.Ltmp85:
+	.loc	5 3212 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3212:7
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp86:
+.LBB5_19:                               @   in Loop: Header=BB5_16 Depth=1
+	.loc	5 3208 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3208:3
+	b	.LBB5_16
+.LBB5_20:
+	.loc	5 3218 15                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3218:15
+	bl	HAL_GetTick
+	.loc	5 3218 13 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3218:13
+	str	r0, [sp, #8]
+	movw	r1, #14336
+	movt	r1, #16386
+	.loc	5 3221 3 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3221:3
+	ldr	r0, [r1]
+	bic	r0, r0, #67108864
+	str	r0, [r1]
+	.loc	5 3224 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3224:3
+	b	.LBB5_21
+.LBB5_21:                               @ =>This Inner Loop Header: Depth=1
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r0, #14336
+	movt	r0, #16386
+	.loc	5 3224 10                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3224:10
+	ldr	r0, [r0]
+	.loc	5 3224 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3224:3
+	lsls	r0, r0, #4
+	cmp	r0, #0
+	bpl	.LBB5_25
+	b	.LBB5_22
+.LBB5_22:                               @   in Loop: Header=BB5_21 Depth=1
+.Ltmp87:
+	.loc	5 3226 10 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3226:10
+	bl	HAL_GetTick
+	.loc	5 3226 26 is_stmt 0             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3226:26
+	ldr	r1, [sp, #8]
+	.loc	5 3226 24                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3226:24
+	subs	r0, r0, r1
+.Ltmp88:
+	.loc	5 3226 9                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3226:9
+	cmp	r0, #3
+	blo	.LBB5_24
+	b	.LBB5_23
+.LBB5_23:
+	.loc	5 0 9                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:9
+	movs	r0, #3
+.Ltmp89:
+	.loc	5 3228 7 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3228:7
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp90:
+.LBB5_24:                               @   in Loop: Header=BB5_21 Depth=1
+	.loc	5 3224 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3224:3
+	b	.LBB5_21
+.LBB5_25:
+	.loc	5 0 3 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:3
+	movw	r1, #14340
+	movt	r1, #16386
+	movw	r0, #12304
+	movt	r0, #1024
+	.loc	5 3257 16 is_stmt 1             @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3257:16
+	str	r0, [r1]
+	movw	r1, #14468
+	movt	r1, #16386
+	movw	r0, #12288
+	movt	r0, #8192
+	.loc	5 3265 19                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3265:19
+	str	r0, [r1]
+	movw	r1, #14348
+	movt	r1, #16386
+	.loc	5 3280 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3280:3
+	str	r1, [sp, #4]                    @ 4-byte Spill
+	ldr	r0, [r1]
+	bic	r0, r0, #7936
+	str	r0, [r1]
+	.loc	5 3283 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3283:3
+	ldr	r0, [r1]
+	bic	r0, r0, #8192
+	str	r0, [r1]
+	.loc	5 3291 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3291:3
+	ldr	r0, [r1]
+	orr	r0, r0, #10420224
+	str	r0, [r1]
+	.loc	5 3294 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3294:3
+	ldr	r0, [r1]
+	orr	r0, r0, #2097152
+	str	r0, [r1]
+	movw	r1, #14452
+	movt	r1, #16386
+	.loc	5 3302 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3302:3
+	ldr	r0, [r1]
+	bic	r0, r0, #1
+	str	r0, [r1]
+	.loc	5 3305 3                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3305:3
+	ldr	r0, [r1]
+	orr	r0, r0, #16777216
+	str	r0, [r1]
+	.loc	5 3308 19                       @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3308:19
+	movw	r1, :lower16:SystemCoreClock
+	movt	r1, :upper16:SystemCoreClock
+	movw	r0, #9216
+	movt	r0, #244
+	str	r0, [r1]
+	movs	r0, #6
+.Ltmp91:
+	.loc	5 3311 6                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3311:6
+	bl	HAL_InitTick
+.Ltmp92:
+	.loc	5 3311 6 is_stmt 0              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3311:6
+	cbz	r0, .LBB5_27
+	b	.LBB5_26
+.LBB5_26:
+	.loc	5 0 6                           @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:6
+	movs	r0, #1
+.Ltmp93:
+	.loc	5 3313 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3313:5
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp94:
+.LBB5_27:
+	.loc	5 0 5 is_stmt 0                 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:0:5
+	movs	r0, #0
+.Ltmp95:
+	.loc	5 3317 5 is_stmt 1              @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3317:5
+	strb.w	r0, [sp, #15]
+	b	.LBB5_28
+.Ltmp96:
+.LBB5_28:
+	.loc	5 3319 1                        @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3319:1
+	ldrb.w	r0, [sp, #15]
+	.loc	5 3319 1 epilogue_begin is_stmt 0 @ ../ThirdParty/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c:3319:1
+	add	sp, #16
+	pop	{r7, pc}
+.Ltmp97:
+.Lfunc_end5:
+	.size	HAL_RCC_DeInit, .Lfunc_end5-HAL_RCC_DeInit
+	.cfi_endproc
+	.cantunwind
+	.fnend
+                                        @ -- End function
+	.file	6 "D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" "../ThirdParty/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h"
+	.section	.debug_abbrev,"",%progbits
+	.byte	1                               @ Abbreviation Code
+	.byte	17                              @ DW_TAG_compile_unit
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	37                              @ DW_AT_producer
+	.byte	14                              @ DW_FORM_strp
+	.byte	19                              @ DW_AT_language
+	.byte	5                               @ DW_FORM_data2
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	16                              @ DW_AT_stmt_list
+	.byte	23                              @ DW_FORM_sec_offset
+	.byte	27                              @ DW_AT_comp_dir
+	.byte	14                              @ DW_FORM_strp
+	.byte	17                              @ DW_AT_low_pc
+	.byte	1                               @ DW_FORM_addr
+	.byte	85                              @ DW_AT_ranges
+	.byte	23                              @ DW_FORM_sec_offset
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	2                               @ Abbreviation Code
+	.byte	4                               @ DW_TAG_enumeration_type
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	11                              @ DW_AT_byte_size
+	.byte	11                              @ DW_FORM_data1
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	3                               @ Abbreviation Code
+	.byte	40                              @ DW_TAG_enumerator
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	28                              @ DW_AT_const_value
+	.byte	15                              @ DW_FORM_udata
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	4                               @ Abbreviation Code
+	.byte	36                              @ DW_TAG_base_type
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	62                              @ DW_AT_encoding
+	.byte	11                              @ DW_FORM_data1
+	.byte	11                              @ DW_AT_byte_size
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	5                               @ Abbreviation Code
+	.byte	15                              @ DW_TAG_pointer_type
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	6                               @ Abbreviation Code
+	.byte	53                              @ DW_TAG_volatile_type
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	7                               @ Abbreviation Code
+	.byte	22                              @ DW_TAG_typedef
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	8                               @ Abbreviation Code
+	.byte	22                              @ DW_TAG_typedef
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	9                               @ Abbreviation Code
+	.byte	19                              @ DW_TAG_structure_type
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	11                              @ DW_AT_byte_size
+	.byte	11                              @ DW_FORM_data1
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	10                              @ Abbreviation Code
+	.byte	13                              @ DW_TAG_member
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	56                              @ DW_AT_data_member_location
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	11                              @ Abbreviation Code
+	.byte	1                               @ DW_TAG_array_type
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	12                              @ Abbreviation Code
+	.byte	33                              @ DW_TAG_subrange_type
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	55                              @ DW_AT_count
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	13                              @ Abbreviation Code
+	.byte	36                              @ DW_TAG_base_type
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	11                              @ DW_AT_byte_size
+	.byte	11                              @ DW_FORM_data1
+	.byte	62                              @ DW_AT_encoding
+	.byte	11                              @ DW_FORM_data1
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	14                              @ Abbreviation Code
+	.byte	46                              @ DW_TAG_subprogram
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	17                              @ DW_AT_low_pc
+	.byte	1                               @ DW_FORM_addr
+	.byte	18                              @ DW_AT_high_pc
+	.byte	6                               @ DW_FORM_data4
+	.byte	64                              @ DW_AT_frame_base
+	.byte	24                              @ DW_FORM_exprloc
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	39                              @ DW_AT_prototyped
+	.byte	25                              @ DW_FORM_flag_present
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	63                              @ DW_AT_external
+	.byte	25                              @ DW_FORM_flag_present
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	15                              @ Abbreviation Code
+	.byte	5                               @ DW_TAG_formal_parameter
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	2                               @ DW_AT_location
+	.byte	24                              @ DW_FORM_exprloc
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	16                              @ Abbreviation Code
+	.byte	52                              @ DW_TAG_variable
+	.byte	0                               @ DW_CHILDREN_no
+	.byte	2                               @ DW_AT_location
+	.byte	24                              @ DW_FORM_exprloc
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	73                              @ DW_AT_type
+	.byte	19                              @ DW_FORM_ref4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	17                              @ Abbreviation Code
+	.byte	11                              @ DW_TAG_lexical_block
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	17                              @ DW_AT_low_pc
+	.byte	1                               @ DW_FORM_addr
+	.byte	18                              @ DW_AT_high_pc
+	.byte	6                               @ DW_FORM_data4
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	18                              @ Abbreviation Code
+	.byte	46                              @ DW_TAG_subprogram
+	.byte	1                               @ DW_CHILDREN_yes
+	.byte	17                              @ DW_AT_low_pc
+	.byte	1                               @ DW_FORM_addr
+	.byte	18                              @ DW_AT_high_pc
+	.byte	6                               @ DW_FORM_data4
+	.byte	64                              @ DW_AT_frame_base
+	.byte	24                              @ DW_FORM_exprloc
+	.byte	3                               @ DW_AT_name
+	.byte	14                              @ DW_FORM_strp
+	.byte	58                              @ DW_AT_decl_file
+	.byte	11                              @ DW_FORM_data1
+	.byte	59                              @ DW_AT_decl_line
+	.byte	5                               @ DW_FORM_data2
+	.byte	39                              @ DW_AT_prototyped
+	.byte	25                              @ DW_FORM_flag_present
+	.byte	63                              @ DW_AT_external
+	.byte	25                              @ DW_FORM_flag_present
+	.byte	0                               @ EOM(1)
+	.byte	0                               @ EOM(2)
+	.byte	0                               @ EOM(3)
+	.section	.debug_info,"",%progbits
+.Lcu_begin0:
+	.long	.Ldebug_info_end0-.Ldebug_info_start0 @ Length of Unit
+.Ldebug_info_start0:
+	.short	4                               @ DWARF version number
+	.long	.debug_abbrev                   @ Offset Into Abbrev. Section
+	.byte	4                               @ Address Size (in bytes)
+	.byte	1                               @ Abbrev [1] 0xb:0x461 DW_TAG_compile_unit
+	.long	.Linfo_string0                  @ DW_AT_producer
+	.short	12                              @ DW_AT_language
+	.long	.Linfo_string1                  @ DW_AT_name
+	.long	.Lline_table_start0             @ DW_AT_stmt_list
+	.long	.Linfo_string2                  @ DW_AT_comp_dir
+	.long	0                               @ DW_AT_low_pc
+	.long	.Ldebug_ranges0                 @ DW_AT_ranges
+	.byte	2                               @ Abbrev [2] 0x26:0x21 DW_TAG_enumeration_type
+	.long	71                              @ DW_AT_type
+	.byte	1                               @ DW_AT_byte_size
+	.byte	1                               @ DW_AT_decl_file
+	.byte	55                              @ DW_AT_decl_line
+	.byte	3                               @ Abbrev [3] 0x2e:0x6 DW_TAG_enumerator
+	.long	.Linfo_string4                  @ DW_AT_name
+	.byte	0                               @ DW_AT_const_value
+	.byte	3                               @ Abbrev [3] 0x34:0x6 DW_TAG_enumerator
+	.long	.Linfo_string5                  @ DW_AT_name
+	.byte	1                               @ DW_AT_const_value
+	.byte	3                               @ Abbrev [3] 0x3a:0x6 DW_TAG_enumerator
+	.long	.Linfo_string6                  @ DW_AT_name
+	.byte	2                               @ DW_AT_const_value
+	.byte	3                               @ Abbrev [3] 0x40:0x6 DW_TAG_enumerator
+	.long	.Linfo_string7                  @ DW_AT_name
+	.byte	3                               @ DW_AT_const_value
+	.byte	0                               @ End Of Children Mark
+	.byte	4                               @ Abbrev [4] 0x47:0x7 DW_TAG_base_type
+	.long	.Linfo_string3                  @ DW_AT_name
+	.byte	8                               @ DW_AT_encoding
+	.byte	1                               @ DW_AT_byte_size
+	.byte	2                               @ Abbrev [2] 0x4e:0x15 DW_TAG_enumeration_type
+	.long	71                              @ DW_AT_type
+	.byte	1                               @ DW_AT_byte_size
+	.byte	2                               @ DW_AT_decl_file
+	.byte	207                             @ DW_AT_decl_line
+	.byte	3                               @ Abbrev [3] 0x56:0x6 DW_TAG_enumerator
+	.long	.Linfo_string8                  @ DW_AT_name
+	.byte	0                               @ DW_AT_const_value
+	.byte	3                               @ Abbrev [3] 0x5c:0x6 DW_TAG_enumerator
+	.long	.Linfo_string9                  @ DW_AT_name
+	.byte	1                               @ DW_AT_const_value
+	.byte	0                               @ End Of Children Mark
+	.byte	2                               @ Abbrev [2] 0x63:0x15 DW_TAG_enumeration_type
+	.long	71                              @ DW_AT_type
+	.byte	1                               @ DW_AT_byte_size
+	.byte	2                               @ DW_AT_decl_file
+	.byte	201                             @ DW_AT_decl_line
+	.byte	3                               @ Abbrev [3] 0x6b:0x6 DW_TAG_enumerator
+	.long	.Linfo_string10                 @ DW_AT_name
+	.byte	0                               @ DW_AT_const_value
+	.byte	3                               @ Abbrev [3] 0x71:0x6 DW_TAG_enumerator
+	.long	.Linfo_string11                 @ DW_AT_name
+	.byte	1                               @ DW_AT_const_value
+	.byte	0                               @ End Of Children Mark
+	.byte	5                               @ Abbrev [5] 0x78:0x5 DW_TAG_pointer_type
+	.long	125                             @ DW_AT_type
+	.byte	6                               @ Abbrev [6] 0x7d:0x5 DW_TAG_volatile_type
+	.long	130                             @ DW_AT_type
+	.byte	7                               @ Abbrev [7] 0x82:0xb DW_TAG_typedef
+	.long	141                             @ DW_AT_type
+	.long	.Linfo_string13                 @ DW_AT_name
+	.byte	3                               @ DW_AT_decl_file
+	.byte	64                              @ DW_AT_decl_line
+	.byte	4                               @ Abbrev [4] 0x8d:0x7 DW_TAG_base_type
+	.long	.Linfo_string12                 @ DW_AT_name
+	.byte	7                               @ DW_AT_encoding
+	.byte	4                               @ DW_AT_byte_size
+	.byte	5                               @ Abbrev [5] 0x94:0x5 DW_TAG_pointer_type
+	.long	153                             @ DW_AT_type
+	.byte	8                               @ Abbrev [8] 0x99:0xc DW_TAG_typedef
+	.long	165                             @ DW_AT_type
+	.long	.Linfo_string45                 @ DW_AT_name
+	.byte	4                               @ DW_AT_decl_file
+	.short	549                             @ DW_AT_decl_line
+	.byte	9                               @ Abbrev [9] 0xa5:0x18c DW_TAG_structure_type
+	.byte	136                             @ DW_AT_byte_size
+	.byte	4                               @ DW_AT_decl_file
+	.short	517                             @ DW_AT_decl_line
+	.byte	10                              @ Abbrev [10] 0xaa:0xd DW_TAG_member
+	.long	.Linfo_string14                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	519                             @ DW_AT_decl_line
+	.byte	0                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xb7:0xd DW_TAG_member
+	.long	.Linfo_string15                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	520                             @ DW_AT_decl_line
+	.byte	4                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xc4:0xd DW_TAG_member
+	.long	.Linfo_string16                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	521                             @ DW_AT_decl_line
+	.byte	8                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xd1:0xd DW_TAG_member
+	.long	.Linfo_string17                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	522                             @ DW_AT_decl_line
+	.byte	12                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xde:0xd DW_TAG_member
+	.long	.Linfo_string18                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	523                             @ DW_AT_decl_line
+	.byte	16                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xeb:0xd DW_TAG_member
+	.long	.Linfo_string19                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	524                             @ DW_AT_decl_line
+	.byte	20                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0xf8:0xd DW_TAG_member
+	.long	.Linfo_string20                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	525                             @ DW_AT_decl_line
+	.byte	24                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x105:0xd DW_TAG_member
+	.long	.Linfo_string21                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	526                             @ DW_AT_decl_line
+	.byte	28                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x112:0xd DW_TAG_member
+	.long	.Linfo_string22                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	527                             @ DW_AT_decl_line
+	.byte	32                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x11f:0xd DW_TAG_member
+	.long	.Linfo_string23                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	528                             @ DW_AT_decl_line
+	.byte	36                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x12c:0xd DW_TAG_member
+	.long	.Linfo_string24                 @ DW_AT_name
+	.long	561                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	529                             @ DW_AT_decl_line
+	.byte	40                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x139:0xd DW_TAG_member
+	.long	.Linfo_string26                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	530                             @ DW_AT_decl_line
+	.byte	48                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x146:0xd DW_TAG_member
+	.long	.Linfo_string27                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	531                             @ DW_AT_decl_line
+	.byte	52                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x153:0xd DW_TAG_member
+	.long	.Linfo_string28                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	532                             @ DW_AT_decl_line
+	.byte	56                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x160:0xd DW_TAG_member
+	.long	.Linfo_string29                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	533                             @ DW_AT_decl_line
+	.byte	60                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x16d:0xd DW_TAG_member
+	.long	.Linfo_string30                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	534                             @ DW_AT_decl_line
+	.byte	64                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x17a:0xd DW_TAG_member
+	.long	.Linfo_string31                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	535                             @ DW_AT_decl_line
+	.byte	68                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x187:0xd DW_TAG_member
+	.long	.Linfo_string32                 @ DW_AT_name
+	.long	561                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	536                             @ DW_AT_decl_line
+	.byte	72                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x194:0xd DW_TAG_member
+	.long	.Linfo_string33                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	537                             @ DW_AT_decl_line
+	.byte	80                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1a1:0xd DW_TAG_member
+	.long	.Linfo_string34                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	538                             @ DW_AT_decl_line
+	.byte	84                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1ae:0xd DW_TAG_member
+	.long	.Linfo_string35                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	539                             @ DW_AT_decl_line
+	.byte	88                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1bb:0xd DW_TAG_member
+	.long	.Linfo_string36                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	540                             @ DW_AT_decl_line
+	.byte	92                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1c8:0xd DW_TAG_member
+	.long	.Linfo_string37                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	541                             @ DW_AT_decl_line
+	.byte	96                              @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1d5:0xd DW_TAG_member
+	.long	.Linfo_string38                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	542                             @ DW_AT_decl_line
+	.byte	100                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1e2:0xd DW_TAG_member
+	.long	.Linfo_string39                 @ DW_AT_name
+	.long	561                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	543                             @ DW_AT_decl_line
+	.byte	104                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1ef:0xd DW_TAG_member
+	.long	.Linfo_string40                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	544                             @ DW_AT_decl_line
+	.byte	112                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x1fc:0xd DW_TAG_member
+	.long	.Linfo_string41                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	545                             @ DW_AT_decl_line
+	.byte	116                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x209:0xd DW_TAG_member
+	.long	.Linfo_string42                 @ DW_AT_name
+	.long	561                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	546                             @ DW_AT_decl_line
+	.byte	120                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x216:0xd DW_TAG_member
+	.long	.Linfo_string43                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	547                             @ DW_AT_decl_line
+	.byte	128                             @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x223:0xd DW_TAG_member
+	.long	.Linfo_string44                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	548                             @ DW_AT_decl_line
+	.byte	132                             @ DW_AT_data_member_location
+	.byte	0                               @ End Of Children Mark
+	.byte	11                              @ Abbrev [11] 0x231:0xc DW_TAG_array_type
+	.long	130                             @ DW_AT_type
+	.byte	12                              @ Abbrev [12] 0x236:0x6 DW_TAG_subrange_type
+	.long	573                             @ DW_AT_type
+	.byte	2                               @ DW_AT_count
+	.byte	0                               @ End Of Children Mark
+	.byte	13                              @ Abbrev [13] 0x23d:0x7 DW_TAG_base_type
+	.long	.Linfo_string25                 @ DW_AT_name
+	.byte	8                               @ DW_AT_byte_size
+	.byte	7                               @ DW_AT_encoding
+	.byte	7                               @ Abbrev [7] 0x244:0xb DW_TAG_typedef
+	.long	71                              @ DW_AT_type
+	.long	.Linfo_string46                 @ DW_AT_name
+	.byte	3                               @ DW_AT_decl_file
+	.byte	62                              @ DW_AT_decl_line
+	.byte	5                               @ Abbrev [5] 0x24f:0x5 DW_TAG_pointer_type
+	.long	596                             @ DW_AT_type
+	.byte	8                               @ Abbrev [8] 0x254:0xc DW_TAG_typedef
+	.long	608                             @ DW_AT_type
+	.long	.Linfo_string47                 @ DW_AT_name
+	.byte	4                               @ DW_AT_decl_file
+	.short	511                             @ DW_AT_decl_line
+	.byte	9                               @ Abbrev [9] 0x260:0x20 DW_TAG_structure_type
+	.byte	8                               @ DW_AT_byte_size
+	.byte	4                               @ DW_AT_decl_file
+	.short	507                             @ DW_AT_decl_line
+	.byte	10                              @ Abbrev [10] 0x265:0xd DW_TAG_member
+	.long	.Linfo_string14                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	509                             @ DW_AT_decl_line
+	.byte	0                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x272:0xd DW_TAG_member
+	.long	.Linfo_string41                 @ DW_AT_name
+	.long	125                             @ DW_AT_type
+	.byte	4                               @ DW_AT_decl_file
+	.short	510                             @ DW_AT_decl_line
+	.byte	4                               @ DW_AT_data_member_location
+	.byte	0                               @ End Of Children Mark
+	.byte	14                              @ Abbrev [14] 0x280:0x5d DW_TAG_subprogram
+	.long	.Lfunc_begin0                   @ DW_AT_low_pc
+	.long	.Lfunc_end0-.Lfunc_begin0       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string48                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2519                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+	.long	1009                            @ DW_AT_type
+                                        @ DW_AT_external
+	.byte	15                              @ Abbrev [15] 0x296:0xf DW_TAG_formal_parameter
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	16
+	.long	.Linfo_string55                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2519                            @ DW_AT_decl_line
+	.long	1020                            @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x2a5:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	12
+	.long	.Linfo_string63                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2521                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x2b4:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	8
+	.long	.Linfo_string64                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2522                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	17                              @ Abbrev [17] 0x2c3:0x19 DW_TAG_lexical_block
+	.long	.Ltmp15                         @ DW_AT_low_pc
+	.long	.Ltmp16-.Ltmp15                 @ DW_AT_high_pc
+	.byte	16                              @ Abbrev [16] 0x2cc:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	4
+	.long	.Linfo_string65                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2585                            @ DW_AT_decl_line
+	.long	125                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	0                               @ End Of Children Mark
+	.byte	18                              @ Abbrev [18] 0x2dd:0x31 DW_TAG_subprogram
+	.long	.Lfunc_begin1                   @ DW_AT_low_pc
+	.long	.Lfunc_end1-.Lfunc_begin1       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string50                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2647                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+                                        @ DW_AT_external
+	.byte	15                              @ Abbrev [15] 0x2ef:0xf DW_TAG_formal_parameter
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	4
+	.long	.Linfo_string55                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2647                            @ DW_AT_decl_line
+	.long	1020                            @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x2fe:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	0
+	.long	.Linfo_string66                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2649                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	14                              @ Abbrev [14] 0x30e:0x62 DW_TAG_subprogram
+	.long	.Lfunc_begin2                   @ DW_AT_low_pc
+	.long	.Lfunc_end2-.Lfunc_begin2       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string51                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2685                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+	.long	130                             @ DW_AT_type
+                                        @ DW_AT_external
+	.byte	15                              @ Abbrev [15] 0x324:0xf DW_TAG_formal_parameter
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	20
+	.long	.Linfo_string67                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2685                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x333:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	16
+	.long	.Linfo_string68                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2688                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x342:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	12
+	.long	.Linfo_string69                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2690                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x351:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	8
+	.long	.Linfo_string70                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2691                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x360:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	4
+	.long	.Linfo_string71                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2693                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	14                              @ Abbrev [14] 0x370:0x35 DW_TAG_subprogram
+	.long	.Lfunc_begin3                   @ DW_AT_low_pc
+	.long	.Lfunc_end3-.Lfunc_begin3       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string52                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2809                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+	.long	1009                            @ DW_AT_type
+                                        @ DW_AT_external
+	.byte	15                              @ Abbrev [15] 0x386:0xf DW_TAG_formal_parameter
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	8
+	.long	.Linfo_string72                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2809                            @ DW_AT_decl_line
+	.long	1126                            @ DW_AT_type
+	.byte	16                              @ Abbrev [16] 0x395:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	4
+	.long	.Linfo_string63                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2811                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	14                              @ Abbrev [14] 0x3a5:0x26 DW_TAG_subprogram
+	.long	.Lfunc_begin4                   @ DW_AT_low_pc
+	.long	.Lfunc_end4-.Lfunc_begin4       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string53                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2892                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+	.long	1009                            @ DW_AT_type
+                                        @ DW_AT_external
+	.byte	16                              @ Abbrev [16] 0x3bb:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	0
+	.long	.Linfo_string63                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	2894                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	14                              @ Abbrev [14] 0x3cb:0x26 DW_TAG_subprogram
+	.long	.Lfunc_begin5                   @ DW_AT_low_pc
+	.long	.Lfunc_end5-.Lfunc_begin5       @ DW_AT_high_pc
+	.byte	1                               @ DW_AT_frame_base
+	.byte	93
+	.long	.Linfo_string54                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	3149                            @ DW_AT_decl_line
+                                        @ DW_AT_prototyped
+	.long	1009                            @ DW_AT_type
+                                        @ DW_AT_external
+	.byte	16                              @ Abbrev [16] 0x3e1:0xf DW_TAG_variable
+	.byte	2                               @ DW_AT_location
+	.byte	145
+	.byte	8
+	.long	.Linfo_string63                 @ DW_AT_name
+	.byte	5                               @ DW_AT_decl_file
+	.short	3151                            @ DW_AT_decl_line
+	.long	130                             @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+	.byte	7                               @ Abbrev [7] 0x3f1:0xb DW_TAG_typedef
+	.long	38                              @ DW_AT_type
+	.long	.Linfo_string49                 @ DW_AT_name
+	.byte	1                               @ DW_AT_decl_file
+	.byte	61                              @ DW_AT_decl_line
+	.byte	5                               @ Abbrev [5] 0x3fc:0x5 DW_TAG_pointer_type
+	.long	1025                            @ DW_AT_type
+	.byte	8                               @ Abbrev [8] 0x401:0xc DW_TAG_typedef
+	.long	1037                            @ DW_AT_type
+	.long	.Linfo_string62                 @ DW_AT_name
+	.byte	6                               @ DW_AT_decl_file
+	.short	435                             @ DW_AT_decl_line
+	.byte	9                               @ Abbrev [9] 0x40d:0x2d DW_TAG_structure_type
+	.byte	16                              @ DW_AT_byte_size
+	.byte	6                               @ DW_AT_decl_file
+	.short	421                             @ DW_AT_decl_line
+	.byte	10                              @ Abbrev [10] 0x412:0xd DW_TAG_member
+	.long	.Linfo_string56                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	6                               @ DW_AT_decl_file
+	.short	423                             @ DW_AT_decl_line
+	.byte	0                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x41f:0xd DW_TAG_member
+	.long	.Linfo_string57                 @ DW_AT_name
+	.long	1082                            @ DW_AT_type
+	.byte	6                               @ DW_AT_decl_file
+	.short	426                             @ DW_AT_decl_line
+	.byte	4                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x42c:0xd DW_TAG_member
+	.long	.Linfo_string61                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	6                               @ DW_AT_decl_file
+	.short	429                             @ DW_AT_decl_line
+	.byte	12                              @ DW_AT_data_member_location
+	.byte	0                               @ End Of Children Mark
+	.byte	8                               @ Abbrev [8] 0x43a:0xc DW_TAG_typedef
+	.long	1094                            @ DW_AT_type
+	.long	.Linfo_string60                 @ DW_AT_name
+	.byte	6                               @ DW_AT_decl_file
+	.short	416                             @ DW_AT_decl_line
+	.byte	9                               @ Abbrev [9] 0x446:0x20 DW_TAG_structure_type
+	.byte	8                               @ DW_AT_byte_size
+	.byte	6                               @ DW_AT_decl_file
+	.short	400                             @ DW_AT_decl_line
+	.byte	10                              @ Abbrev [10] 0x44b:0xd DW_TAG_member
+	.long	.Linfo_string58                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	6                               @ DW_AT_decl_file
+	.short	407                             @ DW_AT_decl_line
+	.byte	0                               @ DW_AT_data_member_location
+	.byte	10                              @ Abbrev [10] 0x458:0xd DW_TAG_member
+	.long	.Linfo_string59                 @ DW_AT_name
+	.long	130                             @ DW_AT_type
+	.byte	6                               @ DW_AT_decl_file
+	.short	412                             @ DW_AT_decl_line
+	.byte	4                               @ DW_AT_data_member_location
+	.byte	0                               @ End Of Children Mark
+	.byte	5                               @ Abbrev [5] 0x466:0x5 DW_TAG_pointer_type
+	.long	1082                            @ DW_AT_type
+	.byte	0                               @ End Of Children Mark
+.Ldebug_info_end0:
+	.section	.debug_ranges,"",%progbits
+.Ldebug_ranges0:
+	.long	.Lfunc_begin0
+	.long	.Lfunc_end0
+	.long	.Lfunc_begin1
+	.long	.Lfunc_end1
+	.long	.Lfunc_begin2
+	.long	.Lfunc_end2
+	.long	.Lfunc_begin3
+	.long	.Lfunc_end3
+	.long	.Lfunc_begin4
+	.long	.Lfunc_end4
+	.long	.Lfunc_begin5
+	.long	.Lfunc_end5
+	.long	0
+	.long	0
+	.section	.debug_str,"MS",%progbits,1
+.Linfo_string0:
+	.asciz	"Component: Arm Compiler for Embedded 6.21 Tool: armclang [5ec1fd00]" @ string offset=0
+.Linfo_string1:
+	.asciz	"../ThirdParty/STM32F4xx_HAL_Driver/Src\\stm32f4xx_hal_rcc_ex.c" @ string offset=68
+.Linfo_string2:
+	.asciz	"D:\\ikingtec\\Robot\\ODrive\\Firmware\\MDK-ARM" @ string offset=130
+.Linfo_string3:
+	.asciz	"unsigned char"                 @ string offset=172
+.Linfo_string4:
+	.asciz	"HAL_OK"                        @ string offset=186
+.Linfo_string5:
+	.asciz	"HAL_ERROR"                     @ string offset=193
+.Linfo_string6:
+	.asciz	"HAL_BUSY"                      @ string offset=203
+.Linfo_string7:
+	.asciz	"HAL_TIMEOUT"                   @ string offset=212
+.Linfo_string8:
+	.asciz	"DISABLE"                       @ string offset=224
+.Linfo_string9:
+	.asciz	"ENABLE"                        @ string offset=232
+.Linfo_string10:
+	.asciz	"RESET"                         @ string offset=239
+.Linfo_string11:
+	.asciz	"SET"                           @ string offset=245
+.Linfo_string12:
+	.asciz	"unsigned int"                  @ string offset=249
+.Linfo_string13:
+	.asciz	"uint32_t"                      @ string offset=262
+.Linfo_string14:
+	.asciz	"CR"                            @ string offset=271
+.Linfo_string15:
+	.asciz	"PLLCFGR"                       @ string offset=274
+.Linfo_string16:
+	.asciz	"CFGR"                          @ string offset=282
+.Linfo_string17:
+	.asciz	"CIR"                           @ string offset=287
+.Linfo_string18:
+	.asciz	"AHB1RSTR"                      @ string offset=291
+.Linfo_string19:
+	.asciz	"AHB2RSTR"                      @ string offset=300
+.Linfo_string20:
+	.asciz	"AHB3RSTR"                      @ string offset=309
+.Linfo_string21:
+	.asciz	"RESERVED0"                     @ string offset=318
+.Linfo_string22:
+	.asciz	"APB1RSTR"                      @ string offset=328
+.Linfo_string23:
+	.asciz	"APB2RSTR"                      @ string offset=337
+.Linfo_string24:
+	.asciz	"RESERVED1"                     @ string offset=346
+.Linfo_string25:
+	.asciz	"__ARRAY_SIZE_TYPE__"           @ string offset=356
+.Linfo_string26:
+	.asciz	"AHB1ENR"                       @ string offset=376
+.Linfo_string27:
+	.asciz	"AHB2ENR"                       @ string offset=384
+.Linfo_string28:
+	.asciz	"AHB3ENR"                       @ string offset=392
+.Linfo_string29:
+	.asciz	"RESERVED2"                     @ string offset=400
+.Linfo_string30:
+	.asciz	"APB1ENR"                       @ string offset=410
+.Linfo_string31:
+	.asciz	"APB2ENR"                       @ string offset=418
+.Linfo_string32:
+	.asciz	"RESERVED3"                     @ string offset=426
+.Linfo_string33:
+	.asciz	"AHB1LPENR"                     @ string offset=436
+.Linfo_string34:
+	.asciz	"AHB2LPENR"                     @ string offset=446
+.Linfo_string35:
+	.asciz	"AHB3LPENR"                     @ string offset=456
+.Linfo_string36:
+	.asciz	"RESERVED4"                     @ string offset=466
+.Linfo_string37:
+	.asciz	"APB1LPENR"                     @ string offset=476
+.Linfo_string38:
+	.asciz	"APB2LPENR"                     @ string offset=486
+.Linfo_string39:
+	.asciz	"RESERVED5"                     @ string offset=496
+.Linfo_string40:
+	.asciz	"BDCR"                          @ string offset=506
+.Linfo_string41:
+	.asciz	"CSR"                           @ string offset=511
+.Linfo_string42:
+	.asciz	"RESERVED6"                     @ string offset=515
+.Linfo_string43:
+	.asciz	"SSCGR"                         @ string offset=525
+.Linfo_string44:
+	.asciz	"PLLI2SCFGR"                    @ string offset=531
+.Linfo_string45:
+	.asciz	"RCC_TypeDef"                   @ string offset=542
+.Linfo_string46:
+	.asciz	"uint8_t"                       @ string offset=554
+.Linfo_string47:
+	.asciz	"PWR_TypeDef"                   @ string offset=562
+.Linfo_string48:
+	.asciz	"HAL_RCCEx_PeriphCLKConfig"     @ string offset=574
+.Linfo_string49:
+	.asciz	"HAL_StatusTypeDef"             @ string offset=600
+.Linfo_string50:
+	.asciz	"HAL_RCCEx_GetPeriphCLKConfig"  @ string offset=618
+.Linfo_string51:
+	.asciz	"HAL_RCCEx_GetPeriphCLKFreq"    @ string offset=647
+.Linfo_string52:
+	.asciz	"HAL_RCCEx_EnablePLLI2S"        @ string offset=674
+.Linfo_string53:
+	.asciz	"HAL_RCCEx_DisablePLLI2S"       @ string offset=697
+.Linfo_string54:
+	.asciz	"HAL_RCC_DeInit"                @ string offset=721
+.Linfo_string55:
+	.asciz	"PeriphClkInit"                 @ string offset=736
+.Linfo_string56:
+	.asciz	"PeriphClockSelection"          @ string offset=750
+.Linfo_string57:
+	.asciz	"PLLI2S"                        @ string offset=771
+.Linfo_string58:
+	.asciz	"PLLI2SN"                       @ string offset=778
+.Linfo_string59:
+	.asciz	"PLLI2SR"                       @ string offset=786
+.Linfo_string60:
+	.asciz	"RCC_PLLI2SInitTypeDef"         @ string offset=794
+.Linfo_string61:
+	.asciz	"RTCClockSelection"             @ string offset=816
+.Linfo_string62:
+	.asciz	"RCC_PeriphCLKInitTypeDef"      @ string offset=834
+.Linfo_string63:
+	.asciz	"tickstart"                     @ string offset=859
+.Linfo_string64:
+	.asciz	"tmpreg1"                       @ string offset=869
+.Linfo_string65:
+	.asciz	"tmpreg"                        @ string offset=877
+.Linfo_string66:
+	.asciz	"tempreg"                       @ string offset=884
+.Linfo_string67:
+	.asciz	"PeriphClk"                     @ string offset=892
+.Linfo_string68:
+	.asciz	"frequency"                     @ string offset=902
+.Linfo_string69:
+	.asciz	"vcoinput"                      @ string offset=912
+.Linfo_string70:
+	.asciz	"srcclk"                        @ string offset=921
+.Linfo_string71:
+	.asciz	"vcooutput"                     @ string offset=928
+.Linfo_string72:
+	.asciz	"PLLI2SInit"                    @ string offset=938
+	.ident	"Component: Arm Compiler for Embedded 6.21 Tool: armclang [5ec1fd00]"
+	.section	".note.GNU-stack","",%progbits
+	.eabi_attribute	30, 6	@ Tag_ABI_optimization_goals
+	.ARM_attribute	16, 1	@ Tag_AV_eba
+	.section	.debug_line,"",%progbits
+.Lline_table_start0:

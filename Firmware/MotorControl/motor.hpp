@@ -49,6 +49,8 @@ public:
 
         float dc_calib_tau = 0.2f;
 
+        bool positive_direction;
+
         // custom property setters
         Motor* parent = nullptr;
         void set_pre_calibrated(bool value) {

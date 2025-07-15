@@ -7,7 +7,8 @@
 // as per the magnitude invariant clarke transform
 // The magnitude of the alpha-beta vector may not be larger than sqrt(3)/2
 // Returns true on success, and false if the input was out of range
-std::tuple<float, float, float, bool> SVM(float alpha, float beta) {
+bool SVM(float alpha, float beta, float *_tA, float *_tB, float *_tC) 
+{
     float tA, tB, tC;
     int Sextant;
 
@@ -119,7 +120,11 @@ std::tuple<float, float, float, bool> SVM(float alpha, float beta) {
             tA >= 0.0f && tA <= 1.0f
          && tB >= 0.0f && tB <= 1.0f
          && tC >= 0.0f && tC <= 1.0f;
-    return {tA, tB, tC, result_valid};
+    
+    *_tA = tA;
+    *_tB = tB;
+    *_tC = tC;
+    return result_valid;    
 }
 
 // based on https://math.stackexchange.com/a/1105038/81278
@@ -170,7 +175,8 @@ int is_in_the_future(uint32_t time_ms) {
 
 // @brief: Returns number of microseconds since system startup
 uint32_t micros(void) {
-    register uint32_t ms, cycle_cnt;
+    // register uint32_t ms, cycle_cnt;
+    uint32_t ms, cycle_cnt;
     do {
         ms = HAL_GetTick();
         cycle_cnt = TIM_TIME_BASE->CNT;

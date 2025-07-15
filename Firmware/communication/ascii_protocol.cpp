@@ -345,19 +345,19 @@ void AsciiProtocol::cmd_system_ctrl(char * pStr, bool use_checksum) {
 void AsciiProtocol::cmd_read_property(char * pStr, bool use_checksum) {
     char name[MAX_LINE_LENGTH];
 
-    if (sscanf(pStr, "r %255s", name) < 1) {
-        respond(use_checksum, "invalid command format");
-    } else {
-        Introspectable property = root_obj.get_child(name, sizeof(name));
-        const StringConvertibleTypeInfo* type_info = dynamic_cast<const StringConvertibleTypeInfo*>(property.get_type_info());
-        if (!type_info) {
-            respond(use_checksum, "invalid property");
-        } else {
-            char response[10];
-            bool success = type_info->get_string(property, response, sizeof(response));
-            respond(use_checksum, success ? response : "not implemented");
-        }
-    }
+   if (sscanf(pStr, "r %255s", name) < 1) {
+       respond(use_checksum, "invalid command format");
+   } else {
+       Introspectable property = root_obj.get_child(name, sizeof(name));
+       const StringConvertibleTypeInfo* type_info = dynamic_cast<const StringConvertibleTypeInfo*>(property.get_type_info());
+       if (!type_info) {
+           respond(use_checksum, "invalid property");
+       } else {
+           char response[10];
+           bool success = type_info->get_string(property, response, sizeof(response));
+           respond(use_checksum, success ? response : "not implemented");
+       }
+   }
 }
 
 // @brief Executes the set write position command
@@ -368,20 +368,20 @@ void AsciiProtocol::cmd_write_property(char * pStr, bool use_checksum) {
     char name[MAX_LINE_LENGTH];
     char value[MAX_LINE_LENGTH];
 
-    if (sscanf(pStr, "w %255s %255s", name, value) < 1) {
-        respond(use_checksum, "invalid command format");
-    } else {
-        Introspectable property = root_obj.get_child(name, sizeof(name));
-        const StringConvertibleTypeInfo* type_info = dynamic_cast<const StringConvertibleTypeInfo*>(property.get_type_info());
-        if (!type_info) {
-            respond(use_checksum, "invalid property");
-        } else {
-            bool success = type_info->set_string(property, value, sizeof(value));
-            if (!success) {
-                respond(use_checksum, "not implemented");
-            }
-        }
-    }
+   if (sscanf(pStr, "w %255s %255s", name, value) < 1) {
+       respond(use_checksum, "invalid command format");
+   } else {
+       Introspectable property = root_obj.get_child(name, sizeof(name));
+       const StringConvertibleTypeInfo* type_info = dynamic_cast<const StringConvertibleTypeInfo*>(property.get_type_info());
+       if (!type_info) {
+           respond(use_checksum, "invalid property");
+       } else {
+           bool success = type_info->set_string(property, value, sizeof(value));
+           if (!success) {
+               respond(use_checksum, "not implemented");
+           }
+       }
+   }
 }
 
 // @brief Executes the motor watchdog update command

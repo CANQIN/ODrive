@@ -24,7 +24,8 @@ extern char serial_number_str[13];
 #ifdef __cplusplus
 }
 
-typedef struct {
+struct SystemStats_t
+{
     bool fully_booted;
     uint32_t uptime; // [ms]
     uint32_t min_heap_space; // FreeRTOS heap [Bytes]
@@ -51,7 +52,7 @@ typedef struct {
 
     USBStats_t& usb = usb_stats_;
     I2CStats_t& i2c = i2c_stats_;
-} SystemStats_t;
+};
 
 struct PWMMapping_t {
     endpoint_ref_t endpoint = {0, 0};
@@ -192,10 +193,10 @@ public:
 
     Axis& get_axis(int num) { return axes[num]; }
 
-    uint32_t get_interrupt_status(int32_t irqn);
-    uint32_t get_dma_status(uint8_t stream_num);
-    uint32_t get_gpio_states();
-    uint64_t get_drv_fault();
+    uint32_t get_interrupt_status(int32_t irqn) override;
+    uint32_t get_dma_status(uint8_t stream_num) override;
+    uint32_t get_gpio_states() override;
+    uint64_t get_drv_fault() override;
     void disarm_with_error(Error error);
 
     Error error_ = ERROR_NONE;

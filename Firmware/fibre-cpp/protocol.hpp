@@ -11,7 +11,7 @@ see protocol.md for the protocol specification
 //#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <cstring>
 #include <fibre/cpp_utils.hpp>
 #include <fibre/bufptr.hpp>

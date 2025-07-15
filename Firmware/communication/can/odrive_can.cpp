@@ -63,7 +63,7 @@ void ODriveCAN::can_server_thread() {
             HAL_CAN_ActivateNotification(handle_, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_RX_FIFO1_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY);
 
             // wait at least 1ms to prevent busy-spin on failed sends
-            osSemaphoreWait(sem_can, std::max(next_service_time, 1UL));
+            osSemaphoreWait(sem_can, std::max(next_service_time, 1u));
         } else if (status == HAL_CAN_ERROR_TIMEOUT) {
             HAL_CAN_ResetError(handle_);
             status = HAL_CAN_Start(handle_);
