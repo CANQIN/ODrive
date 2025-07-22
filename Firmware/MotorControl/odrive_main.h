@@ -5,21 +5,12 @@
 #include <board.h>
 
 #ifdef __cplusplus
-#include <communication/interface_usb.h>
-#include <communication/interface_i2c.h>
-#include <communication/interface_uart.h>
 #include <task_timer.hpp>
 extern "C" {
 #endif
 
 // OS includes
 #include <cmsis_os.h>
-
-// extern const float elec_rad_per_enc;
-extern uint32_t _reboot_cookie;
-
-extern uint64_t serial_number;
-extern char serial_number_str[13];
 
 #ifdef __cplusplus
 }
@@ -50,8 +41,6 @@ struct SystemStats_t
     int32_t prio_can;
     int32_t prio_analog;
 
-    USBStats_t& usb = usb_stats_;
-    I2CStats_t& i2c = i2c_stats_;
 };
 
 struct PWMMapping_t {
@@ -203,8 +192,6 @@ public:
     float& vbus_voltage_ = ::vbus_voltage; // TODO: make this the actual variable
     float& ibus_ = ::ibus_; // TODO: make this the actual variable
     float ibus_report_filter_k_ = 1.0f;
-
-    const uint64_t& serial_number_ = ::serial_number;
 
     // Hardware version is compared with OTP on startup to ensure that we're
     // running on the right board version.

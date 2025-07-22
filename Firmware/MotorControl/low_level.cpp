@@ -77,9 +77,12 @@ osThreadId analog_thread = 0;
 
 
 // @brief Arms the brake resistor
-void safety_critical_arm_brake_resistor() {
-    CRITICAL_SECTION() {
-        for (size_t i = 0; i < AXIS_COUNT; ++i) {
+void safety_critical_arm_brake_resistor() 
+{
+    CRITICAL_SECTION() 
+    {
+        for (size_t i = 0; i < AXIS_COUNT; ++i) 
+        {
             axes[i].motor_.I_bus_ = 0.0f;
         }
         brake_resistor_armed = true;
@@ -169,22 +172,7 @@ void start_adc_pwm()
     // Warp field stabilize.
     osDelay(2);
 
-
     start_timers();
-
-
-    // Start brake resistor PWM in floating output configuration
-#if HW_VERSION_MAJOR == 3
-    htim2.Instance->CCR3 = 0;
-    htim2.Instance->CCR4 = TIM_APB1_PERIOD_CLOCKS + 1;
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-#endif
-
-    if (odrv.config_.enable_brake_resistor) 
-    {
-        safety_critical_arm_brake_resistor();
-    }
 }
 
 // @brief ADC1 measurements are written to this buffer by DMA
@@ -398,35 +386,4 @@ void update_brake_current() {
     int low_off = high_on - TIM_APB1_DEADTIME_CLOCKS;
     if (low_off < 0) low_off = 0;
     safety_critical_apply_brake_resistor_timings(low_off, high_on);
-}
-
-
-/* Analog speed control input */
-
-static void update_analog_endpoint(const struct PWMMapping_t *map, int gpio)
-{
-    float fraction = get_adc_voltage(get_gpio(gpio)) / 3.3f;
-    float value = map->min + (fraction * (map->max - map->min));
-    fibre::set_endpoint_from_float(map->endpoint, value);
-}
-
-static void analog_polling_thread(void *)
-{
-    while (true) 
-    {
-        for (int i = 0; i < GPIO_COUNT; i++) 
-        {
-            struct PWMMapping_t *map = &odrv.config_.analog_mappings[i];
-
-            if (fibre::is_endpoint_ref_valid(map->endpoint))
-                update_analog_endpoint(map, i);
-        }
-        osDelay(10);
-    }
-}
-
-void start_analog_thread() 
-{
-    osThreadDef(analog_thread_def, analog_polling_thread, osPriorityLow, 0, stack_size_analog_thread / sizeof(StackType_t));
-    analog_thread = osThreadCreate(osThread(analog_thread_def), NULL);
 }

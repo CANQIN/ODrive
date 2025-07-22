@@ -3,12 +3,7 @@
 #include "odrive_main.h"
 #include "nvm_config.hpp"
 
-#include "usart.h"
 #include "freertos_vars.h"
-#include "usb_device.h"
-#include <communication/interface_usb.h>
-#include <communication/interface_uart.h>
-#include <communication/interface_i2c.h>
 #include <communication/interface_can.hpp>
 
 osSemaphoreId sem_usb_irq;
@@ -276,22 +271,16 @@ void vApplicationIdleHook(void)
         uint32_t min_stack_space[AXIS_COUNT];
         std::transform(axes.begin(), axes.end(), std::begin(min_stack_space), [](auto& axis) { return uxTaskGetStackHighWaterMark(axis.thread_id_) * sizeof(StackType_t); });
         odrv.system_stats_.max_stack_usage_axis = axes[0].stack_size_ - *std::min_element(std::begin(min_stack_space), std::end(min_stack_space));
-        odrv.system_stats_.max_stack_usage_usb = stack_size_usb_thread - uxTaskGetStackHighWaterMark(usb_thread) * sizeof(StackType_t);
-        odrv.system_stats_.max_stack_usage_uart = stack_size_uart_thread - uxTaskGetStackHighWaterMark(uart_thread) * sizeof(StackType_t);
         odrv.system_stats_.max_stack_usage_startup = stack_size_default_task - uxTaskGetStackHighWaterMark(defaultTaskHandle) * sizeof(StackType_t);
         odrv.system_stats_.max_stack_usage_can = odrv.can_.stack_size_ - uxTaskGetStackHighWaterMark(odrv.can_.thread_id_) * sizeof(StackType_t);
         odrv.system_stats_.max_stack_usage_analog =  stack_size_analog_thread - uxTaskGetStackHighWaterMark(analog_thread) * sizeof(StackType_t);
 
         odrv.system_stats_.stack_size_axis = axes[0].stack_size_;
-        odrv.system_stats_.stack_size_usb = stack_size_usb_thread;
-        odrv.system_stats_.stack_size_uart = stack_size_uart_thread;
         odrv.system_stats_.stack_size_startup = stack_size_default_task;
         odrv.system_stats_.stack_size_can = odrv.can_.stack_size_;
         odrv.system_stats_.stack_size_analog = stack_size_analog_thread;
 
         odrv.system_stats_.prio_axis = osThreadGetPriority(axes[0].thread_id_);
-        odrv.system_stats_.prio_usb = osThreadGetPriority(usb_thread);
-        odrv.system_stats_.prio_uart = osThreadGetPriority(uart_thread);
         odrv.system_stats_.prio_startup = osThreadGetPriority(defaultTaskHandle);
         odrv.system_stats_.prio_can = osThreadGetPriority(odrv.can_.thread_id_);
         odrv.system_stats_.prio_analog = osThreadGetPriority(analog_thread);
@@ -416,7 +405,6 @@ void ODrive::control_loop_cb(uint32_t timestamp)
             axis.sensorless_estimator_.vel_estimate_.reset();
         }
 
-        uart_poll();
         odrv.oscilloscope_.update();
     }
 
@@ -570,28 +558,8 @@ uint32_t ODrive::get_gpio_states()
  */
 static void rtos_main(void*) 
 {
-    // Init USB device
-    MX_USB_DEVICE_Init();
-
     // Start ADC for temperature measurements and user measurements
     start_general_purpose_adc();
-
-    //osDelay(100);
-    // Init communications (this requires the axis objects to be constructed)
-    init_communication();
-
-    // Start pwm-in compare modules
-    // must happen after communication is initialized
-    pwm0_input.init();
-
-    // Set up the CS pins for absolute encoders (TODO: move to GPIO init switch statement)
-    for(auto& axis : axes)
-    {
-        if(axis.encoder_.config_.mode & Encoder::MODE_FLAG_ABS)
-        {
-            axis.encoder_.abs_spi_cs_pin_init();
-        }
-    }
 
     // Try to initialized gate drivers for fault-free startup.
     // If this does not succeed, a fault will be raised and the idle loop will
@@ -613,7 +581,6 @@ static void rtos_main(void*)
 
     // Start PWM and enable adc interrupts/callbacks
     start_adc_pwm();
-    start_analog_thread();
 
     // Wait for up to 2s for motor to become ready to allow for error-free
     // startup. This delay gives the current sensor calibration time to
@@ -651,105 +618,17 @@ static void rtos_main(void*)
     vTaskDelete(defaultTaskHandle);
 }
 
-/**
- * @brief Carries out early startup tasks that need to run before any static
- * initializers.
- * This function gets called from the startup assembly code.
- */
-extern "C" void early_start_checks(void) 
-{
-    if(_reboot_cookie == 0xDEADFE75) 
-    {
-        /* The STM DFU bootloader enables internal pull-up resistors on PB10 (AUX_H)
-        * and PB11 (AUX_L), thereby causing shoot-through on the brake resistor
-        * FETs and obliterating them unless external 3.3k pull-down resistors are
-        * present. Pull-downs are only present on ODrive 3.5 or newer.
-        * On older boards we disable DFU by default but if the user insists
-        * there's only one thing left that might save it: time.
-        * The brake resistor gate driver needs a certain 10V supply (GVDD) to
-        * make it work. This voltage is supplied by the motor gate drivers which get
-        * disabled at system reset. So over time GVDD voltage _should_ below
-        * dangerous levels. This is completely handwavy and should not be relied on
-        * so you are on your own on if you ignore this warning.
-        *
-        * This loop takes 5 cycles per iteration and at this point the system runs
-        * on the internal 16MHz RC oscillator so the delay is about 2 seconds.
-        */
-        for (size_t i = 0; i < (16000000UL / 5UL * 2UL); ++i) {
-            __NOP();
-        }
-        _reboot_cookie = 0xDEADBEEF;
-    }
-
-    /* We could jump to the bootloader directly on demand without rebooting
-    but that requires us to reset several peripherals and interrupts for it
-    to function correctly. Therefore it's easier to just reset the entire chip. */
-    if(_reboot_cookie == 0xDEADBEEF) 
-    {
-        _reboot_cookie = 0xCAFEFEED;  //Reset bootloader trigger
-        // __set_MSP((uintptr_t)&_estack);
-        // http://www.st.com/content/ccc/resource/technical/document/application_note/6a/17/92/02/58/98/45/0c/CD00264379.pdf/files/CD00264379.pdf
-        void (*builtin_bootloader)(void) = (void (*)(void))(*((uint32_t *)0x1FFF0004));
-        builtin_bootloader();
-    }
-
-    /* The bootloader might fail to properly clean up after itself,
-    so if we're not sure that the system is in a clean state we
-    just reset it again */
-    if(_reboot_cookie != 42) 
-    {
-        _reboot_cookie = 42;
-        NVIC_SystemReset();
-    }
-}
 
 /**
  * @brief Main entry point called from assembly startup code.
  */
 extern "C" int main(void) 
 {
-    // This procedure of building a USB serial number should be identical
-    // to the way the STM's built-in USB bootloader does it. This means
-    // that the device will have the same serial number in normal and DFU mode.
-    uint32_t uuid0 = *(uint32_t *)(UID_BASE + 0);
-    uint32_t uuid1 = *(uint32_t *)(UID_BASE + 4);
-    uint32_t uuid2 = *(uint32_t *)(UID_BASE + 8);
-    uint32_t uuid_mixed_part = uuid0 + uuid2;
-    serial_number = ((uint64_t)uuid_mixed_part << 16) | (uint64_t)(uuid1 >> 16);
-
-    uint64_t val = serial_number;
-    for (size_t i = 0; i < 12; ++i) 
-    {
-        serial_number_str[i] = "0123456789ABCDEF"[(val >> (48-4)) & 0xf];
-        val <<= 4;
-    }
-    serial_number_str[12] = 0;
-
     // Init low level system functions (clocks, flash interface)
     system_init();
 
-    // Load configuration from NVM. This needs to happen after system_init()
-    // since the flash interface must be initialized and before board_init()
-    // since board initialization can depend on the config.
-    size_t config_size = 0;
-    bool success = config_manager.start_load() && 
-                   config_read_all() && 
-                   config_manager.finish_load(&config_size) && 
-                   config_apply_all();
-    if (success) 
-    {
-        odrv.user_config_loaded_ = config_size;
-    } 
-    else 
-    {
-        config_clear_all();
-        config_apply_all();
-    }
-
-    odrv.misconfigured_ = (odrv.misconfigured_) || 
-                          (odrv.config_.enable_uart_a && !uart_a) || 
-                          (odrv.config_.enable_uart_b && !uart_b) || 
-                          (odrv.config_.enable_uart_c && !uart_c);
+    config_clear_all();
+    config_apply_all();
 
     // Init board-specific peripherals
     if (!board_init()) 
@@ -760,182 +639,7 @@ extern "C" int main(void)
     // Init GPIOs according to their configured mode
     for (size_t i = 0; i < GPIO_COUNT; ++i) 
     {
-        // Skip unavailable GPIOs
-        if (!get_gpio(i)) 
-        {
-            continue;
-        }
-
-        ODriveIntf::GpioMode mode = odrv.config_.gpio_modes[i];
-
-        GPIO_InitTypeDef GPIO_InitStruct;
-        GPIO_InitStruct.Pin = get_gpio(i).pin_mask_;
-
-        // Set Alternate Function setting for this GPIO mode
-        if (mode == ODriveIntf::GPIO_MODE_DIGITAL ||
-            mode == ODriveIntf::GPIO_MODE_DIGITAL_PULL_UP ||
-            mode == ODriveIntf::GPIO_MODE_DIGITAL_PULL_DOWN ||
-            mode == ODriveIntf::GPIO_MODE_MECH_BRAKE ||
-            mode == ODriveIntf::GPIO_MODE_STATUS ||
-            mode == ODriveIntf::GPIO_MODE_ANALOG_IN) 
-        {
-            GPIO_InitStruct.Alternate = 0;
-        } 
-        else 
-        {
-            auto it = std::find_if(alternate_functions[i].begin(), alternate_functions[i].end(), [mode](auto a) 
-            {
-                return a.mode == mode; 
-            });
-
-            if (it == alternate_functions[i].end()) 
-            {
-                odrv.misconfigured_ = true; // this GPIO doesn't support the selected mode
-                continue;
-            }
-            
-            GPIO_InitStruct.Alternate = it->alternate_function;
-        }
-
-        switch (mode) 
-        {
-            case ODriveIntf::GPIO_MODE_DIGITAL: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_UP: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-                GPIO_InitStruct.Pull = GPIO_PULLUP;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_DOWN: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-                GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_ANALOG_IN: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_UART_A: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_a) 
-                {
-                    odrv.misconfigured_ = true;
-                }
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_UART_B: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_b) 
-                {
-                    odrv.misconfigured_ = true;
-                }
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_UART_C: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_c) 
-                {
-                    odrv.misconfigured_ = true;
-                }
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_CAN_A: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_can_a) 
-                {
-                    odrv.misconfigured_ = true;
-                }
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_I2C_A: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-                GPIO_InitStruct.Pull = GPIO_PULLUP;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_i2c_a) 
-                {
-                    odrv.misconfigured_ = true;
-                }
-            } 
-            break;
-            // case ODriveIntf::GPIO_MODE_SPI_A: 
-            // { 
-            //     // TODO
-            // } 
-            // break;
-            case ODriveIntf::GPIO_MODE_PWM: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_ENC0: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_ENC1: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_ENC2: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_MECH_BRAKE: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            case ODriveIntf::GPIO_MODE_STATUS: 
-            {
-                GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-                GPIO_InitStruct.Pull = GPIO_NOPULL;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } 
-            break;
-            default: 
-            {
-                odrv.misconfigured_ = true;
-                continue;
-            }
-        }
-
-        HAL_GPIO_Init(get_gpio(i).port_, &GPIO_InitStruct);
+        // HAL_GPIO_Init(get_gpio(i).port_, &GPIO_InitStruct);
     }
 
     // Init usb irq binary semaphore, and start with no tokens by removing the starting one.

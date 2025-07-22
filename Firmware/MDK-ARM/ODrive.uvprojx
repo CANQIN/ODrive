@@ -340,7 +340,7 @@
               <MiscControls>-Wno-c99-designator</MiscControls>
               <Define>USE_FULL_LL_DRIVER,USE_HAL_DRIVER,STM32F405xx,ARM_MATH_CM4,FPU_FPV4,HW_VERSION_MAJOR=3,HW_VERSION_MINOR=6,HW_VERSION_VOLTAGE=56,FIBRE_ENABLE_SERVER=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Firmware;..\MotorControl;..\ThirdParty\STM32F4xx_HAL_Driver\Inc;..\ThirdParty\FreeRTOS\Source\include;..\ThirdParty\FreeRTOS\Source\CMSIS_RTOS;..\ThirdParty\FreeRTOS\Source\portable\GCC\ARM_CM4F;..\ThirdParty\CMSIS\Include;..\ThirdParty\CMSIS\Device\ST\STM32F4xx\Include;..\ThirdParty\STM32_USB_Device_Library\Core\Inc;..\ThirdParty\STM32_USB_Device_Library\Class\CDC\Inc;..\Board\v3\Inc;..\fibre-cpp\include</IncludePath>
+              <IncludePath>..\..\Firmware;..\MotorControl;..\ThirdParty\STM32F4xx_HAL_Driver\Inc;..\ThirdParty\FreeRTOS\Source\include;..\ThirdParty\FreeRTOS\Source\CMSIS_RTOS;..\ThirdParty\FreeRTOS\Source\portable\GCC\ARM_CM4F;..\ThirdParty\CMSIS\Include;..\ThirdParty\CMSIS\Device\ST\STM32F4xx\Include;..\Board\v3\Inc;..\fibre-cpp\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -479,11 +479,6 @@
               <FileType>8</FileType>
               <FilePath>..\MotorControl\trapTraj.cpp</FilePath>
             </File>
-            <File>
-              <FileName>pwm_input.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\MotorControl\pwm_input.cpp</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -525,24 +520,9 @@
               <FilePath>..\Board\v3\Src\main.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\usbd_conf.c</FilePath>
-            </File>
-            <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Board\v3\Src\spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_cdc_if.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\usbd_cdc_if.c</FilePath>
             </File>
             <File>
               <FileName>adc.c</FileName>
@@ -555,19 +535,9 @@
               <FilePath>..\Board\v3\Src\stm32f4xx_hal_msp.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_desc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\usbd_desc.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Board\v3\Src\stm32f4xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>usb_device.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\usb_device.c</FilePath>
             </File>
             <File>
               <FileName>can.c</FileName>
@@ -583,11 +553,6 @@
               <FileName>gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Board\v3\Src\gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Board\v3\Src\i2c.c</FilePath>
             </File>
             <File>
               <FileName>version.c</FileName>
@@ -613,26 +578,6 @@
               <FileName>communication.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\communication\communication.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>ascii_protocol.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\communication\ascii_protocol.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>interface_uart.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\communication\interface_uart.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>interface_usb.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\communication\interface_usb.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>interface_i2c.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\communication\interface_i2c.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -668,26 +613,6 @@
               <FileName>stm32_spi_arbiter.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Drivers\STM32\stm32_spi_arbiter.cpp</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Fibre</GroupName>
-          <Files>
-            <File>
-              <FileName>fibre.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\fibre-cpp\fibre.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>channel_discoverer.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\fibre-cpp\channel_discoverer.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>legacy_protocol.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\fibre-cpp\legacy_protocol.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -743,31 +668,6 @@
               <FileName>port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ThirdParty\FreeRTOS\Source\portable\GCC\ARM_CM4F\port.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>ThirdParty/STM32_USB_Device_Library</GroupName>
-          <Files>
-            <File>
-              <FileName>usbd_core.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ThirdParty\STM32_USB_Device_Library\Core\Src\usbd_core.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_ctlreq.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ThirdParty\STM32_USB_Device_Library\Core\Src\usbd_ctlreq.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_ioreq.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ThirdParty\STM32_USB_Device_Library\Core\Src\usbd_ioreq.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_cdc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ThirdParty\STM32_USB_Device_Library\Class\CDC\Src\usbd_cdc.c</FilePath>
             </File>
           </Files>
         </Group>

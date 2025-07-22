@@ -13,8 +13,6 @@
 #include <spi.h>
 #include <tim.h>
 #include <can.h>
-#include <i2c.h>
-#include <usb_device.h>
 #include <main.h>
 #include "cmsis_os.h"
 
@@ -80,7 +78,6 @@
 #include <Drivers/DRV8301/drv8301.hpp>
 #include <Drivers/STM32/stm32_gpio.hpp>
 #include <Drivers/STM32/stm32_spi_arbiter.hpp>
-#include <MotorControl/pwm_input.hpp>
 #include <MotorControl/thermistor.hpp>
 
 using TGateDriver = Drv8301;
@@ -98,15 +95,8 @@ extern Stm32Gpio gpios[GPIO_COUNT];
 struct GpioFunction { int mode = 0; uint8_t alternate_function = 0xff; };
 extern std::array<GpioFunction, 3> alternate_functions[GPIO_COUNT];
 
-extern USBD_HandleTypeDef& usb_dev_handle;
-
 extern Stm32SpiArbiter& ext_spi_arbiter;
 
-extern UART_HandleTypeDef* uart_a;
-extern UART_HandleTypeDef* uart_b;
-extern UART_HandleTypeDef* uart_c;
-
-extern PwmInput pwm0_input;
 #endif
 
 // Period in [s]
