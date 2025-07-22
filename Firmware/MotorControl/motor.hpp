@@ -8,13 +8,15 @@ class Motor;
 #include <autogen/interfaces.hpp>
 #include "foc.hpp"
 
-class Motor : public ODriveIntf::MotorIntf {
+class Motor : public ODriveIntf::MotorIntf 
+{
 public:
 
     // NOTE: for gimbal motors, all units of Nm are instead V.
     // example: vel_gain is [V/(turn/s)] instead of [Nm/(turn/s)]
     // example: current_lim and calibration_current will instead determine the maximum voltage applied to the motor.
-    struct Config_t {
+    struct Config_t 
+    {
         bool pre_calibrated = false; // can be set to true to indicate that all values here are valid
         int32_t pole_pairs = 7;
         float calibration_current = 10.0f;    // [A]
@@ -53,13 +55,26 @@ public:
 
         // custom property setters
         Motor* parent = nullptr;
-        void set_pre_calibrated(bool value) {
+        void set_pre_calibrated(bool value) 
+        {
             pre_calibrated = value;
             parent->is_calibrated_ = parent->is_calibrated_ || parent->config_.pre_calibrated;
         }
-        void set_phase_inductance(float value) { phase_inductance = value; parent->update_current_controller_gains(); }
-        void set_phase_resistance(float value) { phase_resistance = value; parent->update_current_controller_gains(); }
-        void set_current_control_bandwidth(float value) { current_control_bandwidth = value; parent->update_current_controller_gains(); }
+        void set_phase_inductance(float value) 
+        { 
+            phase_inductance = value; 
+            parent->update_current_controller_gains(); 
+        }
+        void set_phase_resistance(float value) 
+        { 
+            phase_resistance = value; 
+            parent->update_current_controller_gains(); 
+        }
+        void set_current_control_bandwidth(float value) 
+        { 
+            current_control_bandwidth = value; 
+            parent->update_current_controller_gains(); 
+        }
     };
 
     Motor(TIM_HandleTypeDef* timer,

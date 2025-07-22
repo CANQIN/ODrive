@@ -42,7 +42,8 @@ Axis::Axis(int axis_num,
     mechanical_brake_.axis_ = this;
 }
 
-Axis::LockinConfig_t Axis::default_calibration() {
+Axis::LockinConfig_t Axis::default_calibration() 
+{
     Axis::LockinConfig_t config;
     config.current = 10.0f;           // [A]
     config.ramp_time = 0.4f;          // [s]
@@ -56,7 +57,8 @@ Axis::LockinConfig_t Axis::default_calibration() {
     return config;
 }
 
-Axis::LockinConfig_t Axis::default_sensorless() {
+Axis::LockinConfig_t Axis::default_sensorless() 
+{
     Axis::LockinConfig_t config;
     config.current = 10.0f;           // [A]
     config.ramp_time = 0.4f;          // [s]
@@ -70,31 +72,36 @@ Axis::LockinConfig_t Axis::default_sensorless() {
     return config;
 }
 
-static void step_cb_wrapper(void* ctx) {
+static void step_cb_wrapper(void* ctx) 
+{
     reinterpret_cast<Axis*>(ctx)->step_cb();
 }
 
-bool Axis::apply_config() {
+bool Axis::apply_config() 
+{
     config_.parent = this;
     decode_step_dir_pins();
     watchdog_feed();
     return true;
 }
 
-void Axis::clear_config() {
+void Axis::clear_config() 
+{
     config_ = {};
     config_.step_gpio_pin = default_step_gpio_pin_;
     config_.dir_gpio_pin = default_dir_gpio_pin_;
     config_.can.node_id = axis_num_;
 }
 
-static void run_state_machine_loop_wrapper(void* ctx) {
+static void run_state_machine_loop_wrapper(void* ctx) 
+{
     reinterpret_cast<Axis*>(ctx)->run_state_machine_loop();
     reinterpret_cast<Axis*>(ctx)->thread_id_valid_ = false;
 }
 
 // @brief Starts run_state_machine_loop in a new thread
-void Axis::start_thread() {
+void Axis::start_thread() 
+{
     osThreadDef(thread_def, run_state_machine_loop_wrapper, thread_priority_, 0, stack_size_ / sizeof(StackType_t));
     thread_id_ = osThreadCreate(osThread(thread_def), this);
     thread_id_valid_ = true;
@@ -103,7 +110,8 @@ void Axis::start_thread() {
 /**
  * @brief Blocks until at least one complete control loop has been executed.
  */
-bool Axis::wait_for_control_iteration() {
+bool Axis::wait_for_control_iteration() 
+{
     osSignalWait(0x0001, osWaitForever); // this might return instantly
     osSignalWait(0x0001, osWaitForever); // this might be triggered at the
                                          // end of a control loop iteration
@@ -114,28 +122,36 @@ bool Axis::wait_for_control_iteration() {
 }
 
 // step/direction interface
-void Axis::step_cb() {
-    if (step_dir_active_) {
+void Axis::step_cb() 
+{
+    if (step_dir_active_) 
+    {
         dir_gpio_.read() ? ++steps_ : --steps_;
         controller_.input_pos_updated();
     }
 }
 
-void Axis::decode_step_dir_pins() {
+void Axis::decode_step_dir_pins() 
+{
     step_gpio_ = get_gpio(config_.step_gpio_pin);
     dir_gpio_ = get_gpio(config_.dir_gpio_pin);
 }
 
 // @brief (de)activates step/dir input
-void Axis::set_step_dir_active(bool active) {
-    if (active) {
+void Axis::set_step_dir_active(bool active) 
+{
+    if (active) 
+    {
         // Subscribe to rising edges of the step GPIO
-        if (!step_gpio_.subscribe(true, false, step_cb_wrapper, this)) {
+        if (!step_gpio_.subscribe(true, false, step_cb_wrapper, this)) 
+        {
             odrv.misconfigured_ = true;
         }
 
         step_dir_active_ = true;
-    } else {
+    } 
+    else 
+    {
         step_dir_active_ = false;
 
         // Unsubscribe from step GPIO
@@ -147,15 +163,19 @@ void Axis::set_step_dir_active(bool active) {
 
 // @brief Do axis level checks and call subcomponent do_checks
 // Returns true if everything is ok.
-bool Axis::do_checks(uint32_t timestamp) {
+bool Axis::do_checks(uint32_t timestamp) 
+{
     // Sub-components should use set_error which will propegate to this error_
     motor_.effective_current_lim();
     motor_.do_checks(timestamp);
 
     // Check for endstop presses
-    if (min_endstop_.config_.enabled && min_endstop_.rose() && !(current_state_ == AXIS_STATE_HOMING)) {
+    if (min_endstop_.config_.enabled && min_endstop_.rose() && !(current_state_ == AXIS_STATE_HOMING)) 
+    {
         error_ |= ERROR_MIN_ENDSTOP_PRESSED;
-    } else if (max_endstop_.config_.enabled && max_endstop_.rose() && !(current_state_ == AXIS_STATE_HOMING)) {
+    } 
+    else if (max_endstop_.config_.enabled && max_endstop_.rose() && !(current_state_ == AXIS_STATE_HOMING)) 
+    {
         error_ |= ERROR_MAX_ENDSTOP_PRESSED;
     }
 
@@ -163,27 +183,34 @@ bool Axis::do_checks(uint32_t timestamp) {
 }
 
 // @brief Feed the watchdog to prevent watchdog timeouts.
-void Axis::watchdog_feed() {
+void Axis::watchdog_feed() 
+{
     watchdog_current_value_ = get_watchdog_reset();
 }
 
 // @brief Check the watchdog timer for expiration. Also sets the watchdog error bit if expired.
-bool Axis::watchdog_check() {
-    if (!config_.enable_watchdog) return true;
+bool Axis::watchdog_check() 
+{
+    if (!config_.enable_watchdog) 
+        return true;
 
     // explicit check here to ensure that we don't underflow back to UINT32_MAX
-    if (watchdog_current_value_ > 0) {
+    if (watchdog_current_value_ > 0) 
+    {
         watchdog_current_value_--;
         return true;
-    } else {
+    } 
+    else 
+    {
         error_ |= ERROR_WATCHDOG_TIMER_EXPIRED;
         return false;
     }
 }
 
-bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_armed,
-        std::function<bool(bool)> loop_cb) {
-    CRITICAL_SECTION() {
+bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_armed, std::function<bool(bool)> loop_cb) 
+{
+    CRITICAL_SECTION() 
+    {
         // Reset state variables
         open_loop_controller_.Idq_setpoint_ = {0.0f, 0.0f};
         open_loop_controller_.Vdq_setpoint_ = {0.0f, 0.0f};
@@ -217,22 +244,25 @@ bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_arme
     bool success = false;
     float dir = lockin_config.vel >= 0.0f ? 1.0f : -1.0f;
 
-    while ((requested_state_ == AXIS_STATE_UNDEFINED) && motor_.is_armed_) {
+    while ((requested_state_ == AXIS_STATE_UNDEFINED) && motor_.is_armed_) 
+    {
         bool reached_target_vel = std::abs(open_loop_controller_.phase_vel_.any().value_or(0.0f) - lockin_config.vel) <= std::numeric_limits<float>::epsilon();
         bool reached_target_dist = open_loop_controller_.total_distance_.any().value_or(0.0f) * dir >= lockin_config.finish_distance * dir;
 
         // Check if terminal condition is reached
-        bool terminal_condition = (reached_target_vel && lockin_config.finish_on_vel)
-                               || (reached_target_dist && lockin_config.finish_on_distance)
-                               || (encoder_.index_found_ && lockin_config.finish_on_enc_idx);
-        if (terminal_condition) {
+        bool terminal_condition = (reached_target_vel && lockin_config.finish_on_vel) || 
+                                  (reached_target_dist && lockin_config.finish_on_distance) || 
+                                  (encoder_.index_found_ && lockin_config.finish_on_enc_idx);
+        if (terminal_condition) 
+        {
             success = true;
             break;
         }
 
         // Activate index pin as soon as target velocity was reached. This is
         // to avoid hitting the index from the wrong direction.
-        if (reached_target_vel && !encoder_.index_found_ && !subscribed_to_idx_once) {
+        if (reached_target_vel && !encoder_.index_found_ && !subscribed_to_idx_once) 
+        {
             encoder_.set_idx_subscribe(true);
             subscribed_to_idx_once = true;
         }
@@ -246,7 +276,8 @@ bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_arme
         osDelay(1);
     }
 
-    if (!success || !remain_armed) {
+    if (!success || !remain_armed) 
+    {
         motor_.disarm();
     }
 
@@ -254,30 +285,39 @@ bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_arme
 }
 
 
-bool Axis::start_closed_loop_control() {
+bool Axis::start_closed_loop_control() 
+{
     bool sensorless_mode = config_.enable_sensorless_mode;
 
-    if (sensorless_mode) {
+    if (sensorless_mode) 
+    {
         // TODO: restart if desired
-        if (!run_lockin_spin(config_.sensorless_ramp, true)) {
+        if (!run_lockin_spin(config_.sensorless_ramp, true)) 
+        {
             return false;
         }
     }
 
     // Hook up the data paths between the components
-    CRITICAL_SECTION() {
-        if (sensorless_mode) {
+    CRITICAL_SECTION() 
+    {
+        if (sensorless_mode) 
+        {
             controller_.pos_estimate_linear_src_.disconnect();
             controller_.pos_estimate_circular_src_.disconnect();
             controller_.pos_wrap_src_.disconnect();
             controller_.vel_estimate_src_.connect_to(&sensorless_estimator_.vel_estimate_);
-        } else if (controller_.config_.load_encoder_axis < AXIS_COUNT) {
+        } 
+        else if (controller_.config_.load_encoder_axis < AXIS_COUNT) 
+        {
             Axis* ax = &axes[controller_.config_.load_encoder_axis];
             controller_.pos_estimate_circular_src_.connect_to(&ax->encoder_.pos_circular_);
             controller_.pos_wrap_src_.connect_to(&controller_.config_.circular_setpoint_range);
             controller_.pos_estimate_linear_src_.connect_to(&ax->encoder_.pos_estimate_);
             controller_.vel_estimate_src_.connect_to(&ax->encoder_.vel_estimate_);
-        } else {
+        } 
+        else 
+        {
             controller_.pos_estimate_circular_src_.disconnect();
             controller_.pos_estimate_linear_src_.disconnect();
             controller_.pos_wrap_src_.disconnect();
@@ -313,7 +353,8 @@ bool Axis::start_closed_loop_control() {
         motor_.phase_vel_src_.connect_to(stator_phase_vel_src);
         motor_.current_control_.phase_vel_src_.connect_to(stator_phase_vel_src);
         
-        if (sensorless_mode) {
+        if (sensorless_mode) 
+        {
             // Make the final velocity of the loĉk-in spin the setpoint of the
             // closed loop controller to allow for smooth transition.
             float vel = config_.sensorless_ramp.vel / (2.0f * M_PI * motor_.config_.pole_pairs);
@@ -323,7 +364,8 @@ bool Axis::start_closed_loop_control() {
     }
 
     // In sensorless mode the motor is already armed.
-    if (!motor_.is_armed_) {
+    if (!motor_.is_armed_) 
+    {
         wait_for_control_iteration();
         motor_.arm(&motor_.current_control_);
     }
@@ -331,16 +373,19 @@ bool Axis::start_closed_loop_control() {
     return true;
 }
 
-bool Axis::stop_closed_loop_control() {
+bool Axis::stop_closed_loop_control() 
+{
     motor_.disarm();
     return check_for_errors();
 }
 
-bool Axis::run_closed_loop_control_loop() {
+bool Axis::run_closed_loop_control_loop() 
+{
     start_closed_loop_control();
     set_step_dir_active(config_.enable_step_dir);
 
-    while ((requested_state_ == AXIS_STATE_UNDEFINED) && motor_.is_armed_) {
+    while ((requested_state_ == AXIS_STATE_UNDEFINED) && motor_.is_armed_) 
+    {
         osDelay(1);
     }
 
@@ -452,12 +497,16 @@ bool Axis::run_idle_loop() {
 }
 
 // Infinite loop that does calibration and enters main control loop as appropriate
-void Axis::run_state_machine_loop() {
-    for (;;) {
+void Axis::run_state_machine_loop() 
+{
+    for (;;) 
+    {
         // Load the task chain if a specific request is pending
-        if (requested_state_ != AXIS_STATE_UNDEFINED) {
+        if (requested_state_ != AXIS_STATE_UNDEFINED) 
+        {
             size_t pos = 0;
-            if (requested_state_ == AXIS_STATE_STARTUP_SEQUENCE) {
+            if (requested_state_ == AXIS_STATE_STARTUP_SEQUENCE) 
+            {
                 if (config_.startup_motor_calibration)
                     task_chain_[pos++] = AXIS_STATE_MOTOR_CALIBRATION;
                 if (config_.startup_encoder_index_search && encoder_.config_.use_index)
@@ -469,7 +518,9 @@ void Axis::run_state_machine_loop() {
                 if (config_.startup_closed_loop_control)
                     task_chain_[pos++] = AXIS_STATE_CLOSED_LOOP_CONTROL;
                 task_chain_[pos++] = AXIS_STATE_IDLE;
-            } else if (requested_state_ == AXIS_STATE_FULL_CALIBRATION_SEQUENCE) {
+            } 
+            else if (requested_state_ == AXIS_STATE_FULL_CALIBRATION_SEQUENCE) 
+            {
                 task_chain_[pos++] = AXIS_STATE_MOTOR_CALIBRATION;
                 if (encoder_.config_.mode == ODriveIntf::EncoderIntf::MODE_HALL)
                     task_chain_[pos++] = AXIS_STATE_ENCODER_HALL_POLARITY_CALIBRATION;
@@ -477,7 +528,9 @@ void Axis::run_state_machine_loop() {
                     task_chain_[pos++] = AXIS_STATE_ENCODER_INDEX_SEARCH;
                 task_chain_[pos++] = AXIS_STATE_ENCODER_OFFSET_CALIBRATION;
                 task_chain_[pos++] = AXIS_STATE_IDLE;
-            } else if (requested_state_ != AXIS_STATE_UNDEFINED) {
+            } 
+            else if (requested_state_ != AXIS_STATE_UNDEFINED) 
+            {
                 task_chain_[pos++] = requested_state_;
                 task_chain_[pos++] = AXIS_STATE_IDLE;
             }
@@ -492,8 +545,10 @@ void Axis::run_state_machine_loop() {
         // Run the specified state
         // Handlers should exit if requested_state != AXIS_STATE_UNDEFINED
         bool status;
-        switch (current_state_) {
-            case AXIS_STATE_MOTOR_CALIBRATION: {
+        switch (current_state_) 
+        {
+            case AXIS_STATE_MOTOR_CALIBRATION: 
+            {
                 // These error checks are a hacky way to force legacy behavior
                 // when an error is raised. TODO: remove this when we overhaul
                 // the error architecture
@@ -501,18 +556,22 @@ void Axis::run_state_machine_loop() {
                 //if (odrv.any_error())
                 //    goto invalid_state_label;
                 status = motor_.run_calibration();
-            } break;
+            } 
+            break;
 
-            case AXIS_STATE_ENCODER_INDEX_SEARCH: {
+            case AXIS_STATE_ENCODER_INDEX_SEARCH: 
+            {
                 //if (odrv.any_error())
                 //    goto invalid_state_label;
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
                 status = encoder_.run_index_search();
-            } break;
+            } 
+            break;
 
-            case AXIS_STATE_ENCODER_DIR_FIND: {
+            case AXIS_STATE_ENCODER_DIR_FIND: 
+            {
                 //if (odrv.any_error())
                 //    goto invalid_state_label;
                 if (!motor_.is_calibrated_)
@@ -522,28 +581,35 @@ void Axis::run_state_machine_loop() {
                 // Help facilitate encoder.is_ready without reboot
                 if (status)
                     encoder_.apply_config(motor_.config_.motor_type);
-            } break;
+            } 
+            break;
 
-            case AXIS_STATE_ENCODER_HALL_POLARITY_CALIBRATION: {
+            case AXIS_STATE_ENCODER_HALL_POLARITY_CALIBRATION: 
+            {
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
                 status = encoder_.run_hall_polarity_calibration();
-            } break;
+            } 
+            break;
 
-            case AXIS_STATE_ENCODER_HALL_PHASE_CALIBRATION: {
+            case AXIS_STATE_ENCODER_HALL_PHASE_CALIBRATION: 
+            {
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
-                if (!encoder_.config_.hall_polarity_calibrated) {
+                if (!encoder_.config_.hall_polarity_calibrated) 
+                {
                     encoder_.set_error(ODriveIntf::EncoderIntf::ERROR_HALL_NOT_CALIBRATED_YET);
                     goto invalid_state_label;
                 }
 
                 status = encoder_.run_hall_phase_calibration();
-            } break;
+            } 
+            break;
 
-            case AXIS_STATE_HOMING: {
+            case AXIS_STATE_HOMING: 
+            {
                 Controller::ControlMode stored_control_mode = controller_.config_.control_mode;
                 Controller::InputMode stored_input_mode = controller_.config_.input_mode;
                 
@@ -551,7 +617,8 @@ void Axis::run_state_machine_loop() {
 
                 controller_.config_.control_mode = stored_control_mode;
                 controller_.config_.input_mode = stored_input_mode;
-            } break;
+            } 
+            break;
 
             case AXIS_STATE_ENCODER_OFFSET_CALIBRATION: {
                 //if (odrv.any_error())

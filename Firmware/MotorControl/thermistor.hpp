@@ -6,7 +6,8 @@ class Motor; // declared in motor.hpp
 #include "current_limiter.hpp"
 #include <autogen/interfaces.hpp>
 
-class ThermistorCurrentLimiter : public CurrentLimiter, public ODriveIntf::ThermistorCurrentLimiterIntf {
+class ThermistorCurrentLimiter : public CurrentLimiter, public ODriveIntf::ThermistorCurrentLimiterIntf 
+{
 public:
     virtual ~ThermistorCurrentLimiter() = default;
 
@@ -32,9 +33,11 @@ public:
     std::array<float, 2> lpf_vals_ = { 0.0f };
 };
 
-class OnboardThermistorCurrentLimiter : public ThermistorCurrentLimiter, public ODriveIntf::OnboardThermistorCurrentLimiterIntf {
+class OnboardThermistorCurrentLimiter : public ThermistorCurrentLimiter, public ODriveIntf::OnboardThermistorCurrentLimiterIntf 
+{
 public:
-    struct Config_t {
+    struct Config_t 
+    {
         float temp_limit_lower = 100;
         float temp_limit_upper = 120;
         bool enabled = true;
@@ -46,11 +49,13 @@ public:
     Config_t config_;
 };
 
-class OffboardThermistorCurrentLimiter : public ThermistorCurrentLimiter, public ODriveIntf::OffboardThermistorCurrentLimiterIntf {
+class OffboardThermistorCurrentLimiter : public ThermistorCurrentLimiter, public ODriveIntf::OffboardThermistorCurrentLimiterIntf 
+{
 public:
     static const size_t num_coeffs_ = 4;
 
-    struct Config_t {
+    struct Config_t 
+    {
         float thermistor_poly_coeffs[num_coeffs_];
 
 #if HW_VERSION_MAJOR == 3
@@ -64,7 +69,11 @@ public:
 
         // custom setters
         OffboardThermistorCurrentLimiter* parent;
-        void set_gpio_pin(uint16_t value) { gpio_pin = value; parent->decode_pin(); }
+        void set_gpio_pin(uint16_t value) 
+        { 
+            gpio_pin = value; 
+            parent->decode_pin(); 
+        }
     };
 
     virtual ~OffboardThermistorCurrentLimiter() = default;

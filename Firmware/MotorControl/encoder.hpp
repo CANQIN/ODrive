@@ -10,13 +10,15 @@ class Encoder;
 #include "component.hpp"
 
 
-class Encoder : public ODriveIntf::EncoderIntf {
+class Encoder : public ODriveIntf::EncoderIntf 
+{
 public:
     static constexpr uint32_t MODE_FLAG_ABS = 0x100;
     static constexpr std::array<float, 6> hall_edge_defaults = 
         {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
-    struct Config_t {
+    struct Config_t 
+    {
         Mode mode = MODE_INCREMENTAL;
         float calib_range = 0.02f; // Accuracy required to pass encoder cpr check
         float calib_scan_distance = 16.0f * M_PI; // rad electrical
@@ -147,7 +149,8 @@ public:
     uint16_t abs_spi_dma_rx_[1];
     Stm32SpiArbiter::SpiTask spi_task_;
 
-    constexpr float getCoggingRatio(){
+    constexpr float getCoggingRatio()
+    {
         return 1.0f / 3600.0f;
     }
 

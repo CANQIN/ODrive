@@ -17,9 +17,11 @@ class Axis;
 
 #include <array>
 
-class Axis : public ODriveIntf::AxisIntf {
+class Axis : public ODriveIntf::AxisIntf 
+{
 public:
-    struct LockinConfig_t {
+    struct LockinConfig_t 
+    {
         float current = 10.0f;           // [A]
         float ramp_time = 0.4f;          // [s]
         float ramp_distance = 1 * M_PI;  // [rad]
@@ -31,7 +33,8 @@ public:
         bool finish_on_enc_idx = false;
     };
 
-    struct TaskTimes {
+    struct TaskTimes 
+    {
         TaskTimer thermistor_update;
         TaskTimer encoder_update;
         TaskTimer sensorless_estimator_update;
@@ -51,7 +54,8 @@ public:
     static LockinConfig_t default_sensorless();
     static LockinConfig_t default_lockin();
 
-    struct CANConfig_t {
+    struct CANConfig_t 
+    {
         uint32_t node_id = 0;
         bool is_extended = false;
         uint32_t heartbeat_rate_ms = 100;
@@ -66,7 +70,8 @@ public:
         uint32_t bus_vi_rate_ms = 0;
     };
 
-    struct Config_t {
+    struct Config_t 
+    {
         bool startup_motor_calibration = false;   //<! run motor calibration at startup, skip otherwise
         bool startup_encoder_index_search = false; //<! run encoder index search after startup, skip otherwise
                                                 // this only has an effect if encoder.config.use_index is also true
@@ -98,15 +103,25 @@ public:
 
         // custom setters
         Axis* parent = nullptr;
-        void set_step_gpio_pin(uint16_t value) { step_gpio_pin = value; parent->decode_step_dir_pins(); }
-        void set_dir_gpio_pin(uint16_t value) { dir_gpio_pin = value; parent->decode_step_dir_pins(); }
+        void set_step_gpio_pin(uint16_t value) 
+        { 
+            step_gpio_pin = value; 
+            parent->decode_step_dir_pins(); 
+        }
+        void set_dir_gpio_pin(uint16_t value) 
+        { 
+            dir_gpio_pin = value; 
+            parent->decode_step_dir_pins(); 
+        }
     };
 
-    struct Homing_t {
+    struct Homing_t 
+    {
         bool is_homed = false;
     };
 
-    struct CAN_t {
+    struct CAN_t 
+    {
         uint32_t last_heartbeat = 0;
         uint32_t last_encoder = 0;
         uint32_t last_motor_error = 0;
@@ -148,19 +163,20 @@ public:
     bool watchdog_check();
 
     // True if there are no errors
-    bool inline check_for_errors() {
+    bool inline check_for_errors() 
+    {
         return error_ == ERROR_NONE;
     }
 
     bool start_closed_loop_control();
     bool stop_closed_loop_control();
-    bool run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_armed,
-                std::function<bool(bool)> loop_cb = {} );
+    bool run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_armed, std::function<bool(bool)> loop_cb = {} );
     bool run_closed_loop_control_loop();
     bool run_homing();
     bool run_idle_loop();
 
-    constexpr uint32_t get_watchdog_reset() {
+    constexpr uint32_t get_watchdog_reset() 
+    {
         return static_cast<uint32_t>(std::clamp<float>(config_.watchdog_timeout, 0, UINT32_MAX / (current_meas_hz + 1)) * current_meas_hz);
     }
 
@@ -185,7 +201,8 @@ public:
     MechanicalBrake& mechanical_brake_;
     TaskTimes task_times_;
     
-    struct Test_t {
+    struct Test_t 
+    {
         uint8_t test_type_;
     };
     Test_t test_;
@@ -209,7 +226,6 @@ public:
     AxisState& current_state_ = task_chain_.front();
     Homing_t homing_;
     CAN_t can_;
-
 
     // watchdog
     uint32_t watchdog_current_value_= 0;

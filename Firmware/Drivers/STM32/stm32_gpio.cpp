@@ -3,7 +3,8 @@
 
 #define N_EXTI 16
 
-struct subscription_t {
+struct subscription_t 
+{
     GPIO_TypeDef* port = nullptr;
     void (*callback)(void*) = nullptr;
     void* ctx = nullptr;
@@ -16,8 +17,10 @@ const Stm32Gpio Stm32Gpio::none{nullptr, 0};
  * Note that all GPIOs with the same pin number map to the same IRQn,
  * no matter which port they belong to.
  */
-static inline IRQn_Type get_irq_number(uint16_t pin_number) {
-    switch (pin_number) {
+static inline IRQn_Type get_irq_number(uint16_t pin_number) 
+{
+    switch (pin_number) 
+    {
         case 0: return EXTI0_IRQn;
         case 1: return EXTI1_IRQn;
         case 2: return EXTI2_IRQn;
@@ -42,7 +45,8 @@ static inline IRQn_Type get_irq_number(uint16_t pin_number) {
 #define GPIO_OUTPUT_TYPE      0x00000010U
 
 
-bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) {
+bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) 
+{
     if (port_ == GPIOA) {
         __HAL_RCC_GPIOA_CLK_ENABLE();
     } else if (port_ == GPIOB) {
@@ -101,9 +105,11 @@ bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) {
     return true;
 }
 
-bool Stm32Gpio::subscribe(bool rising_edge, bool falling_edge, void (*callback)(void*), void* ctx) {
+bool Stm32Gpio::subscribe(bool rising_edge, bool falling_edge, void (*callback)(void*), void* ctx) 
+{
     uint32_t pin_number = get_pin_number();
-    if (pin_number >= N_EXTI) {
+    if (pin_number >= N_EXTI) 
+    {
         return false; // invalid pin number
     }
 
@@ -146,15 +152,18 @@ bool Stm32Gpio::subscribe(bool rising_edge, bool falling_edge, void (*callback)(
     return true;
 }
 
-void Stm32Gpio::unsubscribe() {
+void Stm32Gpio::unsubscribe() 
+{
     uint32_t pin_number = get_pin_number();
-    if (pin_number >= N_EXTI) {
+    if (pin_number >= N_EXTI) 
+    {
         return; // invalid pin number
     }
 
     struct subscription_t& subscription = subscriptions[pin_number];
 
-    if (subscription.port != port_) {
+    if (subscription.port != port_) 
+    {
         return; // the subscription was not for this GPIO
     }
 
@@ -168,19 +177,23 @@ void Stm32Gpio::unsubscribe() {
     subscription.port = nullptr; // after this line, the subscription can be reused (possibly by another thread)
 }
 
-void maybe_handle(uint16_t exti_number) {
-    if(__HAL_GPIO_EXTI_GET_IT(1 << exti_number) == RESET) {
+void maybe_handle(uint16_t exti_number) 
+{
+    if(__HAL_GPIO_EXTI_GET_IT(1 << exti_number) == RESET) 
+    {
         return; // This interrupt source did not trigger the interrupt line
     }
 
     __HAL_GPIO_EXTI_CLEAR_IT(1 << exti_number);
     
-    if (exti_number >= N_EXTI) {
+    if (exti_number >= N_EXTI) 
+    {
         return;
     }
 
     subscription_t& subscription = subscriptions[exti_number];
-    if (subscription.callback) {
+    if (subscription.callback) 
+    {
         (*subscription.callback)(subscription.ctx);
     }
 }

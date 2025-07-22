@@ -7,10 +7,10 @@
 /**
  * @brief Field oriented controller.
  * 
- * This controller can run in either current control mode or voltage control
- * mode.
+ * This controller can run in either current control mode or voltage control mode.
  */
-class FieldOrientedController : public AlphaBetaFrameController, public ComponentBase {
+class FieldOrientedController : public AlphaBetaFrameController, public ComponentBase 
+{
 public:
     void update(uint32_t timestamp) final;
 

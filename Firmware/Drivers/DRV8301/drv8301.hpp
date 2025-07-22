@@ -9,9 +9,11 @@
 #include <Drivers/STM32/stm32_gpio.hpp>
 
 
-class Drv8301 : public GateDriverBase, public OpAmpBase {
+class Drv8301 : public GateDriverBase, public OpAmpBase 
+{
 public:
-    typedef enum : uint32_t {
+    typedef enum : uint32_t 
+    {
         FaultType_NoFault  = (0 << 0),  //!< No fault
 
         // Status Register 1
@@ -76,39 +78,48 @@ public:
      * @brief This has no effect on this driver chip because the drive stages are
      * always enabled while the chip is initialized
      */
-    bool set_enabled(bool enabled) final { return true; }
+    bool set_enabled(bool enabled) final 
+    { 
+        return true; 
+    }
 
     FaultType_e get_error();
 
-    float get_midpoint() final {
+    float get_midpoint() final 
+    {
         return 0.5f; // [V]
     }
 
-    float get_max_output_swing() final {
+    float get_max_output_swing() final 
+    {
         return 1.35f / 1.65f; // +-1.35V, normalized from a scale of +-1.65V to +-0.5
     }
 
 private:
-    enum CtrlMode_e {
+    enum CtrlMode_e 
+    {
         DRV8301_CtrlMode_Read = 1 << 15,   //!< Read Mode
         DRV8301_CtrlMode_Write = 0 << 15   //!< Write Mode
     };
 
-    enum RegName_e {
+    enum RegName_e 
+    {
         kRegNameStatus1  = 0 << 11,  //!< Status Register 1
         kRegNameStatus2  = 1 << 11,  //!< Status Register 2
         kRegNameControl1 = 2 << 11,  //!< Control Register 1
         kRegNameControl2 = 3 << 11   //!< Control Register 2
     };
 
-    struct RegisterFile {
+    struct RegisterFile 
+    {
         uint16_t control_register_1;
         uint16_t control_register_2;
     };
 
     static inline uint16_t build_ctrl_word(const CtrlMode_e ctrlMode,
                                            const RegName_e regName,
-                                           const uint16_t data) {
+                                           const uint16_t data) 
+    {
         return ctrlMode | regName | (data & 0x07FF);
     }
 
@@ -134,7 +145,8 @@ private:
     // a RAM section which cannot be used by DMA.
     uint16_t tx_buf_, rx_buf_;
 
-    enum {
+    enum 
+    {
         kStateUninitialized,
         kStateStartupChecks,
         kStateReady,

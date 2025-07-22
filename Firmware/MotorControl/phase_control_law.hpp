@@ -5,7 +5,8 @@
 #include <variant>
 
 template<size_t N_PHASES>
-class PhaseControlLaw {
+class PhaseControlLaw 
+{
 public:
     /**
      * @brief Called when this controller becomes the active controller.
@@ -70,7 +71,8 @@ public:
             std::optional<float>* ibus) = 0;
 };
 
-class AlphaBetaFrameController : public PhaseControlLaw<3> {
+class AlphaBetaFrameController : public PhaseControlLaw<3> 
+{
 private:
     ODriveIntf::MotorIntf::Error on_measurement(
             std::optional<float> vbus_voltage,

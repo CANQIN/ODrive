@@ -41,8 +41,10 @@ private:
 #pragma GCC optimize (3)
 
     template<size_t I, size_t ... Is>
-    static void start_synchronously_impl(std::array<TIM_HandleTypeDef*, I> timers, std::array<size_t, I> counters, std::index_sequence<Is...>) {
-        for (size_t i = 0; i < I; ++i) {
+    static void start_synchronously_impl(std::array<TIM_HandleTypeDef*, I> timers, std::array<size_t, I> counters, std::index_sequence<Is...>) 
+    {
+        for (size_t i = 0; i < I; ++i) 
+        {
             TIM_HandleTypeDef* htim = timers[i];
 
             // Stop the timer so we can start all of them later more atomically.
@@ -62,7 +64,8 @@ private:
         // register uint32_t cr_val[I];
         volatile uint32_t* cr_addr[I];
         uint32_t cr_val[I];
-        for (size_t i = 0; i < I; ++i) {
+        for (size_t i = 0; i < I; ++i) 
+        {
             cr_addr[i] = &timers[i]->Instance->CR1;
             cr_val[i] = timers[i]->Instance->CR1 | TIM_CR1_CEN;
         }

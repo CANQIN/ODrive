@@ -212,18 +212,21 @@ void ODrive::enter_dfu_mode() {
     }
 }
 
-bool ODrive::any_error() {
-    return error_ != ODrive::ERROR_NONE
-        || std::any_of(axes.begin(), axes.end(), [](Axis& axis){
-            return axis.error_ != Axis::ERROR_NONE
-                || axis.motor_.error_ != Motor::ERROR_NONE
-                || axis.sensorless_estimator_.error_ != SensorlessEstimator::ERROR_NONE
-                || axis.encoder_.error_ != Encoder::ERROR_NONE
-                || axis.controller_.error_ != Controller::ERROR_NONE;
-        });
+bool ODrive::any_error() 
+{
+    return error_ != ODrive::ERROR_NONE || 
+           std::any_of(axes.begin(), axes.end(), [](Axis& axis)
+           {
+               return axis.error_ != Axis::ERROR_NONE || 
+                      axis.motor_.error_ != Motor::ERROR_NONE || 
+                      axis.sensorless_estimator_.error_ != SensorlessEstimator::ERROR_NONE || 
+                      axis.encoder_.error_ != Encoder::ERROR_NONE || 
+                      axis.controller_.error_ != Controller::ERROR_NONE;
+           });
 }
 
-uint64_t ODrive::get_drv_fault() {
+uint64_t ODrive::get_drv_fault() 
+{
 #if AXIS_COUNT == 1
     return motors[0].gate_driver_.get_error();
 #elif AXIS_COUNT == 2
@@ -233,8 +236,10 @@ uint64_t ODrive::get_drv_fault() {
 #endif
 }
 
-void ODrive::clear_errors() {
-    for (auto& axis: axes) {
+void ODrive::clear_errors() 
+{
+    for (auto& axis: axes) 
+    {
         axis.motor_.error_ = Motor::ERROR_NONE;
         axis.controller_.error_ = Controller::ERROR_NONE;
         axis.sensorless_estimator_.error_ = SensorlessEstimator::ERROR_NONE;
@@ -243,23 +248,28 @@ void ODrive::clear_errors() {
         axis.error_ = Axis::ERROR_NONE;
     }
     error_ = ERROR_NONE;
-    if (odrv.config_.enable_brake_resistor) {
+    if (odrv.config_.enable_brake_resistor) 
+    {
         safety_critical_arm_brake_resistor();
     }
 }
 
 extern "C" {
 
-void vApplicationStackOverflowHook(xTaskHandle *pxTask, signed portCHAR *pcTaskName) {
-    for(auto& axis: axes){
+void vApplicationStackOverflowHook(xTaskHandle *pxTask, signed portCHAR *pcTaskName) 
+{
+    for(auto& axis: axes)
+    {
         axis.motor_.disarm();
     }
     safety_critical_disarm_brake_resistor();
     for (;;); // TODO: safe action
 }
 
-void vApplicationIdleHook(void) {
-    if (odrv.system_stats_.fully_booted) {
+void vApplicationIdleHook(void) 
+{
+    if (odrv.system_stats_.fully_booted) 
+    {
         odrv.system_stats_.uptime = xTaskGetTickCount();
         odrv.system_stats_.min_heap_space = xPortGetMinimumEverFreeHeapSize();
 
@@ -297,7 +307,8 @@ void vApplicationIdleHook(void) {
  * This function is called after every current measurement of every motor.
  * It should finish as quickly as possible.
  */
-void ODrive::do_fast_checks() {
+void ODrive::do_fast_checks() 
+{
     if (!(vbus_voltage >= config_.dc_bus_undervoltage_trip_level))
         disarm_with_error(ERROR_DC_BUS_UNDER_VOLTAGE);
     if (!(vbus_voltage <= config_.dc_bus_overvoltage_trip_level))
@@ -310,9 +321,12 @@ void ODrive::do_fast_checks() {
  * This should be called if a system level exception ocurred that makes it
  * unsafe to run power through the system in general.
  */
-void ODrive::disarm_with_error(Error error) {
-    CRITICAL_SECTION() {
-        for (auto& axis: axes) {
+void ODrive::disarm_with_error(Error error) 
+{
+    CRITICAL_SECTION() 
+    {
+        for (auto& axis: axes) 
+        {
             axis.motor_.disarm_with_error(Motor::ERROR_SYSTEM_LEVEL);
         }
         safety_critical_disarm_brake_resistor();
@@ -338,11 +352,14 @@ void ODrive::disarm_with_error(Error error) {
  * Time consuming and undeterministic logic/arithmetic should live on
  * control_loop_cb() instead.
  */
-void ODrive::sampling_cb() {
+void ODrive::sampling_cb() 
+{
     n_evt_sampling_++;
 
-    MEASURE_TIME(task_times_.sampling) {
-        for (auto& axis: axes) {
+    MEASURE_TIME(task_times_.sampling) 
+    {
+        for (auto& axis: axes) 
+        {
             axis.encoder_.sample_now();
         }
     }
@@ -361,20 +378,23 @@ void ODrive::sampling_cb() {
  *        potentially missed timer update interrupts. Therefore this counter
  *        must not rely on any interrupts.
  */
-void ODrive::control_loop_cb(uint32_t timestamp) {
+void ODrive::control_loop_cb(uint32_t timestamp) 
+{
     last_update_timestamp_ = timestamp;
     n_evt_control_loop_++;
 
     // TODO: use a configurable component list for most of the following things
 
-    MEASURE_TIME(task_times_.control_loop_misc) {
+    MEASURE_TIME(task_times_.control_loop_misc) 
+    {
         // Reset all output ports so that we are certain about the freshness of
         // all values that we use.
         // If we forget to reset a value here the worst that can happen is that
         // this safety check doesn't work.
         // TODO: maybe we should add a check to output ports that prevents
         // double-setting the value.
-        for (auto& axis: axes) {
+        for (auto& axis: axes) 
+        {
             axis.acim_estimator_.slip_vel_.reset();
             axis.acim_estimator_.stator_phase_vel_.reset();
             axis.acim_estimator_.stator_phase_.reset();
@@ -400,64 +420,89 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
         odrv.oscilloscope_.update();
     }
 
-    for (auto& axis : axes) {
-        MEASURE_TIME(axis.task_times_.endstop_update) {
+    for (auto& axis : axes) 
+    {
+        MEASURE_TIME(axis.task_times_.endstop_update) 
+        {
             axis.min_endstop_.update();
             axis.max_endstop_.update();
         }
     }
 
-    MEASURE_TIME(task_times_.control_loop_checks) {
-        for (auto& axis: axes) {
+    MEASURE_TIME(task_times_.control_loop_checks) 
+    {
+        for (auto& axis: axes) 
+        {
             // look for errors at axis level and also all subcomponents
             bool checks_ok = axis.do_checks(timestamp);
 
             // make sure the watchdog is being fed. 
             bool watchdog_ok = axis.watchdog_check();
 
-            if (!checks_ok || !watchdog_ok) {
+            if (!checks_ok || !watchdog_ok) 
+            {
                 axis.motor_.disarm();
             }
         }
     }
 
-    for (auto& axis: axes) {
+    for (auto& axis: axes) 
+    {
         // Sub-components should use set_error which will propegate to this error_
-        MEASURE_TIME(axis.task_times_.thermistor_update) {
+        MEASURE_TIME(axis.task_times_.thermistor_update) 
+        {
             axis.motor_.fet_thermistor_.update();
             axis.motor_.motor_thermistor_.update();
         }
 
         MEASURE_TIME(axis.task_times_.encoder_update)
+        {
             axis.encoder_.update();
+        }
     }
 
     // Controller of either axis might use the encoder estimate of the other
     // axis so we process both encoders before we continue.
 
-    for (auto& axis: axes) {
+    for (auto& axis: axes) 
+    {
         MEASURE_TIME(axis.task_times_.sensorless_estimator_update)
+        {
             axis.sensorless_estimator_.update();
+        }
 
-        MEASURE_TIME(axis.task_times_.controller_update) {
-            if (!axis.controller_.update()) { // uses position and velocity from encoder
+        MEASURE_TIME(axis.task_times_.controller_update) 
+        {
+            if (!axis.controller_.update()) 
+            { 
+                // uses position and velocity from encoder
                 axis.error_ |= Axis::ERROR_CONTROLLER_FAILED;
             }
         }
 
         MEASURE_TIME(axis.task_times_.open_loop_controller_update)
+        {
             axis.open_loop_controller_.update(timestamp);
+        }
 
         MEASURE_TIME(axis.task_times_.motor_update)
-            axis.motor_.update(timestamp); // uses torque from controller and phase_vel from encoder
+        {
+            // uses torque from controller and phase_vel from encoder
+            axis.motor_.update(timestamp); 
+        }
 
         MEASURE_TIME(axis.task_times_.current_controller_update)
-            axis.motor_.current_control_.update(timestamp); // uses the output of controller_ or open_loop_contoller_ and encoder_ or sensorless_estimator_ or acim_estimator_
+        {
+            // uses the output of controller_ or open_loop_contoller_ and encoder_ or sensorless_estimator_ or acim_estimator_
+            axis.motor_.current_control_.update(timestamp); 
+        }
     }
 
     // Tell the axis threads that the control loop has finished
-    for (auto& axis: axes) {
-        if (axis.thread_id_) {
+    for (auto& axis: axes) 
+    {
+        if (axis.thread_id_) 
+        {
             osSignalSet(axis.thread_id_, 0x0001);
         }
     }
@@ -467,8 +512,10 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
 
 
 /** @brief For diagnostics only */
-uint32_t ODrive::get_interrupt_status(int32_t irqn) {
-    if ((irqn < -14) || (irqn >= 240)) {
+uint32_t ODrive::get_interrupt_status(int32_t irqn) 
+{
+    if ((irqn < -14) || (irqn >= 240)) 
+    {
         return 0xffffffff;
     }
 
@@ -484,12 +531,15 @@ uint32_t ODrive::get_interrupt_status(int32_t irqn) {
 }
 
 /** @brief For diagnostics only */
-uint32_t ODrive::get_dma_status(uint8_t stream_num) {
-    DMA_Stream_TypeDef* streams[] = {
+uint32_t ODrive::get_dma_status(uint8_t stream_num) 
+{
+    DMA_Stream_TypeDef* streams[] = 
+    {
         DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3, DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7,
         DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3, DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7
     };
-    if (stream_num >= 16) {
+    if (stream_num >= 16) 
+    {
         return 0xffffffff;
     }
     DMA_Stream_TypeDef* stream = streams[stream_num];
@@ -504,10 +554,12 @@ uint32_t ODrive::get_dma_status(uint8_t stream_num) {
     return (is_reset ? 0 : 0x80000000) | ((channel & 0x7) << 2) | (priority & 0x3);
 }
 
-uint32_t ODrive::get_gpio_states() {
+uint32_t ODrive::get_gpio_states() 
+{
     // TODO: get values that were sampled synchronously with the control loop
     uint32_t val = 0;
-    for (size_t i = 0; i < GPIO_COUNT; ++i) {
+    for (size_t i = 0; i < GPIO_COUNT; ++i) 
+    {
         val |= ((gpios[i].read() ? 1UL : 0UL) << i);
     }
     return val;
@@ -516,10 +568,10 @@ uint32_t ODrive::get_gpio_states() {
 /**
  * @brief Main thread started from main().
  */
-static void rtos_main(void*) {
+static void rtos_main(void*) 
+{
     // Init USB device
     MX_USB_DEVICE_Init();
-
 
     // Start ADC for temperature measurements and user measurements
     start_general_purpose_adc();
@@ -533,8 +585,10 @@ static void rtos_main(void*) {
     pwm0_input.init();
 
     // Set up the CS pins for absolute encoders (TODO: move to GPIO init switch statement)
-    for(auto& axis : axes){
-        if(axis.encoder_.config_.mode & Encoder::MODE_FLAG_ABS){
+    for(auto& axis : axes)
+    {
+        if(axis.encoder_.config_.mode & Encoder::MODE_FLAG_ABS)
+        {
             axis.encoder_.abs_spi_cs_pin_init();
         }
     }
@@ -542,15 +596,18 @@ static void rtos_main(void*) {
     // Try to initialized gate drivers for fault-free startup.
     // If this does not succeed, a fault will be raised and the idle loop will
     // periodically attempt to reinit the gate driver.
-    for(auto& axis: axes){
+    for(auto& axis: axes)
+    {
         axis.motor_.setup();
     }
 
-    for(auto& axis: axes){
+    for(auto& axis: axes)
+    {
         axis.encoder_.setup();
     }
 
-    for(auto& axis: axes){
+    for(auto& axis: axes)
+    {
         axis.acim_estimator_.idq_src_.connect_to(&axis.motor_.Idq_setpoint_);
     }
 
@@ -562,24 +619,29 @@ static void rtos_main(void*) {
     // startup. This delay gives the current sensor calibration time to
     // converge. If the DRV chip is unpowered, the motor will not become ready
     // but we still enter idle state.
-    for (size_t i = 0; i < 2000; ++i) {
-        bool motors_ready = std::all_of(axes.begin(), axes.end(), [](auto& axis) {
+    for (size_t i = 0; i < 2000; ++i) 
+    {
+        bool motors_ready = std::all_of(axes.begin(), axes.end(), [](auto& axis) 
+        {
             return axis.motor_.current_meas_.has_value();
         });
-        if (motors_ready) {
+        if (motors_ready) 
+        {
             break;
         }
         osDelay(1);
     }
 
-    for (auto& axis: axes) {
+    for (auto& axis: axes) 
+    {
         axis.sensorless_estimator_.error_ &= ~SensorlessEstimator::ERROR_UNKNOWN_CURRENT_MEASUREMENT;
     }
 
     // Start state machine threads. Each thread will go through various calibration
     // procedures and then run the actual controller loops.
     // TODO: generalize for AXIS_COUNT != 2
-    for (size_t i = 0; i < AXIS_COUNT; ++i) {
+    for (size_t i = 0; i < AXIS_COUNT; ++i) 
+    {
         axes[i].start_thread();
     }
 
@@ -594,8 +656,10 @@ static void rtos_main(void*) {
  * initializers.
  * This function gets called from the startup assembly code.
  */
-extern "C" void early_start_checks(void) {
-    if(_reboot_cookie == 0xDEADFE75) {
+extern "C" void early_start_checks(void) 
+{
+    if(_reboot_cookie == 0xDEADFE75) 
+    {
         /* The STM DFU bootloader enables internal pull-up resistors on PB10 (AUX_H)
         * and PB11 (AUX_L), thereby causing shoot-through on the brake resistor
         * FETs and obliterating them unless external 3.3k pull-down resistors are
@@ -620,7 +684,8 @@ extern "C" void early_start_checks(void) {
     /* We could jump to the bootloader directly on demand without rebooting
     but that requires us to reset several peripherals and interrupts for it
     to function correctly. Therefore it's easier to just reset the entire chip. */
-    if(_reboot_cookie == 0xDEADBEEF) {
+    if(_reboot_cookie == 0xDEADBEEF) 
+    {
         _reboot_cookie = 0xCAFEFEED;  //Reset bootloader trigger
         // __set_MSP((uintptr_t)&_estack);
         // http://www.st.com/content/ccc/resource/technical/document/application_note/6a/17/92/02/58/98/45/0c/CD00264379.pdf/files/CD00264379.pdf
@@ -631,7 +696,8 @@ extern "C" void early_start_checks(void) {
     /* The bootloader might fail to properly clean up after itself,
     so if we're not sure that the system is in a clean state we
     just reset it again */
-    if(_reboot_cookie != 42) {
+    if(_reboot_cookie != 42) 
+    {
         _reboot_cookie = 42;
         NVIC_SystemReset();
     }
@@ -640,7 +706,8 @@ extern "C" void early_start_checks(void) {
 /**
  * @brief Main entry point called from assembly startup code.
  */
-extern "C" int main(void) {
+extern "C" int main(void) 
+{
     // This procedure of building a USB serial number should be identical
     // to the way the STM's built-in USB bootloader does it. This means
     // that the device will have the same serial number in normal and DFU mode.
@@ -651,7 +718,8 @@ extern "C" int main(void) {
     serial_number = ((uint64_t)uuid_mixed_part << 16) | (uint64_t)(uuid1 >> 16);
 
     uint64_t val = serial_number;
-    for (size_t i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) 
+    {
         serial_number_str[i] = "0123456789ABCDEF"[(val >> (48-4)) & 0xf];
         val <<= 4;
     }
@@ -664,31 +732,37 @@ extern "C" int main(void) {
     // since the flash interface must be initialized and before board_init()
     // since board initialization can depend on the config.
     size_t config_size = 0;
-    bool success = config_manager.start_load()
-            && config_read_all()
-            && config_manager.finish_load(&config_size)
-            && config_apply_all();
-    if (success) {
+    bool success = config_manager.start_load() && 
+                   config_read_all() && 
+                   config_manager.finish_load(&config_size) && 
+                   config_apply_all();
+    if (success) 
+    {
         odrv.user_config_loaded_ = config_size;
-    } else {
+    } 
+    else 
+    {
         config_clear_all();
         config_apply_all();
     }
 
-    odrv.misconfigured_ = odrv.misconfigured_
-            || (odrv.config_.enable_uart_a && !uart_a)
-            || (odrv.config_.enable_uart_b && !uart_b)
-            || (odrv.config_.enable_uart_c && !uart_c);
+    odrv.misconfigured_ = (odrv.misconfigured_) || 
+                          (odrv.config_.enable_uart_a && !uart_a) || 
+                          (odrv.config_.enable_uart_b && !uart_b) || 
+                          (odrv.config_.enable_uart_c && !uart_c);
 
     // Init board-specific peripherals
-    if (!board_init()) {
+    if (!board_init()) 
+    {
         for (;;); // TODO: handle properly
     }
 
     // Init GPIOs according to their configured mode
-    for (size_t i = 0; i < GPIO_COUNT; ++i) {
+    for (size_t i = 0; i < GPIO_COUNT; ++i) 
+    {
         // Skip unavailable GPIOs
-        if (!get_gpio(i)) {
+        if (!get_gpio(i)) 
+        {
             continue;
         }
 
@@ -703,113 +777,159 @@ extern "C" int main(void) {
             mode == ODriveIntf::GPIO_MODE_DIGITAL_PULL_DOWN ||
             mode == ODriveIntf::GPIO_MODE_MECH_BRAKE ||
             mode == ODriveIntf::GPIO_MODE_STATUS ||
-            mode == ODriveIntf::GPIO_MODE_ANALOG_IN) {
+            mode == ODriveIntf::GPIO_MODE_ANALOG_IN) 
+        {
             GPIO_InitStruct.Alternate = 0;
-        } else {
-            auto it = std::find_if(
-                    alternate_functions[i].begin(), alternate_functions[i].end(),
-                    [mode](auto a) { return a.mode == mode; });
+        } 
+        else 
+        {
+            auto it = std::find_if(alternate_functions[i].begin(), alternate_functions[i].end(), [mode](auto a) 
+            {
+                return a.mode == mode; 
+            });
 
-            if (it == alternate_functions[i].end()) {
+            if (it == alternate_functions[i].end()) 
+            {
                 odrv.misconfigured_ = true; // this GPIO doesn't support the selected mode
                 continue;
             }
+            
             GPIO_InitStruct.Alternate = it->alternate_function;
         }
 
-        switch (mode) {
-            case ODriveIntf::GPIO_MODE_DIGITAL: {
+        switch (mode) 
+        {
+            case ODriveIntf::GPIO_MODE_DIGITAL: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_UP: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_UP: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
                 GPIO_InitStruct.Pull = GPIO_PULLUP;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_DOWN: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_DIGITAL_PULL_DOWN: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
                 GPIO_InitStruct.Pull = GPIO_PULLDOWN;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_ANALOG_IN: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_ANALOG_IN: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
-            } break;
-            case ODriveIntf::GPIO_MODE_UART_A: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_UART_A: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_a) {
+                if (!odrv.config_.enable_uart_a) 
+                {
                     odrv.misconfigured_ = true;
                 }
-            } break;
-            case ODriveIntf::GPIO_MODE_UART_B: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_UART_B: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_b) {
+                if (!odrv.config_.enable_uart_b) 
+                {
                     odrv.misconfigured_ = true;
                 }
-            } break;
-            case ODriveIntf::GPIO_MODE_UART_C: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_UART_C: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = (i == 0) ? GPIO_PULLDOWN : GPIO_PULLUP; // this is probably swapped but imitates old behavior
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_uart_c) {
+                if (!odrv.config_.enable_uart_c) 
+                {
                     odrv.misconfigured_ = true;
                 }
-            } break;
-            case ODriveIntf::GPIO_MODE_CAN_A: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_CAN_A: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_can_a) {
+                if (!odrv.config_.enable_can_a) 
+                {
                     odrv.misconfigured_ = true;
                 }
-            } break;
-            case ODriveIntf::GPIO_MODE_I2C_A: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_I2C_A: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
                 GPIO_InitStruct.Pull = GPIO_PULLUP;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_i2c_a) {
+                if (!odrv.config_.enable_i2c_a) 
+                {
                     odrv.misconfigured_ = true;
                 }
-            } break;
-            //case ODriveIntf::GPIO_MODE_SPI_A: { // TODO
-            //} break;
-            case ODriveIntf::GPIO_MODE_PWM: {
+            } 
+            break;
+            // case ODriveIntf::GPIO_MODE_SPI_A: 
+            // { 
+            //     // TODO
+            // } 
+            // break;
+            case ODriveIntf::GPIO_MODE_PWM: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = GPIO_PULLDOWN;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_ENC0: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_ENC0: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_ENC1: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_ENC1: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_ENC2: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_ENC2: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_MECH_BRAKE: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_MECH_BRAKE: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            case ODriveIntf::GPIO_MODE_STATUS: {
+            } 
+            break;
+            case ODriveIntf::GPIO_MODE_STATUS: 
+            {
                 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
                 GPIO_InitStruct.Pull = GPIO_NOPULL;
                 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-            } break;
-            default: {
+            } 
+            break;
+            default: 
+            {
                 odrv.misconfigured_ = true;
                 continue;
             }

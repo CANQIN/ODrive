@@ -116,69 +116,89 @@ AsciiProtocol ascii_over_uart(&uart_rx_stream, &uart_tx_multiplexer);
 
 bool uart0_stdout_pending = false;
 
-static void uart_server_thread(void * ctx) {
+static void uart_server_thread(void * ctx) 
+{
     (void) ctx;
 
-    if (odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_FIBRE) {
+    if (odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_FIBRE) 
+    {
         fibre_over_uart.start({});
-    } else if (odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII
-            || odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT) {
+    } 
+    else if (odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII || 
+             odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT) 
+    {
         ascii_over_uart.start();
     }
 
-    for (;;) {
+    for (;;) 
+    {
         osEvent event = osMessageGet(uart_event_queue, osWaitForever);
 
-        if (event.status != osEventMessage) {
+        if (event.status != osEventMessage) 
+        {
             continue;
         }
 
-        switch (event.value.v) {
-            case 1: {
+        switch (event.value.v) 
+        {
+            case 1: 
+            {
                 // This event is triggered by the control loop at 8kHz. This should be
                 // enough for most applications.
                 // At 1Mbaud/s that corresponds to at most 12.5 bytes which can arrive
                 // during the sleep period.
 
                 // Check for UART errors and restart receive DMA transfer if required
-                if (huart_->RxState != HAL_UART_STATE_BUSY_RX) {
+                if (huart_->RxState != HAL_UART_STATE_BUSY_RX) 
+                {
                     HAL_UART_AbortReceive(huart_);
                     HAL_UART_Receive_DMA(huart_, dma_rx_buffer, sizeof(dma_rx_buffer));
                     dma_last_rcv_idx = 0;
                 }
                 // Fetch the circular buffer "write pointer", where it would write next
                 uint32_t new_rcv_idx = UART_RX_BUFFER_SIZE - huart_->hdmarx->Instance->NDTR;
-                if (new_rcv_idx > UART_RX_BUFFER_SIZE) { // defensive programming
+                if (new_rcv_idx > UART_RX_BUFFER_SIZE) 
+                { 
+                    // defensive programming
                     continue;
                 }
 
                 // Process bytes in one or two chunks (two in case there was a wrap)
-                if (new_rcv_idx < dma_last_rcv_idx) {
+                if (new_rcv_idx < dma_last_rcv_idx) 
+                {
                     uart_rx_stream.did_receive(dma_rx_buffer + dma_last_rcv_idx,
                             UART_RX_BUFFER_SIZE - dma_last_rcv_idx);
                     dma_last_rcv_idx = 0;
                 }
-                if (new_rcv_idx > dma_last_rcv_idx) {
+                if (new_rcv_idx > dma_last_rcv_idx) 
+                {
                     uart_rx_stream.did_receive(dma_rx_buffer + dma_last_rcv_idx,
                             new_rcv_idx - dma_last_rcv_idx);
                     dma_last_rcv_idx = new_rcv_idx;
                 }
-            } break;
+            } 
+            break;
 
-            case 2: {
+            case 2: 
+            {
                 uart_tx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 3: { // stdout has data
+            case 3: 
+            { 
+                // stdout has data
                 uart0_stdout_pending = false;
                 uart0_stdout_sink.maybe_start_async_write();
-            } break;
+            } 
+            break;
         }
     }
 }
 
 // TODO: allow multiple UART server instances
-void start_uart_server(UART_HandleTypeDef* huart) {
+void start_uart_server(UART_HandleTypeDef* huart) 
+{
     huart_ = huart;
     uart_tx_stream.huart_ = huart;
 
@@ -193,14 +213,19 @@ void start_uart_server(UART_HandleTypeDef* huart) {
     uart_thread = osThreadCreate(osThread(uart_server_thread_def), NULL);
 }
 
-void uart_poll() {
-    if (uart_thread) { // the thread is only started if UART is enabled
+void uart_poll() 
+{
+    if (uart_thread) 
+    { 
+        // the thread is only started if UART is enabled
         osMessagePut(uart_event_queue, 1, 0);
     }
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) {
-    if (huart == huart_) {
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) 
+{
+    if (huart == huart_) 
+    {
         osMessagePut(uart_event_queue, 2, 0);
     }
 }

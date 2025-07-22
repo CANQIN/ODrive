@@ -137,13 +137,16 @@ void safety_critical_apply_brake_resistor_timings(uint32_t low_off, uint32_t hig
 
 /* Function implementations --------------------------------------------------*/
 
-void start_adc_pwm() {
+void start_adc_pwm() 
+{
     // Disarm motors
-    for (auto& axis: axes) {
+    for (auto& axis: axes) 
+    {
         axis.motor_.disarm();
     }
 
-    for (Motor& motor: motors) {
+    for (Motor& motor: motors) 
+    {
         // Init PWM
         int half_load = TIM_1_8_PERIOD_CLOCKS / 2;
         motor.timer_->Instance->CCR1 = half_load;
@@ -178,7 +181,8 @@ void start_adc_pwm() {
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 #endif
 
-    if (odrv.config_.enable_brake_resistor) {
+    if (odrv.config_.enable_brake_resistor) 
+    {
         safety_critical_arm_brake_resistor();
     }
 }
@@ -195,7 +199,8 @@ uint16_t adc_measurements_[ADC_CHANNEL_COUNT] = { 0 };
 //
 // The injected (high priority) channel of ADC1 is used to sample vbus_voltage.
 // This conversion is triggered by TIM1 at the frequency of the motor control loop.
-void start_general_purpose_adc() {
+void start_general_purpose_adc() 
+{
     ADC_ChannelConfTypeDef sConfig;
 
     // Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
@@ -211,17 +216,20 @@ void start_general_purpose_adc() {
     hadc1.Init.NbrOfConversion = ADC_CHANNEL_COUNT;
     hadc1.Init.DMAContinuousRequests = ENABLE;
     hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-    if (HAL_ADC_Init(&hadc1) != HAL_OK) {
+    if (HAL_ADC_Init(&hadc1) != HAL_OK) 
+    {
         odrv.misconfigured_ = true; // TODO: this is a bit of an abuse of this flag
         return;
     }
 
     // Set up sampling sequence (channel 0 ... channel 15)
     sConfig.SamplingTime = ADC_SAMPLETIME_15CYCLES;
-    for (uint32_t channel = 0; channel < ADC_CHANNEL_COUNT; ++channel) {
+    for (uint32_t channel = 0; channel < ADC_CHANNEL_COUNT; ++channel) 
+    {
         sConfig.Channel = channel << ADC_CR1_AWDCH_Pos;
         sConfig.Rank = channel + 1; // rank numbering starts at 1
-        if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+        if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) 
+        {
             odrv.misconfigured_ = true; // TODO: this is a bit of an abuse of this flag
             return;
         }
@@ -247,20 +255,24 @@ void start_general_purpose_adc() {
 //  21000kHz / (15+26) / 16 = 32kHz
 // The true frequency is slightly lower because of the injected vbus
 // measurements
-float get_adc_voltage(Stm32Gpio gpio) {
+float get_adc_voltage(Stm32Gpio gpio) 
+{
     return get_adc_relative_voltage(gpio) * adc_ref_voltage;
 }
 
-float get_adc_relative_voltage(Stm32Gpio gpio) {
+float get_adc_relative_voltage(Stm32Gpio gpio) 
+{
     const uint16_t channel = channel_from_gpio(gpio);
     return get_adc_relative_voltage_ch(channel);
 }
 
 // @brief Given a GPIO_port and pin return the associated adc_channel.
 // returns UINT16_MAX if there is no adc_channel;
-uint16_t channel_from_gpio(Stm32Gpio gpio) {
+uint16_t channel_from_gpio(Stm32Gpio gpio) 
+{
     uint32_t channel = UINT32_MAX;
-    if (gpio.port_ == GPIOA) {
+    if (gpio.port_ == GPIOA) 
+    {
         if (gpio.pin_mask_ == GPIO_PIN_0)
             channel = 0;
         else if (gpio.pin_mask_ == GPIO_PIN_1)
@@ -277,12 +289,16 @@ uint16_t channel_from_gpio(Stm32Gpio gpio) {
             channel = 6;
         else if (gpio.pin_mask_ == GPIO_PIN_7)
             channel = 7;
-    } else if (gpio.port_ == GPIOB) {
+    } 
+    else if (gpio.port_ == GPIOB) 
+    {
         if (gpio.pin_mask_ == GPIO_PIN_0)
             channel = 8;
         else if (gpio.pin_mask_ == GPIO_PIN_1)
             channel = 9;
-    } else if (gpio.port_ == GPIOC) {
+    } 
+    else if (gpio.port_ == GPIOC) 
+    {
         if (gpio.pin_mask_ == GPIO_PIN_0)
             channel = 10;
         else if (gpio.pin_mask_ == GPIO_PIN_1)
@@ -301,7 +317,8 @@ uint16_t channel_from_gpio(Stm32Gpio gpio) {
 
 // @brief Given an adc channel return the voltage as a ratio of adc_ref_voltage
 // returns -1.0f if the channel is not valid.
-float get_adc_relative_voltage_ch(uint16_t channel) {
+float get_adc_relative_voltage_ch(uint16_t channel) 
+{
     if (channel < ADC_CHANNEL_COUNT)
         return (float)adc_measurements_[channel] / adc_full_scale;
     else
@@ -312,7 +329,8 @@ float get_adc_relative_voltage_ch(uint16_t channel) {
 // IRQ Callbacks
 //--------------------------------
 
-void vbus_sense_adc_cb(uint32_t adc_value) {
+void vbus_sense_adc_cb(uint32_t adc_value) 
+{
     constexpr float voltage_scale = adc_ref_voltage * VBUS_S_DIVIDER_RATIO / adc_full_scale;
     vbus_voltage = adc_value * voltage_scale;
 }
@@ -394,8 +412,10 @@ static void update_analog_endpoint(const struct PWMMapping_t *map, int gpio)
 
 static void analog_polling_thread(void *)
 {
-    while (true) {
-        for (int i = 0; i < GPIO_COUNT; i++) {
+    while (true) 
+    {
+        for (int i = 0; i < GPIO_COUNT; i++) 
+        {
             struct PWMMapping_t *map = &odrv.config_.analog_mappings[i];
 
             if (fibre::is_endpoint_ref_valid(map->endpoint))
@@ -405,7 +425,8 @@ static void analog_polling_thread(void *)
     }
 }
 
-void start_analog_thread() {
+void start_analog_thread() 
+{
     osThreadDef(analog_thread_def, analog_polling_thread, osPriorityLow, 0, stack_size_analog_thread / sizeof(StackType_t));
     analog_thread = osThreadCreate(osThread(analog_thread_def), NULL);
 }

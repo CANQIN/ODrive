@@ -269,7 +269,8 @@ bool check_board_version(const uint8_t* otp_ptr) {
            (otp_ptr[5] == HW_VERSION_VOLTAGE);
 }
 
-void system_init() {
+void system_init() 
+{
     // Reset of all peripherals, Initializes the Flash interface and the Systick.
     HAL_Init();
 
@@ -278,18 +279,21 @@ void system_init() {
 
     // If the OTP is pristine, use the fake-otp in RAM instead
     const uint8_t* otp_ptr = (const uint8_t*)FLASH_OTP_BASE;
-    if (*otp_ptr == 0xff) {
+    if (*otp_ptr == 0xff) 
+    {
         otp_ptr = fake_otp;
     }
 
     // Ensure that the board version for which this firmware is compiled matches
     // the board we're running on.
-    if (!check_board_version(otp_ptr)) {
+    if (!check_board_version(otp_ptr)) 
+    {
         for (;;);
     }
 }
 
-bool board_init() {
+bool board_init() 
+{
     // Initialize all configured peripherals
     MX_GPIO_Init();
     MX_DMA_Init();
@@ -327,17 +331,20 @@ bool board_init() {
     HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
 
-    if (odrv.config_.enable_uart_a) {
+    if (odrv.config_.enable_uart_a) 
+    {
         uart_a->Init.BaudRate = odrv.config_.uart_a_baudrate;
         MX_UART4_Init();
     }
 
-    if (odrv.config_.enable_uart_b) {
+    if (odrv.config_.enable_uart_b) 
+    {
         uart_b->Init.BaudRate = odrv.config_.uart_b_baudrate;
         MX_USART2_UART_Init();
     }
 
-    if (odrv.config_.enable_i2c_a) {
+    if (odrv.config_.enable_i2c_a) 
+    {
         // Set up the direction GPIO as input
         get_gpio(3).config(GPIO_MODE_INPUT, GPIO_PULLUP);
         get_gpio(4).config(GPIO_MODE_INPUT, GPIO_PULLUP);
@@ -351,11 +358,13 @@ bool board_init() {
         MX_I2C1_Init(i2c_stats_.addr);
     }
 
-    if (odrv.config_.enable_can_a) {
+    if (odrv.config_.enable_can_a) 
+    {
         // The CAN initialization will (and must) init its own GPIOs before the
         // GPIO modes are initialized. Therefore we ensure that the later GPIO
         // mode initialization won't override the CAN mode.
-        if (odrv.config_.gpio_modes[15] != ODriveIntf::GPIO_MODE_CAN_A || odrv.config_.gpio_modes[16] != ODriveIntf::GPIO_MODE_CAN_A) {
+        if (odrv.config_.gpio_modes[15] != ODriveIntf::GPIO_MODE_CAN_A || odrv.config_.gpio_modes[16] != ODriveIntf::GPIO_MODE_CAN_A) 
+        {
             odrv.misconfigured_ = true;
         }
     }
@@ -377,8 +386,10 @@ bool board_init() {
     return true;
 }
 
-void start_timers() {
-    CRITICAL_SECTION() {
+void start_timers() 
+{
+    CRITICAL_SECTION() 
+    {
         // Temporarily disable ADC triggers so they don't trigger as a side
         // effect of starting the timers.
         hadc1.Instance->CR2 &= ~(ADC_CR2_JEXTEN);
@@ -415,30 +426,35 @@ void start_timers() {
     }
 }
 
-static bool fetch_and_reset_adcs(
-        std::optional<Iph_ABC_t>* current0,
-        std::optional<Iph_ABC_t>* current1) {
+static bool fetch_and_reset_adcs(std::optional<Iph_ABC_t>* current0,
+                                 std::optional<Iph_ABC_t>* current1) 
+{
     bool all_adcs_done = (ADC1->SR & ADC_SR_JEOC) == ADC_SR_JEOC
         && (ADC2->SR & (ADC_SR_EOC | ADC_SR_JEOC)) == (ADC_SR_EOC | ADC_SR_JEOC)
         && (ADC3->SR & (ADC_SR_EOC | ADC_SR_JEOC)) == (ADC_SR_EOC | ADC_SR_JEOC);
-    if (!all_adcs_done) {
+    if (!all_adcs_done) 
+    {
         return false;
     }
 
     vbus_sense_adc_cb(ADC1->JDR1);
 
-    if (m0_gate_driver.is_ready()) {
+    if (m0_gate_driver.is_ready()) 
+    {
         std::optional<float> phB = motors[0].phase_current_from_adcval(ADC2->JDR1);
         std::optional<float> phC = motors[0].phase_current_from_adcval(ADC3->JDR1);
-        if (phB.has_value() && phC.has_value()) {
+        if (phB.has_value() && phC.has_value()) 
+        {
             *current0 = {-*phB - *phC, *phB, *phC};
         }
     }
 
-    if (m1_gate_driver.is_ready()) {
+    if (m1_gate_driver.is_ready()) 
+    {
         std::optional<float> phB = motors[1].phase_current_from_adcval(ADC2->DR);
         std::optional<float> phC = motors[1].phase_current_from_adcval(ADC3->DR);
-        if (phB.has_value() && phC.has_value()) {
+        if (phB.has_value() && phC.has_value()) 
+        {
             *current1 = {-*phB - *phC, *phB, *phC};
         }
     }
@@ -452,21 +468,26 @@ static bool fetch_and_reset_adcs(
 
 extern "C" {
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) 
+{
     HAL_SPI_TxRxCpltCallback(hspi);
 }
 
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) 
+{
     HAL_SPI_TxRxCpltCallback(hspi);
 }
 
-void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
-    if (hspi == &hspi3) {
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) 
+{
+    if (hspi == &hspi3) 
+    {
         spi3_arbiter.on_complete();
     }
 }
 
-void TIM5_IRQHandler(void) {
+void TIM5_IRQHandler(void) 
+{
     COUNT_IRQ(TIM5_IRQn);
     pwm0_input.on_capture();
 }
@@ -474,7 +495,8 @@ void TIM5_IRQHandler(void) {
 volatile uint32_t timestamp_ = 0;
 volatile bool counting_down_ = false;
 
-void TIM8_UP_TIM13_IRQHandler(void) {
+void TIM8_UP_TIM13_IRQHandler(void) 
+{
     COUNT_IRQ(TIM8_UP_TIM13_IRQn);
     
     // Entry into this function happens at 21-23 clock cycles after the timer
@@ -486,7 +508,8 @@ void TIM8_UP_TIM13_IRQHandler(void) {
     bool counting_down = TIM8->CR1 & TIM_CR1_DIR;
 
     bool timer_update_missed = (counting_down_ == counting_down);
-    if (timer_update_missed) {
+    if (timer_update_missed) 
+    {
         motors[0].disarm_with_error(Motor::ERROR_TIMER_UPDATE_MISSED);
         motors[1].disarm_with_error(Motor::ERROR_TIMER_UPDATE_MISSED);
         return;
@@ -495,13 +518,16 @@ void TIM8_UP_TIM13_IRQHandler(void) {
 
     timestamp_ += TIM_1_8_PERIOD_CLOCKS * (TIM_1_8_RCR + 1);
 
-    if (!counting_down) {
+    if (!counting_down) 
+    {
         TaskTimer::enabled = odrv.task_timers_armed_;
         // Run sampling handlers and kick off control tasks when TIM8 is
         // counting up.
         odrv.sampling_cb();
         NVIC->STIR = ControlLoop_IRQn;
-    } else {
+    } 
+    else 
+    {
         // Tentatively reset all PWM outputs to 50% duty cycles. If the control
         // loop handler finishes in time then these values will be overridden
         // before they go into effect.
@@ -515,7 +541,8 @@ void TIM8_UP_TIM13_IRQHandler(void) {
     }
 }
 
-void ControlLoop_IRQHandler(void) {
+void ControlLoop_IRQHandler(void) 
+{
     COUNT_IRQ(ControlLoop_IRQn);
     uint32_t timestamp = timestamp_;
 
@@ -523,7 +550,8 @@ void ControlLoop_IRQHandler(void) {
     std::optional<Iph_ABC_t> current0;
     std::optional<Iph_ABC_t> current1;
 
-    if (!fetch_and_reset_adcs(&current0, &current1)) {
+    if (!fetch_and_reset_adcs(&current0, &current1)) 
+    {
         motors[0].disarm_with_error(Motor::ERROR_BAD_TIMING);
         motors[1].disarm_with_error(Motor::ERROR_BAD_TIMING);
     }
@@ -533,10 +561,12 @@ void ControlLoop_IRQHandler(void) {
     // So for now we guess the current to be 0 (this is not correct shortly after
     // disarming and when the motor spins fast in idle). Passing an invalid
     // current reading would create problems with starting FOC.
-    if (!(TIM1->BDTR & TIM_BDTR_MOE_Msk)) {
+    if (!(TIM1->BDTR & TIM_BDTR_MOE_Msk)) 
+    {
         current0 = {0.0f, 0.0f};
     }
-    if (!(TIM8->BDTR & TIM_BDTR_MOE_Msk)) {
+    if (!(TIM8->BDTR & TIM_BDTR_MOE_Msk)) 
+    {
         current1 = {0.0f, 0.0f};
     }
 
@@ -547,11 +577,13 @@ void ControlLoop_IRQHandler(void) {
 
     // By this time the ADCs for both M0 and M1 should have fired again. But
     // let's wait for them just to be sure.
-    MEASURE_TIME(odrv.task_times_.dc_calib_wait) {
+    MEASURE_TIME(odrv.task_times_.dc_calib_wait) 
+    {
         while (!(ADC2->SR & ADC_SR_EOC));
     }
 
-    if (!fetch_and_reset_adcs(&current0, &current1)) {
+    if (!fetch_and_reset_adcs(&current0, &current1)) 
+    {
         motors[0].disarm_with_error(Motor::ERROR_BAD_TIMING);
         motors[1].disarm_with_error(Motor::ERROR_BAD_TIMING);
     }
@@ -565,7 +597,8 @@ void ControlLoop_IRQHandler(void) {
     // If we did everything right, the TIM8 update handler should have been
     // called exactly once between the start of this function and now.
 
-    if (timestamp_ != timestamp + TIM_1_8_PERIOD_CLOCKS * (TIM_1_8_RCR + 1)) {
+    if (timestamp_ != timestamp + TIM_1_8_PERIOD_CLOCKS * (TIM_1_8_RCR + 1)) 
+    {
         motors[0].disarm_with_error(Motor::ERROR_CONTROL_DEADLINE_MISSED);
         motors[1].disarm_with_error(Motor::ERROR_CONTROL_DEADLINE_MISSED);
     }
@@ -574,18 +607,21 @@ void ControlLoop_IRQHandler(void) {
     TaskTimer::enabled = false;
 }
 
-void I2C1_EV_IRQHandler(void) {
+void I2C1_EV_IRQHandler(void) 
+{
     COUNT_IRQ(I2C1_EV_IRQn);
     HAL_I2C_EV_IRQHandler(&hi2c1);
 }
 
-void I2C1_ER_IRQHandler(void) {
+void I2C1_ER_IRQHandler(void) 
+{
     COUNT_IRQ(I2C1_ER_IRQn);
     HAL_I2C_ER_IRQHandler(&hi2c1);
 }
 
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS; // defined in usbd_conf.c
-void OTG_FS_IRQHandler(void) {
+void OTG_FS_IRQHandler(void) 
+{
     COUNT_IRQ(OTG_FS_IRQn);
     HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
 }

@@ -5,9 +5,11 @@
 
 #include <spi.h>
 
-class Stm32SpiArbiter {
+class Stm32SpiArbiter 
+{
 public:
-    struct SpiTask {
+    struct SpiTask 
+    {
         SPI_InitTypeDef config;
         Stm32Gpio ncs_gpio;
         const uint8_t* tx_buf;

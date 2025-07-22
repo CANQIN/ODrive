@@ -154,20 +154,26 @@ AsciiProtocol ascii_over_cdc(&usb_cdc_rx_stream, &usb_cdc_tx_multiplexer);
 
 bool usb_cdc_stdout_pending = false;
 
-static void usb_server_thread(void * ctx) {
+static void usb_server_thread(void * ctx) 
+{
     (void) ctx;
  
-    for (;;) {
+    for (;;) 
+    {
         osEvent event = osMessageGet(usb_event_queue, osWaitForever);
 
-        if (event.status != osEventMessage) {
+        if (event.status != osEventMessage) 
+        {
             continue;
         }
 
         usb_stats_.rx_cnt++;
 
-        switch (event.value.v) {
-            case 1: { // USB connected event
+        switch (event.value.v) 
+        {
+            case 1: 
+            { 
+                // USB connected event
                 usb_cdc_tx_stream.connected_ = true;
                 usb_native_tx_stream.connected_ = true;
                 usb_cdc_rx_stream.connected_ = true;
@@ -175,15 +181,20 @@ static void usb_server_thread(void * ctx) {
 
                 fibre_over_usb.start({});
 
-                if (odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_FIBRE) {
+                if (odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_FIBRE) 
+                {
                     fibre_over_cdc.start({});
-                } else if (odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII
-                        || odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT) {
+                } 
+                else if (odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII || odrv.config_.usb_cdc_protocol == ODrive::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT) 
+                {
                     ascii_over_cdc.start();
                 }
-            } break;
+            } 
+            break;
 
-            case 2: { // USB disconnected event
+            case 2: 
+            { 
+                // USB disconnected event
                 usb_cdc_tx_stream.connected_ = false;
                 usb_native_tx_stream.connected_ = false;
                 usb_cdc_rx_stream.connected_ = false;
@@ -192,45 +203,66 @@ static void usb_server_thread(void * ctx) {
                 usb_native_tx_stream.did_finish();
                 usb_cdc_rx_stream.did_finish();
                 usb_native_rx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 3: { // TX on CDC interface done
+            case 3: 
+            { 
+                // TX on CDC interface done
                 usb_cdc_tx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 4: { // TX on custom interface done
+            case 4: 
+            { 
+                // TX on custom interface done
                 usb_native_tx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 5: { // RX on CDC interface done
+            case 5: 
+            { 
+                // RX on CDC interface done
                 usb_cdc_rx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 6: { // RX on custom interface done
+            case 6: 
+            { 
+                // RX on custom interface done
                 usb_native_rx_stream.did_finish();
-            } break;
+            } 
+            break;
 
-            case 7: { // stdout has data
+            case 7: 
+            { 
+                // stdout has data
                 usb_cdc_stdout_pending = false;
                 usb_cdc_stdout_sink.maybe_start_async_write();
-            } break;
+            } 
+            break;
         }
     }
 }
 
 // Called from CDC_Receive_FS callback function, this allows the communication
 // thread to handle the incoming data
-void usb_rx_process_packet(uint8_t *buf, uint32_t len, uint8_t endpoint_pair) {
-    if (endpoint_pair == CDC_OUT_EP && usb_cdc_rx_stream.rx_end_) {
+void usb_rx_process_packet(uint8_t *buf, uint32_t len, uint8_t endpoint_pair) 
+{
+    if (endpoint_pair == CDC_OUT_EP && usb_cdc_rx_stream.rx_end_) 
+    {
         usb_cdc_rx_stream.rx_end_ += len;
         osMessagePut(usb_event_queue, 5, 0);
-    } else if (endpoint_pair == ODRIVE_OUT_EP && usb_native_rx_stream.rx_end_) {
+    } 
+    else if (endpoint_pair == ODRIVE_OUT_EP && usb_native_rx_stream.rx_end_) 
+    {
         usb_native_rx_stream.rx_end_ += len;
         osMessagePut(usb_event_queue, 6, 0);
     }
 }
 
-void start_usb_server() {
+void start_usb_server() 
+{
     // Start USB communication thread
     osThreadDef(usb_server_thread_def, usb_server_thread, osPriorityNormal, 0, stack_size_usb_thread / sizeof(StackType_t));
     usb_thread = osThreadCreate(osThread(usb_server_thread_def), NULL);

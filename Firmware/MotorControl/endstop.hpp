@@ -2,9 +2,11 @@
 #define __ENDSTOP_HPP
 
 #include "timer.hpp"
-class Endstop {
+class Endstop 
+{
    public:
-    struct Config_t {
+    struct Config_t 
+    {
         float offset = 0;
         uint32_t debounce_ms = 50;
         uint16_t gpio_num = 0;
@@ -25,24 +27,28 @@ class Endstop {
     bool apply_config();
 
     void update();
-    constexpr bool get_state(){
+    constexpr bool get_state()
+    {
         return endstop_state_;
     }
 
-    constexpr bool rose(){
+    constexpr bool rose()
+    {
         return (endstop_state_ != last_state_) && endstop_state_;
     }
 
-    constexpr bool fell(){
+    constexpr bool fell()
+    {
         return (endstop_state_ != last_state_) && !endstop_state_;
     }
 
     bool endstop_state_ = false;
 
-   private:
+private:
     bool last_state_ = false;
     bool pin_state_ = false;
     float pos_when_pressed_ = 0.0f;
     Timer<float> debounceTimer_;
 };
+
 #endif

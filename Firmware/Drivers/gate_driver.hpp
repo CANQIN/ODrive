@@ -1,7 +1,8 @@
 #ifndef __GATE_DRIVER_HPP
 #define __GATE_DRIVER_HPP
 
-struct GateDriverBase {
+struct GateDriverBase 
+{
     /**
      * @brief Unlocks or locks the gate signals of the gate driver.
      * 
@@ -20,7 +21,8 @@ struct GateDriverBase {
     virtual bool is_ready() = 0;
 };
 
-struct OpAmpBase {
+struct OpAmpBase 
+{
     /**
      * @brief Returns false if the opamp is in a state where it's not operating
      * with the latest configured gain (e.g. because it was not initialized or

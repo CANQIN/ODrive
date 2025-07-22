@@ -3,7 +3,8 @@
 
 #include <gpio.h>
 
-class Stm32Gpio {
+class Stm32Gpio 
+{
 public:
     static const Stm32Gpio none;
 
@@ -21,13 +22,16 @@ public:
      */
     bool config(uint32_t mode, uint32_t pull, uint32_t speed = GPIO_SPEED_FREQ_LOW);
 
-    void write(bool state) {
-        if (port_) {
+    void write(bool state) 
+    {
+        if (port_) 
+        {
             HAL_GPIO_WritePin(port_, pin_mask_, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
         }
     }
 
-    bool read() {
+    bool read() 
+    {
         return port_ && (port_->IDR & pin_mask_);
     }
 
@@ -65,10 +69,12 @@ public:
      */
     void unsubscribe();
 
-    uint16_t get_pin_number() {
+    uint16_t get_pin_number() 
+    {
         uint16_t pin_number = 0;
         uint16_t pin_mask = pin_mask_ >> 1;
-        while (pin_mask) {
+        while (pin_mask) 
+        {
             pin_mask >>= 1;
             pin_number++;
         }
