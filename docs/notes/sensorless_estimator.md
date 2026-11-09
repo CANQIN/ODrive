@@ -1,0 +1,485 @@
+## 文件作用
+
+该文件实现 PMSM 的无位置传感器估算器：
+
+```text
+三相电流
+  → Clarke 变换
+  → 定子磁链积分
+  → 非线性磁链观测器
+  → 永磁体磁链方向
+  → 电角度
+  → PLL
+  → 电角速度和机械转速
+```
+
+核心算法来自论文中的表贴式永磁同步电机非线性观测器。它不需要编码器，而是利用：
+
+- 电机相电阻 \(R\)
+- 电机相电感 \(L\)
+- 永磁体磁链 \(\lambda_m\)
+- 实际施加的 αβ 电压
+- 测量的 αβ 电流
+
+估算转子电角度和速度。
+
+---
+
+## 主要状态和参数
+
+头文件定义了三个配置参数：
+
+```cpp
+float observer_gain = 1000.0f;
+float pll_bandwidth = 1000.0f;
+float pm_flux_linkage = 1.58e-3f;
+```
+
+含义如下：
+
+- `observer_gain`：非线性磁链观测器增益。越大，磁链幅值收敛越快，但过大会放大噪声并可能造成离散系统振荡。
+- `pll_bandwidth`：PLL 带宽，决定速度估算的响应速度和噪声。
+- `pm_flux_linkage`：永磁体磁链，单位相当于 `V·s` 或 `Wb`。注释中给出的 KV 换算公式为：
+
+\[
+\lambda_m \approx
+\frac{5.5133}{p \cdot K_V}
+\]
+
+其中 \(p\) 是极对数，\(K_V\) 是 rpm/V。
+
+内部状态包括：
+
+- `flux_state_[2]`：α、β 轴总定子磁链估计值。
+- `V_alpha_beta_memory_[2]`：与当前电流采样时刻对应的历史施加电压。
+- `pll_pos_`：PLL 内部跟踪的电角度。
+- `phase_`：输出电角度，单位 rad。
+- `phase_vel_`：输出电角速度，单位 rad/s。
+- `vel_estimate_`：机械转速，单位 turns/s。
+
+---
+
+## `reset()`：复位观测器
+
+```cpp
+void SensorlessEstimator::reset()
+```
+
+它把以下内部状态清零：
+
+- PLL 角度
+- 机械转速输出
+- 历史 αβ 电压
+- αβ 磁链积分状态
+
+注意，`error_` 不会被这里清除，因此错误是锁存的，需要由外部错误清除流程处理。
+
+---
+
+## `update()`：一次估算过程
+
+### 1. 计算 PLL 增益
+
+```cpp
+float pll_kp = 2.0f * config_.pll_bandwidth;
+float pll_ki = 0.25f * (pll_kp * pll_kp);
+```
+
+代入后：
+
+\[
+K_p = 2B
+\]
+
+\[
+K_i = B^2
+\]
+
+其中 \(B\) 为 `pll_bandwidth`。这种配置对应临界阻尼二阶 PLL。
+
+随后检查离散时间稳定条件：
+
+```cpp
+if (!(current_meas_period * pll_kp < 1.0f))
+```
+
+即：
+
+\[
+T_sK_p < 1
+\]
+
+不满足时设置：
+
+- `ERROR_UNSTABLE_GAIN`
+- Axis 的 `ERROR_SENSORLESS_ESTIMATOR_FAILED`
+
+然后复位观测器并返回 `false`。
+
+---
+
+### 2. 获取三相电流
+
+```cpp
+auto current_meas = axis_->motor_.current_meas_;
+```
+
+如果电机未使能：
+
+```cpp
+if (!axis_->motor_.is_armed_) {
+    current_meas = {0.0f, 0.0f};
+}
+```
+
+因为未使能时电流采样可能无效，代码直接假定电流为零。
+
+如果电机使能但没有有效电流：
+
+```cpp
+if (!current_meas.has_value())
+```
+
+则报告：
+
+```cpp
+ERROR_UNKNOWN_CURRENT_MEASUREMENT
+```
+
+并复位观测器。
+
+源码中的 TODO 还指出：这里读取的电流会被更高优先级中断修改，目前不是严格线程安全的。
+
+---
+
+### 3. Clarke 变换
+
+```cpp
+float I_alpha_beta[2] = {
+    current_meas->phA,
+    one_by_sqrt3 * (current_meas->phB - current_meas->phC)
+};
+```
+
+即：
+
+\[
+I_\alpha = I_A
+\]
+
+\[
+I_\beta = \frac{I_B-I_C}{\sqrt{3}}
+\]
+
+把三相静止坐标系电流转换为二维 αβ 静止坐标系电流。
+
+---
+
+### 4. 根据电压方程预测总磁链
+
+PMSM 在 αβ 坐标系中的电压方程为：
+
+\[
+\boldsymbol{v}
+=
+R\boldsymbol{i}
++
+\frac{d\boldsymbol{\psi}_s}{dt}
+\]
+
+所以：
+
+\[
+\frac{d\boldsymbol{\psi}_s}{dt}
+=
+\boldsymbol{v}-R\boldsymbol{i}
+\]
+
+代码对应：
+
+```cpp
+float y =
+    -phase_resistance * I_alpha_beta[i]
+    + V_alpha_beta_memory_[i];
+
+flux_state_[i] += y * current_meas_period;
+```
+
+因此：
+
+\[
+\hat{\psi}_{s,k}
+=
+\hat{\psi}_{s,k-1}
++
+T_s(v-Ri)
+\]
+
+这里的 `flux_state_` 是总定子磁链，包含：
+
+- 电感磁链 \(L i\)
+- 永磁体磁链 \(\psi_m\)
+
+---
+
+### 5. 分离永磁体磁链
+
+```cpp
+eta[i] =
+    flux_state_[i]
+    - phase_inductance * I_alpha_beta[i];
+```
+
+也就是：
+
+\[
+\boldsymbol{\eta}
+=
+\hat{\boldsymbol{\psi}}_s
+-
+L\boldsymbol{i}
+\]
+
+理论上：
+
+\[
+\boldsymbol{\eta}
+\approx
+\boldsymbol{\psi}_m
+=
+\lambda_m
+\begin{bmatrix}
+\cos\theta_e \\
+\sin\theta_e
+\end{bmatrix}
+\]
+
+所以：
+
+- `eta` 的长度应该等于永磁体磁链 \(\lambda_m\)
+- `eta` 的方向就是转子电角度
+
+---
+
+### 6. 非线性磁链校正
+
+单纯对 \(v-Ri\) 积分会受到直流偏置、参数误差和测量误差影响，最终发生积分漂移。
+
+代码通过已知的永磁体磁链长度进行约束：
+
+```cpp
+float pm_flux_sqr =
+    config_.pm_flux_linkage * config_.pm_flux_linkage;
+
+float est_pm_flux_sqr =
+    eta[0] * eta[0] + eta[1] * eta[1];
+
+float eta_factor =
+    0.5f
+    * (config_.observer_gain / pm_flux_sqr)
+    * (pm_flux_sqr - est_pm_flux_sqr);
+```
+
+对应校正项：
+
+\[
+\dot{\hat{\psi}}_{s,\mathrm{corr}}
+=
+\frac{\gamma}{2\lambda_m^2}
+\left(
+\lambda_m^2-\|\boldsymbol{\eta}\|^2
+\right)
+\boldsymbol{\eta}
+\]
+
+然后加入磁链状态：
+
+```cpp
+flux_state_[i] +=
+    eta_factor * eta[i] * current_meas_period;
+```
+
+其作用非常直观：
+
+- 如果 \(\|\eta\| < \lambda_m\)，校正因子为正，增大磁链长度。
+- 如果 \(\|\eta\| > \lambda_m\)，校正因子为负，减小磁链长度。
+- 最终将永磁体磁链估计约束在半径为 \(\lambda_m\) 的圆附近。
+
+这就是“非线性观测器”的核心。
+
+---
+
+### 7. 保存与电流采样对应的历史电压
+
+```cpp
+V_alpha_beta_memory_[0] =
+    axis_->motor_.current_control_.final_v_alpha_;
+
+V_alpha_beta_memory_[1] =
+    axis_->motor_.current_control_.final_v_beta_;
+```
+
+控制循环的调用顺序是：
+
+```text
+无感估算器
+→ 速度/位置控制器
+→ 电机控制
+→ 电流控制器
+```
+
+因此执行估算器时，`final_v_alpha_` 和 `final_v_beta_` 还是上一控制周期产生的电压。再通过 `V_alpha_beta_memory_` 延迟一次，使电压与当前 ADC 电流采样的实际 PWM 周期对齐。
+
+这是很重要的时序补偿。如果电压和电流错开一个周期，磁链积分会产生明显的相位和幅值误差。
+
+---
+
+### 8. 根据磁链方向计算电角度
+
+```cpp
+float phase = fast_atan2(eta[1], eta[0]);
+```
+
+即：
+
+\[
+\theta_e = \operatorname{atan2}(\eta_\beta,\eta_\alpha)
+\]
+
+结果通常被限制在：
+
+\[
+[-\pi,\pi)
+\]
+
+这个角度就是估算出的转子电角度。
+
+---
+
+### 9. PLL 估算电角速度
+
+首先使用上一周期速度预测 PLL 角度：
+
+```cpp
+float phase_vel =
+    phase_vel_.previous().value_or(0.0f);
+
+pll_pos_ =
+    wrap_pm_pi(pll_pos_ + Ts * phase_vel);
+```
+
+然后计算观测角度与 PLL 角度之间的最短角度误差：
+
+```cpp
+float delta_phase =
+    wrap_pm_pi(phase - pll_pos_);
+```
+
+`wrap_pm_pi()` 很重要。例如：
+
+- 当前角度接近 \(+\pi\)
+- PLL 角度接近 \(-\pi\)
+
+两者实际上只差很小，但直接相减会接近 \(2\pi\)。角度环绕可避免该问题。
+
+PLL 更新为：
+
+```cpp
+pll_pos_ += Ts * pll_kp * delta_phase;
+phase_vel += Ts * pll_ki * delta_phase;
+```
+
+对应：
+
+\[
+\hat{\theta}_{PLL}
+\leftarrow
+\hat{\theta}_{PLL}
++
+T_s\hat{\omega}
++
+T_sK_p e_\theta
+\]
+
+\[
+\hat{\omega}
+\leftarrow
+\hat{\omega}
++
+T_sK_i e_\theta
+\]
+
+这样得到比直接对角度差分更平滑的电角速度。
+
+一个值得注意的细节是：
+
+```cpp
+phase_ = phase;
+```
+
+输出给 FOC 的是 `atan2()` 得到的原始磁链角度，而不是 `pll_pos_`。PLL 主要用于产生平滑的速度估算和下一周期相位预测。
+
+---
+
+### 10. 输出机械转速
+
+```cpp
+vel_estimate_ =
+    phase_vel /
+    (pole_pairs * 2.0f * M_PI);
+```
+
+电角速度和机械速度的关系为：
+
+\[
+\omega_e=p\omega_m
+\]
+
+而机械转速以 turns/s 输出：
+
+\[
+n_m
+=
+\frac{\omega_e}{2\pi p}
+\]
+
+`std::max(pole_pairs, 1.0f)` 用来防止极对数配置为零时发生除零。
+
+---
+
+## 在整个控制系统中的作用
+
+进入无感闭环之前，ODrive 会先执行开环启动 `sensorless_ramp`，默认最终电角速度约为：
+
+```cpp
+400 rad/s
+```
+
+完成启动后：
+
+- `phase_` 连接到 FOC 电流环的电角度输入。
+- `phase_vel_` 连接到电机前馈和角速度输入。
+- `vel_estimate_` 连接到速度控制器。
+- 位置输入断开，因此该模式主要用于速度控制和转矩控制，不能提供可靠的绝对机械位置控制。
+
+之所以必须先开环加速，是因为该观测器在零速、极低速时可观测性较差。低速时反电动势很小，电阻压降、死区误差和测量偏置会占主导。
+
+## 需要特别注意的地方
+
+1. `phase_resistance`、`phase_inductance` 和 `pm_flux_linkage` 必须准确，否则磁链估算会产生系统性误差。
+
+2. 代码没有检查 `pm_flux_linkage == 0`，错误配置会在：
+
+```cpp
+1.0f / pm_flux_sqr
+```
+
+处产生无穷大或 NaN。
+
+3. 只检查了 PLL 增益的离散稳定性，没有检查 `observer_gain`。观测器增益过大同样可能导致振荡。
+
+4. 算法假设单一的 `phase_inductance`，更适合表贴式 PMSM。对于 \(L_d \neq L_q\) 的强凸极 IPMSM，模型误差会更明显。
+
+5. 使用的是控制器计算出的最终施加电压，而不是真正测量的端电压，因此 PWM 死区、器件压降和母线波动仍会形成观测误差。
+
+总体而言，这个文件完成的就是：通过电机电压方程重建永磁体磁链，用磁链方向获取电角度，再通过 PLL 得到电角速度和机械转速。

@@ -1,0 +1,9 @@
+# Firmware interface generator, verified with Python 3.10 on Windows.
+attrs==26.1.0
+Jinja2==3.0.3
+jsonschema==3.2.0
+MarkupSafe==3.0.4
+pyrsistent==0.20.0
+PyYAML==6.0.2
+setuptools==65.5.0
+six==1.17.0

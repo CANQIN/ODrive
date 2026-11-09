@@ -5,6 +5,7 @@ build/
 deploy/
 .dep/
 tup_build.sh
+tup-generate.vardict
 
 #markdown preview output
 README.html

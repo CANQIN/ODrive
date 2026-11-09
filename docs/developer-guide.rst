@@ -168,6 +168,61 @@ Once you have everything, you can verify the correct installation by running:
     * `ST-Link/V2 Drivers <https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-link009.html>`__
 
 
+Windows PowerShell build
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This checkout includes a portable build setup for Windows. Install Python 3.10
+with the Python launcher, Git, and Windows ``curl.exe``, then run these commands
+from the repository root:
+
+.. code:: powershell
+
+  .\scripts\setup-build-env.ps1
+  .\build.ps1 -BoardVersion v3.6-56V
+
+After setup, open the repository root in VSCode and press ``Ctrl+Shift+B`` to run
+the default ``ODrive: Build Firmware`` task (also available under
+``Terminal > Run Build Task``). Opening ``ODrive_Workspace.code-workspace`` or the
+``Firmware`` folder uses the firmware folder's default ``build`` task instead.
+Both invoke the same script and use the current ``Firmware/tup.config``.
+Compiler output appears in the integrated terminal and GCC errors are collected
+in the Problems panel with links to source locations.
+
+Alternatively, double-click ``build.bat`` in the repository root. The window
+displays the result and waits for a key before closing. Command-line arguments
+are forwarded to ``build.ps1``.
+
+The setup downloads ARM GCC 9-2019-q4-major and Tup v0.8-38-gc6f565e2 from
+their official servers, verifies the archive SHA256 hashes, and installs pinned
+Python build dependencies in ``.venv``. Tools are stored in ``.tools``; both
+directories are ignored by Git. The default Python package index is the Tsinghua
+PyPI mirror. To use another index or Python executable:
+
+.. code:: powershell
+
+  .\scripts\setup-build-env.ps1 -Python D:\Python\Python310\python.exe -IndexUrl https://pypi.org/simple
+
+``build.ps1`` uses the standalone Tup batch generation flow from the Windows CI
+configuration, so GNU Make is not required. It rebuilds all firmware sources and
+stops at the first failed command. It creates ``Firmware/tup.config`` for
+``v3.6-56V`` with ``CONFIG_DEBUG=false`` and ``CONFIG_USE_LTO=false`` if that file
+does not exist. Later runs preserve the configuration; ``-BoardVersion`` updates
+only the board selection. Other compile settings can be edited in that file.
+
+The outputs are ``Firmware/build/ODriveFirmware.elf``, ``.hex``, ``.bin``, and
+``.map``. Compiler output is saved to ``Firmware/build/build.log``. The VSCode
+``build`` task invokes this script on Windows, and the Windows C/C++ configuration
+uses the local ARM compiler for IntelliSense. This entry point builds firmware;
+host tools and CAN DBC generation remain separate targets in the Makefile.
+
+Firmware version generation uses Git tags. If this fork has no firmware tags,
+retrieve the upstream tag used by this checkout before building:
+
+.. code:: powershell
+
+  git fetch --no-tags https://github.com/odriverobotics/ODrive.git tag fw-v0.5.6
+
+
 Configuring the Build
 --------------------------------------------------------------------------------
 
