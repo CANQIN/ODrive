@@ -436,8 +436,38 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
     // axis so we process both encoders before we continue.
 
     for (auto& axis: axes) {
-        MEASURE_TIME(axis.task_times_.sensorless_estimator_update)
-            axis.sensorless_estimator_.update();
+        MEASURE_TIME(axis.task_times_.sensorless_estimator_update) {
+            SensorlessEstimator::Input input;
+            SensorlessEstimator::MotorModel motor_model{};
+            std::optional<Iph_ABC_t> current;
+            bool is_armed = false;
+            // Capture related inputs together; keep the observer math outside
+            // the critical section and before this cycle's motor/FOC updates.
+            CRITICAL_SECTION() {
+                current = axis.motor_.current_meas_;
+                is_armed = axis.motor_.is_armed_;
+                input.voltage_feedback = {
+                    axis.motor_.current_control_.final_v_alpha_,
+                    axis.motor_.current_control_.final_v_beta_};
+                motor_model = {
+                    axis.motor_.config_.phase_resistance,
+                    axis.motor_.config_.phase_inductance,
+                    axis.motor_.config_.pole_pairs};
+            }
+            if (!is_armed) {
+                // Preserve the zero-current assumption while disarmed.
+                current = {0.0f, 0.0f, 0.0f};
+            }
+            if (current.has_value()) {
+                // Clarke transform at the system/algorithm boundary.
+                input.current = SensorlessEstimator::AlphaBeta{
+                    current->phA,
+                    one_by_sqrt3 * (current->phB - current->phC)};
+            }
+            if (!axis.sensorless_estimator_.update(input, motor_model, current_meas_period)) {
+                axis.error_ |= Axis::ERROR_SENSORLESS_ESTIMATOR_FAILED;
+            }
+        }
 
         MEASURE_TIME(axis.task_times_.controller_update) {
             if (!axis.controller_.update()) { // uses position and velocity from encoder

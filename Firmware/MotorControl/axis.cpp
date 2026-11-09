@@ -33,7 +33,6 @@ Axis::Axis(int axis_num,
       mechanical_brake_(mechanical_brake)
 {
     encoder_.axis_ = this;
-    sensorless_estimator_.axis_ = this;
     controller_.axis_ = this;
     motor_.axis_ = this;
     trap_traj_.axis_ = this;

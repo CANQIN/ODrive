@@ -2,6 +2,9 @@
 #define __SENSORLESS_ESTIMATOR_HPP
 
 #include "component.hpp"
+#include <autogen/interfaces.hpp>
+
+// TODO：对外暴露配置接口显式配置；输出数据也显式暴露接口
 
 class SensorlessEstimator : public ODriveIntf::SensorlessEstimatorIntf {
 public:
@@ -11,10 +14,29 @@ public:
         float pm_flux_linkage = 1.58e-3f; // [V / (rad/s)]  { 5.51328895422 / (<pole pairs> * <rpm/v>) }
     };
 
-    void reset();
-    bool update();
+    struct AlphaBeta {
+        float alpha = 0.0f;
+        float beta = 0.0f;
+    };
 
-    Axis* axis_ = nullptr; // set by Axis constructor
+    struct Input {
+        // Missing current is an error; the caller supplies zero when disarmed.
+        std::optional<AlphaBeta> current; // [A]
+        // Latest FOC voltage feedback, before this estimator's extra delay.
+        AlphaBeta voltage_feedback; // [V]
+    };
+
+    struct MotorModel {
+        float phase_resistance; // [ohm]
+        float phase_inductance; // [H]
+        int32_t pole_pairs;
+    };
+
+    void reset();
+    // dt is in seconds. On failure, latch the local error and reset the
+    // observer state; the caller is responsible for system-level fault handling.
+    bool update(const Input& input, const MotorModel& motor, float dt);
+
     Config_t config_;
 
     // TODO: expose on protocol
