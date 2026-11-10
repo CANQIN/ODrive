@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <functional>
+#include <bitset>
 #include "gpio.h"
 
 #include "odrive_main.h"
@@ -32,7 +33,18 @@ Axis::Axis(int axis_num,
       max_endstop_(max_endstop),
       mechanical_brake_(mechanical_brake)
 {
-    encoder_.axis_ = this;
+    encoder_.set_event_handler([](void* context, Encoder::Event event) {
+        auto& axis = *static_cast<Axis*>(context);
+        if (event == Encoder::Event::error) {
+            axis.error_ |= ERROR_ENCODER_FAILED;
+        } else if (event == Encoder::Event::reference_acquired) {
+            if (axis.controller_.config_.anticogging.pre_calibrated) {
+                axis.controller_.anticogging_valid_ = true;
+            }
+        } else if (event == Encoder::Event::configuration_failed) {
+            odrv.misconfigured_ = true;
+        }
+    }, this);
     controller_.axis_ = this;
     motor_.axis_ = this;
     trap_traj_.axis_ = this;
@@ -508,7 +520,7 @@ void Axis::run_state_machine_loop() {
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
-                status = encoder_.run_index_search();
+                status = run_index_search();
             } break;
 
             case AXIS_STATE_ENCODER_DIR_FIND: {
@@ -517,7 +529,7 @@ void Axis::run_state_machine_loop() {
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
-                status = encoder_.run_direction_find();
+                status = run_direction_find();
                 // Help facilitate encoder.is_ready without reboot
                 if (status)
                     encoder_.apply_config(motor_.config_.motor_type);
@@ -527,7 +539,7 @@ void Axis::run_state_machine_loop() {
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
 
-                status = encoder_.run_hall_polarity_calibration();
+                status = run_hall_polarity_calibration();
             } break;
 
             case AXIS_STATE_ENCODER_HALL_PHASE_CALIBRATION: {
@@ -539,7 +551,7 @@ void Axis::run_state_machine_loop() {
                     goto invalid_state_label;
                 }
 
-                status = encoder_.run_hall_phase_calibration();
+                status = run_hall_phase_calibration();
             } break;
 
             case AXIS_STATE_HOMING: {
@@ -557,7 +569,7 @@ void Axis::run_state_machine_loop() {
                 //    goto invalid_state_label;
                 if (!motor_.is_calibrated_)
                     goto invalid_state_label;
-                status = encoder_.run_offset_calibration();
+                status = run_offset_calibration();
             } break;
 
             case AXIS_STATE_LOCKIN_SPIN: {
@@ -598,4 +610,340 @@ void Axis::run_state_machine_loop() {
             task_chain_.back() = AXIS_STATE_UNDEFINED;
         }
     }
+}
+
+
+// 编码器校准由轴编排，类型模块只提供采样与解码结果。
+bool Axis::run_index_search() {
+    encoder_.config_.use_index = true;
+    encoder_.index_found_ = false;
+    encoder_.set_idx_subscribe();
+
+    bool success = run_lockin_spin(config_.calibration_lockin, false);
+    return success;
+}
+
+bool Axis::run_direction_find() {
+    int32_t init_enc_val = encoder_.shadow_count_;
+
+    Axis::LockinConfig_t lockin_config = config_.calibration_lockin;
+    lockin_config.finish_distance = lockin_config.vel * 3.0f; // run for 3 seconds
+    lockin_config.finish_on_distance = true;
+    lockin_config.finish_on_enc_idx = false;
+    lockin_config.finish_on_vel = false;
+    bool success = run_lockin_spin(lockin_config, false);
+
+    if (success) {
+        // Check response and direction
+        if (encoder_.shadow_count_ > init_enc_val + 8) {
+            // motor same dir as encoder
+            encoder_.config_.direction = 1;
+        } else if (encoder_.shadow_count_ < init_enc_val - 8) {
+            // motor opposite dir as encoder
+            encoder_.config_.direction = -1;
+        } else {
+            encoder_.config_.direction = 0;
+        }
+    }
+
+    return success;
+}
+
+bool Axis::run_hall_polarity_calibration() {
+    Axis::LockinConfig_t lockin_config = config_.calibration_lockin;
+    lockin_config.finish_distance = lockin_config.vel * 3.0f; // run for 3 seconds
+    lockin_config.finish_on_distance = true;
+    lockin_config.finish_on_enc_idx = false;
+    lockin_config.finish_on_vel = false;
+
+    auto loop_cb = [this](bool const_vel) {
+        if (const_vel)
+            sample_hall_states_ = true;
+        // No need to cancel early
+        return true;
+    };
+
+    encoder_.config_.hall_polarity_calibrated = false;
+    states_seen_count_.fill(0);
+    bool success = run_lockin_spin(lockin_config, false, loop_cb);
+    sample_hall_states_ = false;
+
+    if (success) {
+        std::bitset<8> state_seen;
+        std::bitset<8> state_confirmed;
+        for (int i = 0; i < 8; i++) {
+            if (states_seen_count_[i] > 0)
+                state_seen[i] = true;
+            if (states_seen_count_[i] > 50)
+                state_confirmed[i] = true;
+        }
+        if (!(state_seen == state_confirmed)) {
+            encoder_.set_error(Encoder::ERROR_ILLEGAL_HALL_STATE);
+            return false;
+        }
+
+        // Hall effect sensors can be arranged at 60 or 120 electrical degrees.
+        // Out of 8 possible states, 120 and 60 deg arrangements each miss 2 states.
+        // ODrive assumes 120 deg separation - if a 60 deg setup is used, it can
+        // be converted to 120 deg states by flipping the polarity of one sensor.
+        uint8_t states = state_seen.to_ulong();
+        uint8_t hall_polarity = 0;
+        auto flip_detect = [](uint8_t states, unsigned int idx)->bool {
+            return (~states & 0xFF) == (1<<(0+idx) | 1<<(7-idx));
+        };
+        if (flip_detect(states, 0)) {
+            hall_polarity = 0b000;
+        } else if (flip_detect(states, 1)) {
+            hall_polarity = 0b001;
+        } else if (flip_detect(states, 2)) {
+            hall_polarity = 0b010;
+        } else if (flip_detect(states, 3)) {
+            hall_polarity = 0b100;
+        } else {
+            encoder_.set_error(Encoder::ERROR_ILLEGAL_HALL_STATE);
+            return false;
+        }
+        encoder_.config_.hall_polarity = hall_polarity;
+        encoder_.config_.hall_polarity_calibrated = true;
+    }
+
+    return success;
+}
+
+bool Axis::run_hall_phase_calibration() {
+    Axis::LockinConfig_t lockin_config = config_.calibration_lockin;
+    lockin_config.finish_distance = lockin_config.vel * 30.0f; // run for 30 seconds
+    lockin_config.finish_on_distance = true;
+    lockin_config.finish_on_enc_idx = false;
+    lockin_config.finish_on_vel = false;
+
+    auto loop_cb = [this](bool const_vel) {
+        if (const_vel)
+            sample_hall_phase_ = true;
+        // No need to cancel early
+        return true;
+    };
+
+    // TODO: There is a race condition here with the execution in Axis::update_encoder.
+    // We should evaluate making thread execution synchronous with the control loops
+    // at least optionally.
+    // Perhaps the new loop_sync feature will give a loose timing guarantee that may be sufficient
+    calibrate_hall_phase_ = true;
+    encoder_.config_.hall_edge_phcnt.fill(0.0f);
+    hall_phase_calib_seen_count_.fill(0);
+    bool success = run_lockin_spin(lockin_config, false, loop_cb);
+    if (encoder_.error_ & Encoder::ERROR_ILLEGAL_HALL_STATE)
+        success = false;
+
+    if (success) {
+        // Check deltas to dicern rotation direction
+        float delta_phase = 0.0f;
+        for (int i = 0; i < 6; i++) {
+            int next_i = (i == 5) ? 0 : i+1;
+            delta_phase += wrap_pm_pi(encoder_.config_.hall_edge_phcnt[next_i] - encoder_.config_.hall_edge_phcnt[i]);
+        }
+        // Correct reverse rotation
+        if (delta_phase < 0.0f) {
+            encoder_.config_.direction = -1;
+            for (int i = 0; i < 6; i++)
+                encoder_.config_.hall_edge_phcnt[i] = wrap_pm_pi(-encoder_.config_.hall_edge_phcnt[i]);
+        } else {
+            encoder_.config_.direction = 1;
+        }
+        // Normalize edge timing to 1st edge in sequence, and change units to counts
+        float offset = encoder_.config_.hall_edge_phcnt[0];
+        for (int i = 0; i < 6; i++) {
+            float& phcnt = encoder_.config_.hall_edge_phcnt[i];
+            phcnt = fmodf_pos((6.0f / (2.0f * M_PI)) * (phcnt - offset), 6.0f);
+        }
+    } else {
+        encoder_.config_.hall_edge_phcnt = Encoder::hall_edge_defaults;
+    }
+
+    calibrate_hall_phase_ = false;
+    return success;
+}
+
+bool Axis::run_offset_calibration() {
+    const float start_lock_duration = 1.0f;
+
+    // Require index found if enabled
+    if (encoder_.config_.use_index && !encoder_.index_found_) {
+        encoder_.set_error(Encoder::ERROR_INDEX_NOT_FOUND_YET);
+        return false;
+    }
+
+    if (encoder_.config_.mode == Encoder::MODE_HALL && !encoder_.config_.hall_polarity_calibrated) {
+        encoder_.set_error(Encoder::ERROR_HALL_NOT_CALIBRATED_YET);
+        return false;
+    }
+
+    // We use encoder_.shadow_count_ to do the calibration, but the offset is used by encoder_.count_in_cpr_
+    // Therefore we have to sync them for calibration
+    encoder_.shadow_count_ = encoder_.count_in_cpr_;
+
+    CRITICAL_SECTION() {
+        // Reset state variables
+        open_loop_controller_.Idq_setpoint_ = {0.0f, 0.0f};
+        open_loop_controller_.Vdq_setpoint_ = {0.0f, 0.0f};
+        open_loop_controller_.phase_ = 0.0f;
+        open_loop_controller_.phase_vel_ = 0.0f;
+
+        float max_current_ramp = motor_.config_.calibration_current / start_lock_duration * 2.0f;
+        open_loop_controller_.max_current_ramp_ = max_current_ramp;
+        open_loop_controller_.max_voltage_ramp_ = max_current_ramp;
+        open_loop_controller_.max_phase_vel_ramp_ = INFINITY;
+        open_loop_controller_.target_current_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? motor_.config_.calibration_current : 0.0f;
+        open_loop_controller_.target_voltage_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? 0.0f : motor_.config_.calibration_current;
+        open_loop_controller_.target_vel_ = 0.0f;
+        open_loop_controller_.total_distance_ = 0.0f;
+        open_loop_controller_.phase_ = open_loop_controller_.initial_phase_ = wrap_pm_pi(0 - encoder_.config_.calib_scan_distance / 2.0f);
+
+        motor_.current_control_.enable_current_control_src_ = (motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL);
+        motor_.current_control_.Idq_setpoint_src_.connect_to(&open_loop_controller_.Idq_setpoint_);
+        motor_.current_control_.Vdq_setpoint_src_.connect_to(&open_loop_controller_.Vdq_setpoint_);
+
+        motor_.current_control_.phase_src_.connect_to(&open_loop_controller_.phase_);
+        acim_estimator_.rotor_phase_src_.connect_to(&open_loop_controller_.phase_);
+
+        motor_.phase_vel_src_.connect_to(&open_loop_controller_.phase_vel_);
+        motor_.current_control_.phase_vel_src_.connect_to(&open_loop_controller_.phase_vel_);
+        acim_estimator_.rotor_phase_vel_src_.connect_to(&open_loop_controller_.phase_vel_);
+    }
+    wait_for_control_iteration();
+
+    motor_.arm(&motor_.current_control_);
+
+    // go to start position of forward scan for start_lock_duration to get ready to scan
+    for (size_t i = 0; i < (size_t)(start_lock_duration * 1000.0f); ++i) {
+        if (!motor_.is_armed_) {
+            return false; // TODO: return "disarmed" error code
+        }
+        if (requested_state_ != Axis::AXIS_STATE_UNDEFINED) {
+            motor_.disarm();
+            return false; // TODO: return "aborted" error code
+        }
+        osDelay(1);
+    }
+
+
+    int32_t init_enc_val = encoder_.shadow_count_;
+    uint32_t num_steps = 0;
+    int64_t encvaluesum = 0;
+
+    CRITICAL_SECTION() {
+        open_loop_controller_.target_vel_ = encoder_.config_.calib_scan_omega;
+        open_loop_controller_.total_distance_ = 0.0f;
+    }
+
+    // scan forward
+    while ((requested_state_ == Axis::AXIS_STATE_UNDEFINED) && motor_.is_armed_) {
+        bool reached_target_dist = open_loop_controller_.total_distance_.any().value_or(-INFINITY) >= encoder_.config_.calib_scan_distance;
+        if (reached_target_dist) {
+            break;
+        }
+        encvaluesum += encoder_.shadow_count_;
+        num_steps++;
+        osDelay(1);
+    }
+
+    // Check response and direction
+    if (encoder_.shadow_count_ > init_enc_val + 8) {
+        // motor same dir as encoder
+        encoder_.config_.direction = 1;
+    } else if (encoder_.shadow_count_ < init_enc_val - 8) {
+        // motor opposite dir as encoder
+        encoder_.config_.direction = -1;
+    } else {
+        // Encoder response error
+        encoder_.set_error(Encoder::ERROR_NO_RESPONSE);
+        motor_.disarm();
+        return false;
+    }
+
+    // Check CPR
+    float elec_rad_per_enc = motor_.config_.pole_pairs * 2 * M_PI * (1.0f / (float)(encoder_.config_.cpr));
+    float expected_encoder_delta = encoder_.config_.calib_scan_distance / elec_rad_per_enc;
+    encoder_.calib_scan_response_ = std::abs(encoder_.shadow_count_ - init_enc_val);
+    if (std::abs(encoder_.calib_scan_response_ - expected_encoder_delta) / expected_encoder_delta > encoder_.config_.calib_range) {
+        encoder_.set_error(Encoder::ERROR_CPR_POLEPAIRS_MISMATCH);
+        motor_.disarm();
+        return false;
+    }
+
+    CRITICAL_SECTION() {
+        open_loop_controller_.target_vel_ = -encoder_.config_.calib_scan_omega;
+    }
+
+    // scan backwards
+    while ((requested_state_ == Axis::AXIS_STATE_UNDEFINED) && motor_.is_armed_) {
+        bool reached_target_dist = open_loop_controller_.total_distance_.any().value_or(INFINITY) <= 0.0f;
+        if (reached_target_dist) {
+            break;
+        }
+        encvaluesum += encoder_.shadow_count_;
+        num_steps++;
+        osDelay(1);
+    }
+
+    // Motor disarmed because of an error
+    if (!motor_.is_armed_) {
+        return false;
+    }
+
+    motor_.disarm();
+
+    encoder_.config_.phase_offset = encvaluesum / num_steps;
+    int32_t residual = encvaluesum - ((int64_t)encoder_.config_.phase_offset * (int64_t)num_steps);
+    encoder_.config_.phase_offset_float = (float)residual / (float)num_steps + 0.5f;  // add 0.5 to center-align state to phase
+
+    encoder_.is_ready_ = true;
+    return true;
+}
+
+bool Axis::update_encoder() {
+    const Encoder::RuntimeContext context{
+        motor_.config_.pole_pairs,
+        controller_.config_.circular_setpoint_range,
+        motor_.config_.motor_type,
+        calibrate_hall_phase_};
+    bool success = encoder_.update(context);
+    if (encoder_.mode_ == Encoder::MODE_HALL) {
+        if (sample_hall_states_) {
+            states_seen_count_[encoder_.hall_state_]++;
+        }
+        if (calibrate_hall_phase_ && encoder_.hall_count_.has_value()) {
+            int32_t hall_cnt = encoder_.hall_count_.value();
+            if (sample_hall_phase_ && last_hall_cnt_.has_value()) {
+                int mod_hall_cnt = mod(hall_cnt - last_hall_cnt_.value(), 6);
+                size_t edge_idx;
+                if (mod_hall_cnt == 0) { goto skip; }
+                else if (mod_hall_cnt == 1) {
+                    edge_idx = hall_cnt;
+                } else if (mod_hall_cnt == 5) {
+                    edge_idx = last_hall_cnt_.value();
+                } else {
+                    encoder_.set_error(Encoder::ERROR_ILLEGAL_HALL_STATE);
+                    return false;
+                }
+
+                auto maybe_phase = open_loop_controller_.phase_.any();
+                if (maybe_phase) {
+                    float phase = maybe_phase.value();
+                    hall_phase_calib_seen_count_[edge_idx]++;
+                    float& edge_phase = encoder_.config_.hall_edge_phcnt[edge_idx];
+                    if (hall_phase_calib_seen_count_[edge_idx] == 1)
+                        edge_phase = phase;
+                    else {
+                        edge_phase += (phase - edge_phase) / hall_phase_calib_seen_count_[edge_idx];
+                        edge_phase = wrap_pm_pi(edge_phase);
+                    }
+                }
+            }
+        skip:
+            last_hall_cnt_ = hall_cnt;
+            return true;
+        }
+    }
+    return success;
 }

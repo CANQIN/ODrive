@@ -163,10 +163,6 @@ extern const unsigned char fw_version_revision_;
 extern const unsigned char fw_version_unreleased_;
 }
 
-static Stm32Gpio get_gpio(size_t gpio_num) {
-    return (gpio_num < GPIO_COUNT) ? gpios[gpio_num] : GPIO_COUNT ? gpios[0] : Stm32Gpio::none;
-}
-
 // general system functions defined in main.cpp
 class ODrive : public ODriveIntf {
 public:

@@ -157,6 +157,12 @@ public:
     bool run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_armed,
                 std::function<bool(bool)> loop_cb = {} );
     bool run_closed_loop_control_loop();
+    bool update_encoder();
+    bool run_index_search();
+    bool run_direction_find();
+    bool run_hall_polarity_calibration();
+    bool run_hall_phase_calibration();
+    bool run_offset_calibration();
     bool run_homing();
     bool run_idle_loop();
 
@@ -204,6 +210,15 @@ public:
     AxisState& current_state_ = task_chain_.front();
     Homing_t homing_;
     CAN_t can_;
+
+
+    // Hall 校准采样状态，由轴负责统计和应用。
+    std::optional<uint8_t> last_hall_cnt_ = std::nullopt; // Used to find hall edges for calibration
+    bool calibrate_hall_phase_ = false;
+    bool sample_hall_states_ = false;
+    bool sample_hall_phase_ = false;
+    std::array<int, 8> states_seen_count_; // for hall polarity calibration
+    std::array<int, 6> hall_phase_calib_seen_count_;
 
 
     // watchdog

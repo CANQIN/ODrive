@@ -429,7 +429,7 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
         }
 
         MEASURE_TIME(axis.task_times_.encoder_update)
-            axis.encoder_.update();
+            axis.update_encoder();
     }
 
     // Controller of either axis might use the encoder estimate of the other

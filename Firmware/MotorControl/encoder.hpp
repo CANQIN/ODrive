@@ -3,7 +3,7 @@
 
 class Encoder;
 
-#include <board.h> // needed for arm_math.h
+#include <tim.h>
 #include <Drivers/STM32/stm32_spi_arbiter.hpp>
 #include "utils.hpp"
 #include <autogen/interfaces.hpp>
@@ -54,6 +54,20 @@ public:
         void set_bandwidth(float value) { bandwidth = value; parent->update_pll_gains(); }
     };
 
+    // 上层提供运行参数；采样解码和 PLL 不访问 Axis。
+    struct RuntimeContext {
+        int32_t pole_pairs;
+        float circular_setpoint_range;
+        ODriveIntf::MotorIntf::MotorType motor_type;
+        bool hall_phase_calibration;
+    };
+    enum class Event { error, reference_acquired, configuration_failed };
+    using EventHandler = void (*)(void*, Event);
+    void set_event_handler(EventHandler handler, void* context) {
+        event_handler_ = handler;
+        event_context_ = context;
+    }
+
     Encoder(TIM_HandleTypeDef* timer, Stm32Gpio index_gpio,
             Stm32Gpio hallA_gpio, Stm32Gpio hallB_gpio, Stm32Gpio hallC_gpio,
             Stm32SpiArbiter* spi_arbiter);
@@ -72,16 +86,11 @@ public:
     void set_circular_count(int32_t count, bool update_offset);
     bool calib_enc_offset(float voltage_magnitude);
 
-    bool run_index_search();
-    bool run_direction_find();
-    bool run_hall_polarity_calibration();
-    bool run_hall_phase_calibration();
-    bool run_offset_calibration();
     void sample_now();
     bool read_sampled_gpio(Stm32Gpio gpio);
     void decode_hall_samples();
     int32_t hall_model(float internal_pos);
-    bool update();
+    bool update(const RuntimeContext& context);
 
     TIM_HandleTypeDef* timer_;
     Stm32Gpio index_gpio_;
@@ -89,7 +98,6 @@ public:
     Stm32Gpio hallB_gpio_;
     Stm32Gpio hallC_gpio_;
     Stm32SpiArbiter* spi_arbiter_;
-    Axis* axis_ = nullptr; // set by Axis constructor
 
     Config_t config_;
 
@@ -123,12 +131,7 @@ public:
     uint16_t port_samples_[sizeof(ports_to_sample) / sizeof(ports_to_sample[0])];
     // Updated by low_level pwm_adc_cb
     uint8_t hall_state_ = 0x0; // bit[0] = HallA, .., bit[2] = HallC
-    std::optional<uint8_t> last_hall_cnt_ = std::nullopt; // Used to find hall edges for calibration
-    bool calibrate_hall_phase_ = false;
-    bool sample_hall_states_ = false;
-    bool sample_hall_phase_ = false;
-    std::array<int, 8> states_seen_count_; // for hall polarity calibration
-    std::array<int, 6> hall_phase_calib_seen_count_;
+    std::optional<uint8_t> hall_count_; // 当前采样解码后的有效 Hall 状态
 
     float sincos_sample_s_ = 0.0f;
     float sincos_sample_c_ = 0.0f;
@@ -149,6 +152,19 @@ public:
         return 1.0f / 3600.0f;
     }
 
+private:
+    void sample_incremental();
+    void update_incremental(int32_t& delta_enc);
+    void sample_hall();
+    bool update_hall(int32_t& delta_enc);
+    void sample_sincos();
+    void update_sincos(int32_t& delta_enc);
+    void setup_spi();
+    bool update_spi(int32_t& delta_enc, int32_t pos_abs_latched);
+    void emit_event(Event event);
+    EventHandler event_handler_ = nullptr;
+    void* event_context_ = nullptr;
+    ODriveIntf::MotorIntf::MotorType motor_type_ = ODriveIntf::MotorIntf::MOTOR_TYPE_HIGH_CURRENT;
 };
 
 #endif // __ENCODER_HPP
