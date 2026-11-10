@@ -1,5 +1,6 @@
 
 #include "encoder.hpp"
+#include "pll.hpp"
 #include <board.h>
 #include <Drivers/STM32/stm32_system.h>
 
@@ -95,8 +96,9 @@ void Encoder::set_idx_subscribe(bool override_enable) {
 }
 
 void Encoder::update_pll_gains() {
-    pll_kp_ = 2.0f * config_.bandwidth;  // basic conversion to discrete time
-    pll_ki_ = 0.25f * (pll_kp_ * pll_kp_); // Critically damped
+    const PllGains gains = pll_gains_from_bandwidth(config_.bandwidth);
+    pll_kp_ = gains.kp;
+    pll_ki_ = gains.ki;
 
     // Check that we don't get problems with discrete time approximation
     if (!(current_meas_period * pll_kp_ < 1.0f)) {
@@ -203,8 +205,12 @@ bool Encoder::update(const RuntimeContext& context) {
 
     //// run pll (for now pll is in units of encoder counts)
     // Predict current pos
-    pos_estimate_counts_ += current_meas_period * vel_estimate_counts_;
-    pos_cpr_counts_      += current_meas_period * vel_estimate_counts_;
+    const PllState linear_prediction = pll_predict(
+        {pos_estimate_counts_, vel_estimate_counts_}, current_meas_period);
+    const PllState circular_prediction = pll_predict(
+        {pos_cpr_counts_, vel_estimate_counts_}, current_meas_period);
+    pos_estimate_counts_ = linear_prediction.position;
+    pos_cpr_counts_ = circular_prediction.position;
     // Encoder model
     auto encoder_model = [this](float internal_pos)->int32_t {
         if (config_.mode == MODE_HALL)
@@ -218,10 +224,16 @@ bool Encoder::update(const RuntimeContext& context) {
     delta_pos_cpr_counts = wrap_pm(delta_pos_cpr_counts, (float)(config_.cpr));
     delta_pos_cpr_counts_ += 0.1f * (delta_pos_cpr_counts - delta_pos_cpr_counts_); // for debug
     // pll feedback
-    pos_estimate_counts_ += current_meas_period * pll_kp_ * delta_pos_counts;
-    pos_cpr_counts_ += current_meas_period * pll_kp_ * delta_pos_cpr_counts;
+    const PllGains gains = {pll_kp_, pll_ki_};
+    const PllState linear_result = pll_correct(
+        linear_prediction, delta_pos_counts, gains, current_meas_period);
+    const PllState circular_result = pll_correct(
+        circular_prediction, delta_pos_cpr_counts, gains, current_meas_period);
+    pos_estimate_counts_ = linear_result.position;
+    pos_cpr_counts_ = circular_result.position;
     pos_cpr_counts_ = fmodf_pos(pos_cpr_counts_, (float)(config_.cpr));
-    vel_estimate_counts_ += current_meas_period * pll_ki_ * delta_pos_cpr_counts;
+    // 两个位置共享速度，速度只由圈内位置误差校正。
+    vel_estimate_counts_ = circular_result.velocity;
     bool snap_to_zero_vel = false;
     if (std::abs(vel_estimate_counts_) < 0.5f * current_meas_period * pll_ki_) {
         vel_estimate_counts_ = 0.0f;  //align delta-sigma on zero to prevent jitter

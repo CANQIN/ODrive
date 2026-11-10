@@ -1,5 +1,6 @@
 
 #include "sensorless_estimator.hpp"
+#include "pll.hpp"
 #include "utils.hpp"
 
 void SensorlessEstimator::reset() {
@@ -21,14 +22,11 @@ bool SensorlessEstimator::update(const Input& input, const MotorModel& motor, fl
     // once by the FOC voltage reporting (input.voltage_feedback), and once by V_alpha_beta_memory.
 
     // PLL
-    // TODO: the PLL part has some code duplication with the encoder PLL
     // Pll gains as a function of bandwidth
-    float pll_kp = 2.0f * config_.pll_bandwidth;
-    // Critically damped
-    float pll_ki = 0.25f * (pll_kp * pll_kp);
+    const PllGains gains = pll_gains_from_bandwidth(config_.pll_bandwidth);
 
     // Check that we don't get problems with discrete time approximation
-    if (!(dt * pll_kp < 1.0f)) {
+    if (!(dt * gains.kp < 1.0f)) {
         error_ |= ERROR_UNSTABLE_GAIN;
         reset(); // Reset state for when the next valid current measurement comes in.
         return false;
@@ -78,21 +76,20 @@ bool SensorlessEstimator::update(const Input& input, const MotorModel& motor, fl
     V_alpha_beta_memory_[0] = input.voltage_feedback.alpha;
     V_alpha_beta_memory_[1] = input.voltage_feedback.beta;
 
-    float phase_vel = phase_vel_.previous().value_or(0.0f);
-
     // predict PLL phase with velocity
-    pll_pos_ = wrap_pm_pi(pll_pos_ + dt * phase_vel);
+    PllState predicted = pll_predict(
+        {pll_pos_, phase_vel_.previous().value_or(0.0f)}, dt);
+    predicted.position = wrap_pm_pi(predicted.position);
     // update PLL phase with observer permanent magnet phase
     float phase = fast_atan2(eta[1], eta[0]);
-    float delta_phase = wrap_pm_pi(phase - pll_pos_);
-    pll_pos_ = wrap_pm_pi(pll_pos_ + dt * pll_kp * delta_phase);
-    // update PLL velocity
-    phase_vel += dt * pll_ki * delta_phase;
+    float delta_phase = wrap_pm_pi(phase - predicted.position);
+    const PllState result = pll_correct(predicted, delta_phase, gains, dt);
+    pll_pos_ = wrap_pm_pi(result.position);
 
     // set outputs
     phase_ = phase;
-    phase_vel_ = phase_vel;
-    vel_estimate_ = phase_vel / (std::max((float)motor.pole_pairs, 1.0f) * 2.0f * M_PI);
+    phase_vel_ = result.velocity;
+    vel_estimate_ = result.velocity / (std::max((float)motor.pole_pairs, 1.0f) * 2.0f * M_PI);
 
     return true;
 };
