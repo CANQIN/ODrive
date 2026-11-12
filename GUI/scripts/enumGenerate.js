@@ -2,18 +2,16 @@ const fs = require('fs');
 const path = require('path');
 
 
-fs.readFile(path.resolve(__dirname,'..','..','tools','odrive','enums.py'), 'utf8', function(err, data) {
+const enumsPath = process.env.ODRIVE_ENUMS_PATH || path.resolve(__dirname, '..', '..', 'tools', 'odrive', 'enums.py');
+fs.readFile(enumsPath, 'utf8', function(err, data) {
     if (err) throw err;
     let enumsString = data;
-    let lines = enumsString.split(process.platform == 'win32' ? '\r\n' : '\n');
+    let lines = enumsString.split(/\r?\n/);
     let enums = {};
     for (const line of lines) {
-        if (line != '' && line[0] != '#') {
-            let name;
-            let value;
-            name = line.split('=')[0];
-            value = line.split('=')[1];
-            enums[name.trim()] = parseInt(value.trim());
+        const constant = line.match(/^([A-Z][A-Z0-9_]*)\s*=\s*(0x[0-9a-fA-F]+|-?\d+)\s*(?:#.*)?$/);
+        if (constant) {
+            enums[constant[1]] = Number(constant[2]);
         }
     }
     fs.writeFile(path.resolve(__dirname, '../src/assets/odriveEnums.json'), JSON.stringify(enums, null, 4), function(err) {

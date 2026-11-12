@@ -6,6 +6,7 @@ import fibre
 import odrive
 import odrive.enums
 from odrive.utils import *
+from odrive.pyfibre.shell import launch_shell as launch_fibre_shell
 
 def print_banner():
     print("Website: https://odriverobotics.com/")
@@ -88,7 +89,7 @@ def launch_shell(args, logger):
             return ("device " + serial_number_str, "dev")
         return ("ODrive " + serial_number_str, "odrv")
 
-    fibre.launch_shell(args, mount,
+    launch_fibre_shell(args, mount,
                        interactive_variables,
                        print_banner, print_help,
                        logger)

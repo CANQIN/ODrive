@@ -1,37 +1,13 @@
-FROM ubuntu:bionic
+FROM ubuntu:22.04
 
-# Prepare the build environment and dependencies
-RUN \
-	set -x && \
-	apt-get update && \
-	apt-get -y install software-properties-common && \
-	add-apt-repository ppa:team-gcc-arm-embedded/ppa && \
-	add-apt-repository ppa:jonathonf/tup && \
-	apt-get update && \
-	apt-get -y upgrade && \
-	apt-get -y install gcc-arm-embedded openocd tup python3.7 python3-yaml python3-jinja2 python3-jsonschema build-essential git time && \
-	# Build step below does not know about debian's python naming schemme
-	ln -s /usr/bin/python3.7 /usr/bin/python && \
-	mkdir -p ODrive
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi \
+      libstdc++-arm-none-eabi-newlib cmake ninja-build build-essential git \
+      python3 python3-yaml python3-jinja2 python3-jsonschema && \
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR ODrive/Firmware
+WORKDIR /ODrive
 
-# Must attach the firmware tree into the container
-CMD \
-	# Regenerate autogen/version.c
-	mkdir -p autogen && \
-	python ../tools/odrive/version.py \
-	--output autogen/version.c && \
-	# Regenerate python interface
-	python interface_generator_stub.py \
-	--definitions odrive-interface.yaml \
-	--template ../tools/enums_template.j2 \
-	--output ../tools/odrive/enums.py && \
-	python interface_generator_stub.py \
-	--definitions odrive-interface.yaml \
-	--template ../tools/arduino_enums_template.j2 \
-	--output ../Arduino/ODriveArduino/ODriveEnums.h && \
-	# Hack around Tup's dependency on FUSE
-	tup init && \
-	tup generate build.sh && \
-	./build.sh
+# 将完整仓库挂载到 /ODrive；这里只构建，不连接或烧录设备。
+CMD ["sh", "-c", "cmake -S . -B build -G Ninja -DODRIVE_BUILD_HOST=OFF -DPython3_EXECUTABLE=/usr/bin/python3 && cmake --build build --target firmware --parallel"]

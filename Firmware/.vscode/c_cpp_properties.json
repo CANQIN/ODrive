@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ThirdParty/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                "${workspaceFolder}/fibre-cpp/include"
+                "${workspaceFolder}/../packages/fibre/include"
             ],
             "compilerPath": "${workspaceFolder}/../.tools/gcc-arm-none-eabi-9-2019-q4-major/bin/arm-none-eabi-g++.exe",
             "intelliSenseMode": "gcc-arm",
@@ -41,7 +41,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ThirdParty/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                "${workspaceFolder}/fibre-cpp/include"
+                "${workspaceFolder}/../packages/fibre/include"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -77,7 +77,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ThirdParty/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                "${workspaceFolder}/fibre-cpp/include"
+                "${workspaceFolder}/../packages/fibre/include"
             ],
             "intelliSenseMode": "gcc-arm",
             "defines": [

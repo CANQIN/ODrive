@@ -18,232 +18,87 @@ The project is under active development, so make sure to check the `Changelog <h
 
 .. _dev-prereq:
 
-Prerequisites
+构建依赖
 -------------------------------------------------------------------------------
 
-The recommended tools for ODrive development are:
+统一构建入口位于仓库根目录，使用 CMake 3.20 或更新版本和 Ninja。
+固件交叉编译需要 ARM GNU 工具链；默认主机 SDK 构建还需要本机 C/C++ 编译器。
+Python 3.10 及 ``scripts/requirements-build.txt`` 中的依赖用于接口和版本生成。
 
- * **make**: Used to invoke tup
- * **Tup**: The build system used to invoke the compile commands
- * **ARM GNU Compiler**: For cross-compiling code
- * **ARM GDB**: For debugging the code and stepping through on the device
- * **OpenOCD**: For flashing the ODrive with the STLink/v2 programmer
- * **Python 3**, along with the packages :code:`PyYAML`, :code:`Jinja2` and :code:`jsonschema`: For running the Python tools (:code:`odrivetool`). Also required for compiling firmware.
+.. code:: bash
 
-See below for specific installation instructions for your OS.
-
-Depending on what you're gonna do, you may not need all of the components.
-
-Once you have everything, you can verify the correct installation by running:
-
-.. code:: Bash
-
+  cmake --version
+  ninja --version
   arm-none-eabi-gcc --version
-  arm-none-eabi-gdb --version
-  openocd --version             # should be 0.10.0 or later
-  tup --version                 # should be 0.7.5 or later
-  python --version              # should be 3.7 or later
+  python -m pip install -r scripts/requirements-build.txt
 
-**Installing Prerequisites**
+工具链可放在 ``PATH`` 中，也可通过 ``ARM_TOOLCHAIN_DIR`` 指定工具链根目录或 ``bin`` 目录。
+OpenOCD、ARM GDB 和 ST-Link 驱动用于用户主动发起的烧录或调试，不是默认构建依赖。
 
-.. tabs::
-  .. tab:: Linux (Ubuntu < 20.04)
-
-    .. code:: Bash
-      
-      sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
-
-    .. code:: Bash
-      
-      sudo apt-get update
-
-    .. code:: Bash
-      
-      sudo apt-get install gcc-arm-embedded
-
-    .. code:: Bash
-      
-      sudo apt-get install openocd
-
-    .. code:: Bash
-      
-      sudo apt-get install git-lfs
-
-    .. code:: Bash
-      
-      sudo add-apt-repository ppa:jonathonf/tup && sudo apt-get update && sudo apt-get install tup
-
-    .. code:: Bash
-      
-      sudo apt-get install python3 python3-yaml python3-jinja2 python3-jsonschema
-
-  .. tab:: Linux (Ubuntu >= 20.04)
-
-    .. code:: Bash
-      
-      sudo apt install gcc-arm-none-eabi
-
-    .. code:: Bash
-      
-      sudo apt install openocd
-
-    .. code:: Bash
-      
-      sudo apt install git-lfs
-
-    .. code:: Bash
-      
-      sudo apt install tup
-
-    .. code:: Bash
-      
-      sudo apt install python3 python3-yaml python3-jinja2 python3-jsonschema
-
-  .. tab:: Arch Linux
-
-    .. code:: Bash
-      
-      sudo pacman -S arm-none-eabi-gcc arm-none-eabi-binutils
-
-    .. code:: Bash
-      
-      sudo pacman -S arm-none-eabi-gdb
-
-    .. code:: Bash
-      
-      sudo pacman -S git-lfs
-
-    .. code:: Bash
-      
-      sudo pacman -S tup
-
-    .. code:: Bash
-      
-      sudo pacman -S python python-yaml python-jinja python-jsonschema
-
-    * `OpenOCD AUR package <https://aur.archlinux.org/packages/openocd/>`__
-
-  .. tab:: Mac
-    First install `Homebrew <https://brew.sh/>`__ Then you can run these commands in Terminal:
-
-    .. code:: Bash
-      
-      brew install armmbed/formulae/arm-none-eabi-gcc
-
-    .. code:: Bash
-      
-      brew install --cask osxfuse && brew install tup
-
-    .. code:: Bash
-      
-      brew install openocd
-
-    .. code:: Bash
-      
-      brew install git-lfs
-
-    .. code:: Bash
-      
-      pip3 install PyYAML Jinja2 jsonschema
-
-  .. tab:: Windows
-
-    .. note:: make sure these programs are not only installed but also added to your `PATH`.
-
-    Some instructions in this document may assume that you're using a bash command prompt, such as the Windows 10 built-in bash or `Git <https://git-scm.com/download/win>`__ bash.
-
-    * `ARM compiler <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__
-
-      .. note:: 
-
-        After installing, create an environment variable named `ARM_GCC_ROOT` whose value is the path you installed to.  e.g. :code:`C:\Program Files (x86)\GNU Tools Arm Embedded\7 2018-q2-update`.  
-        This variable is used to locate include files for the c/c++ Visual Studio Code extension.
-
-      .. note:: 8-2018-q4-major seems to have a bug on Windows.  Please use 7-2018-q2-update.
-    * `Tup <http://gittup.org/tup/index.html>`__
-    * `GNU MCU Eclipse's Windows Build Tools <https://github.com/gnu-mcu-eclipse/windows-build-tools/releases>`__
-    * `Python 3 <https://www.python.org/downloads/>`__
-      * Install Python packages: :code:`pip install PyYAML Jinja2 jsonschema`
-    * `OpenOCD <https://github.com/xpack-dev-tools/openocd-xpack/releases/>`__
-    * `ST-Link/V2 Drivers <https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-utilities/stsw-link009.html>`__
-
-
-Windows PowerShell build
+Windows PowerShell 构建
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This checkout includes a portable build setup for Windows. Install Python 3.10
-with the Python launcher, Git, and Windows ``curl.exe``, then run these commands
-from the repository root:
+先安装 CMake、Ninja、本机 C/C++ 编译器及带 Python launcher 的 Python 3.10。
+在仓库根目录运行：
 
 .. code:: powershell
 
   .\scripts\setup-build-env.ps1
   .\build.ps1 -BoardVersion v3.6-56V
 
-After setup, open the repository root in VSCode and press ``Ctrl+Shift+B`` to run
-the default ``ODrive: Build Firmware`` task (also available under
-``Terminal > Run Build Task``). Opening ``ODrive_Workspace.code-workspace`` or the
-``Firmware`` folder uses the firmware folder's default ``build`` task instead.
-Both invoke the same script and use the current ``Firmware/tup.config``.
-Compiler output appears in the integrated terminal and GCC errors are collected
-in the Problems panel with links to source locations.
-
-Alternatively, double-click ``build.bat`` in the repository root. The window
-displays the result and waits for a key before closing. Command-line arguments
-are forwarded to ``build.ps1``.
-
-The setup downloads ARM GCC 9-2019-q4-major and Tup v0.8-38-gc6f565e2 from
-their official servers, verifies the archive SHA256 hashes, and installs pinned
-Python build dependencies in ``.venv``. Tools are stored in ``.tools``; both
-directories are ignored by Git. The default Python package index is the Tsinghua
-PyPI mirror. To use another index or Python executable:
+环境脚本检查 CMake 和 Ninja，下载并校验 ARM GCC 9-2019-q4-major，
+在 ``.venv`` 中安装接口生成依赖。脚本不再安装旧构建系统。
+指定 Python 或包索引时可使用：
 
 .. code:: powershell
 
   .\scripts\setup-build-env.ps1 -Python D:\Python\Python310\python.exe -IndexUrl https://pypi.org/simple
 
-``build.ps1`` uses the standalone Tup batch generation flow from the Windows CI
-configuration, so GNU Make is not required. It rebuilds all firmware sources and
-stops at the first failed command. It creates ``Firmware/tup.config`` for
-``v3.6-56V`` with ``CONFIG_DEBUG=false`` and ``CONFIG_USE_LTO=false`` if that file
-does not exist. Later runs preserve the configuration; ``-BoardVersion`` updates
-only the board selection. Other compile settings can be edited in that file.
+``build.ps1`` 调用根 CMake，不删除已有生成文件。默认输出目录为 ``build/``，
+可通过 ``-BuildDirectory`` 更换，通过 ``-Configuration Debug`` 选择调试配置。
+``-Target firmware`` 只构建固件，默认 ``all`` 构建启用的所有目标。
+VSCode 根目录或 Firmware 目录的默认构建任务都使用此入口；构建日志位于 ``build/build.log``。
 
-The outputs are ``Firmware/build/ODriveFirmware.elf``, ``.hex``, ``.bin``, and
-``.map``. Compiler output is saved to ``Firmware/build/build.log``. The VSCode
-``build`` task invokes this script on Windows, and the Windows C/C++ configuration
-uses the local ARM compiler for IntelliSense. This entry point builds firmware;
-host tools and CAN DBC generation remain separate targets in the Makefile.
-
-Firmware version generation uses Git tags. If this fork has no firmware tags,
-retrieve the upstream tag used by this checkout before building:
-
-.. code:: powershell
-
-  git fetch --no-tags https://github.com/odriverobotics/ODrive.git tag fw-v0.5.6
-
-
-Configuring the Build
+配置与产物
 --------------------------------------------------------------------------------
 
-To customize the compile time parameters, copy or rename the file :code:`Firmware/tup.config.default` to :code:`Firmware/tup.config` and edit the following parameters in that file:
+在仓库根目录执行：
 
-* **CONFIG_BOARD_VERSION** The board version you're using. Can be `v3.1`, `v3.2`, `v3.3`, `v3.4-24V`, `v3.4-48V`, `v3.5-24V`, `v3.5-48V`, etc. Check for a label on the upper side of the ODrive to find out which version you have. 
-  Some ODrive versions don't specify the voltage: in that case you can read the value of the main capacitors: 120uF are 48V ODrives, 470uF are 24V ODrives.
+.. code:: bash
 
-* **CONFIG_DEBUG** Defines whether debugging will be enabled when compiling the firmware; specifically the :code:`-g -gdwarf-2` flags. 
-  Note that printf debugging will only function if your tup.config specifies the :code:`USB_PROTOCOL` or :code:`UART_PROTOCOL` as stdout and :code:`DEBUG_PRINT` is defined. 
-  See the IDE specific documentation for more information.
+  cmake -S . -B build -G Ninja -DODRIVE_BOARD_VERSION=v3.6-56V -DCMAKE_BUILD_TYPE=Release
+  cmake --build build --parallel
 
-You can also modify the compile-time defaults for all :code:`.config` parameters. 
-You will find them if you search for :code:`AxisConfig`, :code:`MotorConfig`, etc.
+默认同时启用固件和主机 SDK。两个子工程使用不同编译器与构建目录：
+
+* 固件：``build/firmware/ODriveFirmware.{elf,hex,bin,map}``。
+* 主机 SDK：``build/host/install/``。
+* Python 和 Arduino 枚举：``build/generated/python/``、``build/generated/arduino/``。
+
+常用选项：
+
+* ``ODRIVE_BUILD_FIRMWARE``、``ODRIVE_BUILD_HOST``：默认 ``ON``，按需关闭某一侧。
+* ``ODRIVE_BOARD_VERSION``：默认 ``v3.6-56V``，支持原有 v3 系列板型。
+  v4 板型需要未随公开仓库提供的 ``Private`` 配置，缺失时配置阶段明确报错。
+* ``CMAKE_BUILD_TYPE``：``Release`` 或 ``Debug``。
+* ``ODRIVE_USE_LTO``、``ODRIVE_STRICT``：默认 ``OFF``，分别控制链接优化与警告视为错误。
+* ``ARM_TOOLCHAIN_DIR``、``Python3_EXECUTABLE``：显式选择 ARM 工具链和 Python。
+* ``ODRIVE_BUILD_TOOLS``、``ODRIVE_BUILD_GUI``：默认 ``OFF``；启用后提供 ``tools``、
+  ``gui_web``、``gui_package`` 可选目标。
+
+``interfaces`` 目标生成供主机工具和 GUI 使用的枚举，写入构建目录。
+``tools`` 打包本轮 SDK 和 ODrive Python 工具；GUI 构建参见 ``GUI/README.md``。
+这些目标不运行服务、不连接或烧录设备。
+
+容器构建使用根 Dockerfile，需要把完整仓库挂载到 ``/ODrive``。
+固件版本由 Git 标签生成，缺少本分支所需固件标签时应先取得对应标签。
 
 .. _build-and-flash:
 
-Building and Flashing the Firmware
+构建与手动烧录
 --------------------------------------------------------------------------------
 
-#. Run :code:`make` in the :code:`Firmware` directory.
+#. 在仓库根目录执行 :code:`cmake --build build --target firmware`。
 #. Connect the ODrive via USB and power it up.
 #. Flash the firmware using :ref:`odrivetool dfu <firmware-update>`.
 
@@ -257,7 +112,16 @@ Flashing using an STLink/v2
   .. note:: Always plug in `GND` first!
 
 * You need to power the board by only **ONE** of the following: VCC(3.3v), 5V, or the main power connection (the DC bus). The USB port (J1) does not power the board.
-* Run :code:`make flash` in the :code:`Firmware` directory.
+* 构建不会自动烧录。使用 OpenOCD 手动指定 ``build/firmware/ODriveFirmware.elf``，或使用下述 DFU 工具。
+
+在仓库根目录手动烧录 v3 板型：
+
+.. code:: bash
+
+  openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program {build/firmware/ODriveFirmware.elf} verify reset exit"
+
+需要选择特定 ST-Link 时，在目标配置前增加 ``-c "hla_serial <序列号>"``。
+v4 板型使用 ``target/stm32f7x.cfg``，并在 ``program`` 命令前增加 ``-c "reset_config none separate"``。
 
 .. note:: If you receive the error `can't find target interface/stlink-v2.cfg` or similar, create and set an environment variable named :code:`OPENOCD_SCRIPTS` to the location of the openocd scripts directory.
 
@@ -277,7 +141,7 @@ Open the ODrive_Workspace.code-workspace file, and start a debugging session (F5
 VSCode will pick up the correct settings from the workspace and automatically connect.  
 Breakpoints can be added graphically in VSCode.
 
-* Run :code:`make gdb`. This will reset and halt at program start. Now you can set breakpoints and run the program. If you know how to use gdb, you are good to go.
+* 手动使用 :code:`arm-none-eabi-gdb build/firmware/ODriveFirmware.elf`，或选择 VSCode 中相应的 Cortex-Debug 配置。
 
 Setting up an IDE
 --------------------------------------------------------------------------------
@@ -361,7 +225,7 @@ Troubleshooting
 :code:`LIBUSB_ERROR_IO` when flashing with the STLink/v2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Problem:** when I try to flash the ODrive with the STLink using :code:`make flash` I get this error:
+**Problem:** when I try to flash the ODrive with the STLink using OpenOCD 手动烧录命令 I get this error:
 
 .. code:: Bash
 
@@ -389,12 +253,12 @@ This happens from time to time.
 #. Power off the ODrive you're trying to flash
 #. Plug in the STLink into your computer
 #. Power on the ODrive
-#. Run :code:`make flash` again
+#. Run OpenOCD 手动烧录命令 again
 
 :code:`Cannot identify target as a STM32 family` when flashing using openocd
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Problem:** When I try to flash ODrive v4.1 with :code:`make flash` then I get:
+**Problem:** When I try to flash ODrive v4.1 with OpenOCD 手动烧录命令 then I get:
 
 .. code:: Bash
 
@@ -442,21 +306,20 @@ Documentation
 
 .. _modifying-libfibre:
 
-Modifying libfibre
+修改 Fibre SDK
 --------------------------------------------------------------------------------
 
-If you need to modify libfibre add :code:`CONFIG_BUILD_LIBFIBRE=true` to your tup.config and rerun :code:`make`. 
-After this you can start :code:`odrivetool` (on your local PC) and it will use the updated libfibre.
+平台无关 SDK 位于 ``packages/fibre/``。修改后通过统一入口重建：
 
-To cross-compile libfibre for the Raspberry Pi, run :code:`make libfibre-linux-armhf` or :code:`make libfibre-all`. 
-This will require a docker container. See ;:ref:`fibre-cpp readme <../Firmware/fibre-cpp/README.md>` for details.
+.. code:: bash
 
-.. code:: Bash
+  cmake -S . -B build -G Ninja
+  cmake --build build --parallel
 
-  docker run -it -v "$(pwd)":/build -v /tmp/build:/build/build -w /build fibre-compiler configs/linux-armhf.config
-
-If you're satisfied with the changes don't forget to generate binaries for all
-supported systems using :code:`make libfibre-all`.
+主机库安装到 ``build/host/install/``。Python 客户端使用应用提供的传输实现，
+原生库路径通过 ``FIBRE_LIBRARY_PATH`` 指定；MCU 通过收发接口和端点实现接入。
+独立 SDK 的接入细节参见 ``packages/fibre/README.md``。
+跨平台库需使用目标平台的工具链单独构建，不使用固件的 ARM 构建目录。
 
 Releases
 --------------------------------------------------------------------------------
@@ -466,8 +329,7 @@ We use GitHub Releases to provide firmware releases.
 #. Cut off the changelog to reflect the new release
 #. Merge the release candidate into master.
 #. Push a (lightweight) tag to the master branch. Follow the existing naming convention.
-#. If you changed something in libfibre, regenerate the binaries using :code:`make libfibre-all`. 
-   See :ref:`Modifying libfibre <modifying-libfibre>` for details.
+#. 修改 Fibre 后，使用各目标平台工具链构建 SDK 及应用适配，见 :ref:`修改 Fibre SDK <modifying-libfibre>`。
 #. Push the python tools to PyPI (see setup.py for details).
 #. Edit the release on GitHub to add a title and description (copy&paste from changelog).
 

@@ -6,6 +6,21 @@ Firmware for the new generation of ODrives ([ODrive Pro](https://odriverobotics.
 
 ## Overview
 
+### 本地统一构建
+
+工程入口为根目录 CMake，固件与上位机使用不同工具链和构建目录：
+
+```sh
+cmake -S . -B build -G Ninja -DARM_TOOLCHAIN_DIR=/path/to/arm-gcc -DPython3_EXECUTABLE=/path/to/python
+cmake --build build --parallel
+```
+
+默认构建 `firmware` 和 `host`：固件输出在 `build/firmware/`，新 Fibre 客户端安装在 `build/host/install/`。`tools` 通过包外 PyUSB 适配使用该客户端，GUI 继续调用 tools 的应用接口。固件与 tools 共用 [独立 Fibre 包](packages/fibre/README.md)。
+
+`ODRIVE_BOARD_VERSION` 默认 `v3.6-56V`。按需启用 `ODRIVE_BUILD_TOOLS` 生成 Python 分发包，启用 `ODRIVE_BUILD_GUI` 提供 `gui_web`、`gui_package`；GUI 依赖可通过 `gui_dependencies` 安装。打包文件写入 `build/dist/`，原生库对应本次 PC 工具链。
+
+具体配置见 [开发指南](docs/developer-guide.rst)。
+
 ![ODrive Logo](https://static1.squarespace.com/static/58aff26de4fcb53b5efd2f02/t/59bf2a7959cc6872bd68be7e/1505700483663/Odrive+logo+plus+text+black.png?format=1000w)
 
 This project is all about accurately driving brushless motors, for cheap. The aim is to make it possible to use inexpensive brushless motors in high performance robotics projects, like [this](https://www.youtube.com/watch?v=WT4E5nb3KtY).

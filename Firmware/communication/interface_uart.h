@@ -21,7 +21,7 @@ void uart_poll(void);
 
 
 #ifdef __cplusplus
-#include <fibre/../../stream_utils.hpp>
+#include <fibre/stream_utils.hpp>
 extern fibre::BufferedStreamSink<64> uart0_stdout_sink;
 extern bool uart0_stdout_pending;
 #endif

@@ -5,6 +5,7 @@ import math
 import time
 import sys
 import threading
+from pathlib import Path
 import fibre
 import odrive
 from odrive.enums import *
@@ -201,15 +202,24 @@ class TestFlashAndErase(ODriveTest):
     def __init__(self):
         ODriveTest.__init__(self, exclusive=True)
     def run_test(self, odrv_ctx: ODriveTestContext, logger):
-        # Set board-version and compile
-        with open("tup.config", mode="w") as tup_config:
-            tup_config.write("CONFIG_STRICT=true\n")
-            tup_config.write("CONFIG_BOARD_VERSION={}\n".format(odrv_ctx.yaml['board-version']))
-        #exit(1)
-        run("make", logger, timeout=10)
-        run("make flash PROGRAMMER='" + odrv_ctx.yaml['programmer'] + "'", logger, timeout=20)
-        # FIXME: device does not reboot correctly after erasing config this way
-        #run("make erase_config PROGRAMMER='" + test_rig.programmer + "'", timeout=10)
+        # 使用独立的 CMake 构建目录，避免覆盖开发者的构建配置。
+        repository = Path(__file__).resolve().parents[3]
+        board = odrv_ctx.yaml['board-version']
+        build = repository / 'build' / 'test-rig' / board
+        run(shlex.join(['cmake', '-S', str(repository), '-B', str(build), '-G', 'Ninja',
+                        '-DODRIVE_BUILD_HOST=OFF', '-DODRIVE_STRICT=ON',
+                        '-DODRIVE_BOARD_VERSION=' + board,
+                        '-DPython3_EXECUTABLE=' + sys.executable]), logger, timeout=60)
+        run(shlex.join(['cmake', '--build', str(build), '--target', 'firmware',
+                        '--parallel']), logger, timeout=300)
+        programmer = ['-c', 'hla_serial ' + odrv_ctx.yaml['programmer']]
+        target = 'stm32f4x.cfg' if board.startswith('v3.') else 'stm32f7x.cfg'
+        reset = [] if board.startswith('v3.') else ['-c', 'reset_config none separate']
+        firmware = (build / 'firmware' / 'ODriveFirmware.elf').as_posix()
+        run(shlex.join(['openocd', '-f', 'interface/stlink.cfg'] + programmer +
+                       ['-f', 'target/' + target] + reset +
+                       ['-c', 'program {' + firmware + '} verify reset exit']),
+            logger, timeout=20)
 
         logger.debug("waiting for ODrive...")
         odrv_ctx.rediscover()

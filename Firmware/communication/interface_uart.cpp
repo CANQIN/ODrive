@@ -6,7 +6,8 @@
 #include <MotorControl/utils.hpp>
 
 #include <fibre/async_stream.hpp>
-#include <fibre/../../legacy_protocol.hpp>
+#include <fibre/legacy_protocol.hpp>
+#include <fibre/protocol.hpp>
 #include <usart.h>
 #include <cmsis_os.h>
 #include <freertos_vars.h>
@@ -108,7 +109,7 @@ void Stm32UartRxStream::did_receive(uint8_t* buffer, size_t length) {
 Stm32UartTxStream uart_tx_stream(huart_);
 Stm32UartRxStream uart_rx_stream;
 
-LegacyProtocolStreamBased fibre_over_uart(&uart_rx_stream, &uart_tx_stream);
+LegacyProtocolStreamBased fibre_over_uart(&uart_rx_stream, &uart_tx_stream, &fibre::endpoint_server);
 
 fibre::AsyncStreamSinkMultiplexer<2> uart_tx_multiplexer(uart_tx_stream);
 fibre::BufferedStreamSink<64> uart0_stdout_sink(uart_tx_multiplexer); // Used in communication.cpp

@@ -2,9 +2,13 @@
 import os
 import sys
 
-# We want to use the fibre package that is included with the odrive package
-# in order to avoid any version mismatch issues,
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "pyfibre"))
+_fibre_source = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "..", "..", "packages", "fibre", "bindings", "python"))
+if os.path.isdir(os.path.join(_fibre_source, "fibre")):
+    sys.path.insert(0, _fibre_source)
+
+from . import pyfibre
+pyfibre.configure_fibre_library()
 
 import fibre
 
@@ -30,6 +34,7 @@ _objects = []
 
 def _start_discovery(path):
     _domain_termination_token = fibre.Event()
+    domain_context = pyfibre.Domain(path)
 
     async def discovered_object(obj):
         def lost_object(_):
@@ -43,7 +48,7 @@ def _start_discovery(path):
             _discovery_signal.notify_all()
 
     def domain_thread():
-        with fibre.Domain(path) as domain:
+        with domain_context as domain:
             discovery = domain.run_discovery(discovered_object)
             _domain_termination_token.wait()
             discovery.stop()
@@ -64,7 +69,7 @@ def find_any(path=default_search_path, serial_number=None, cancellation_token=No
     terminated.
     
     If you want finer grained control over object discovery
-    consider using fibre.Domain directly.
+    consider using odrive.pyfibre.Domain directly.
     """
     assert(cancellation_token is None or isinstance(cancellation_token, fibre.Event))
 
@@ -76,7 +81,7 @@ def find_any(path=default_search_path, serial_number=None, cancellation_token=No
             _discovery_path[0] = path
         elif path != _discovery_path[0]:
             raise Exception("Cannot change discovery path between multiple find_any() "
-                            "calls: {} != {}. Use fibre.Domain() directly for finer "
+                            "calls: {} != {}. Use odrive.pyfibre.Domain() directly for finer "
                             "grained discovery control.".format(path, _discovery_path))
 
     cancelled = [False]

@@ -1,0 +1,7 @@
+/build*/
+/install*/
+/bindings/python/build/
+/bindings/python/dist/
+*.egg-info/
+__pycache__/
+*.py[cod]

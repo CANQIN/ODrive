@@ -44,14 +44,21 @@ Building the Firmware
 
 * **Terminal** -> **Run Build Task** (:kbd:`Ctrl1` **+** :kbd:`Shift` **+** :kbd:`B`)
 
-A terminal window will open with your native shell.  VSCode is configured to run the command :code:`make -j4` in this terminal.
+当前 ``build`` 任务从仓库根目录配置 CMake，并执行 ``firmware`` 目标；Windows 使用根目录的 ``build.ps1``。
+命令行也可以在仓库根目录执行：
+
+.. code:: bash
+
+  cmake -S . -B build -G Ninja -DODRIVE_BOARD_VERSION=v3.6-56V -DCMAKE_BUILD_TYPE=Release
+  cmake --build build --target firmware --parallel
+
+固件输出为 ``build/firmware/ODriveFirmware.elf``、``.hex`` 和 ``.bin``。
 
 Flashing the Firmware
 --------------------------------------------------------------------------------
 
-* **Terminal** -> **Run Task** -> **flash**
-
-A terminal window will open with your native shell.  VSCode is configured to run the command :code:`make flash` in this terminal.
+当前 VSCode 配置只提供构建任务。按 :ref:`开发指南的 STLink 烧录流程 <flashing-with-an-stlink>`，
+使用 OpenOCD 手动烧录 ``build/firmware/ODriveFirmware.elf``。
 
 If the flashing worked, you can connect to the board using the :ref:`odrivetool <odrivetool-startup>`.
 
@@ -64,9 +71,11 @@ You can read more on Cortex-Debug `here. <https://github.com/Marus/cortex-debug>
 Note: If developing on Windows, you should have :code:`arm-none-eabi-gdb` and :code:`openOCD` on your PATH.
 
   * Make sure you have the Firmware folder as your active folder
-  * Set :code:`CONFIG_DEBUG=true` in the tup.config file
+  * 在仓库根目录用 :code:`cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug` 配置，
+    再执行 :code:`cmake --build build --target firmware --parallel`。
+    Windows 也可使用 :code:`./build.ps1 -Configuration Debug -Target firmware`。
   * Flash the board with the newest code (starting debug session doesn't do this)
-  * In the **Run** tab (:kbd:`Ctrl` **+** :kbd:`Shift` **+** :kbd:`D`), select "Debug ODrive (Firmware)"
+  * 在 **Run** 页签 (:kbd:`Ctrl` **+** :kbd:`Shift` **+** :kbd:`D`) 选择对应板型配置，例如 "Debug ODrive v3.x - ST-Link"。
   * Press **Start Debugging** (or press :kbd:`F5`)
   * The processor will reset and halt.
   * Set your breakpoints. Note: you can only set breakpoints when the processor is halted, if you set them during run mode, they won't get applied.
@@ -79,4 +88,5 @@ Cleaning the Build
 
 This sometimes needs to be done if you change branches.
 
-* Open a terminal (**View** -> **Integrated Terminal**) and enter :code:`make clean`
+* 在仓库根目录执行 :code:`cmake --build build/firmware --target clean` 清理 MCU 构建产物，
+  再通过 ``build`` 任务或 :code:`cmake --build build --target firmware --parallel` 重建。

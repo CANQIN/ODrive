@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:web": "node scripts/buildWeb.js",
     "lint": "vue-cli-service lint",
     "enumGenerate": "node scripts/enumGenerate.js",
     "preelectron:build": "electron-icon-builder --input=./public/icon.png --output=build --flatten && npm run enumGenerate",

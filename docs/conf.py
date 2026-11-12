@@ -15,8 +15,6 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('./figures'))
-sys.path.insert(0, os.path.abspath('./exts')) # needed for fibre_autodoc extension
-sys.path.insert(0, os.path.abspath('../tools/fibre-tools')) # needed for fibre_autodoc extension
 
 
 # -- Project information -----------------------------------------------------
@@ -38,7 +36,6 @@ extensions = ['sphinx_tabs.tabs',
     'sphinx.ext.autodoc', # Generate documentation from Python modules
     'sphinx.ext.autosummary', # Generate summary tables for Python documentation
     'sphinx.ext.intersphinx', # Hyperlinks to external projects (such as Python standard library)
-    'fibre_autodoc', # Generate summary tables for Python documentation
     'myst_parser' # render CHANGELOG markdown file
     
 ]
@@ -68,8 +65,6 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-fibre_interface_files = ['../Firmware/odrive-interface.yaml']
 
 autosummary_generate = False
 

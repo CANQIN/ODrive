@@ -3,16 +3,21 @@
     "tasks": [
         {
             "label": "ODrive: Build Firmware",
-            "type": "process",
-            "command": "powershell.exe",
-            "args": [
-                "-NoLogo",
-                "-NoProfile",
-                "-File",
-                "${workspaceFolder}/build.ps1"
-            ],
+            "type": "shell",
+            "command": "cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/build\" -G Ninja && cmake --build \"${workspaceFolder}/build\" --target firmware --parallel",
+            "windows": {
+                "command": "powershell.exe",
+                "args": [
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-File",
+                    "${workspaceFolder}/build.ps1",
+                    "-Target",
+                    "firmware"
+                ]
+            },
             "options": {
-                "cwd": "${workspaceFolder}/Firmware"
+                "cwd": "${workspaceFolder}"
             },
             "group": {
                 "kind": "build",
@@ -25,7 +30,10 @@
             },
             "problemMatcher": {
                 "base": "$gcc",
-                "fileLocation": ["relative", "${workspaceFolder}/Firmware"]
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}/Firmware"
+                ]
             }
         }
     ]

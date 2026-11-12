@@ -5,7 +5,8 @@
 #include <MotorControl/utils.hpp>
 
 #include <fibre/async_stream.hpp>
-#include <fibre/../../legacy_protocol.hpp>
+#include <fibre/legacy_protocol.hpp>
+#include <fibre/protocol.hpp>
 #include <usbd_cdc.h>
 #include <usbd_cdc_if.h>
 #include <usb_device.h>
@@ -145,8 +146,8 @@ Stm32UsbTxStream usb_native_tx_stream(ODRIVE_IN_EP);
 Stm32UsbRxStream usb_cdc_rx_stream(CDC_OUT_EP);
 Stm32UsbRxStream usb_native_rx_stream(ODRIVE_OUT_EP);
 
-LegacyProtocolStreamBased fibre_over_cdc(&usb_cdc_rx_stream, &usb_cdc_tx_stream);
-LegacyProtocolPacketBased fibre_over_usb(&usb_native_rx_stream, &usb_native_tx_stream, USB_TX_DATA_SIZE - 1); // See note on MTU above
+LegacyProtocolStreamBased fibre_over_cdc(&usb_cdc_rx_stream, &usb_cdc_tx_stream, &fibre::endpoint_server);
+LegacyProtocolPacketBased fibre_over_usb(&usb_native_rx_stream, &usb_native_tx_stream, USB_TX_DATA_SIZE - 1, &fibre::endpoint_server); // See note on MTU above
 
 fibre::AsyncStreamSinkMultiplexer<2> usb_cdc_tx_multiplexer(usb_cdc_tx_stream);
 fibre::BufferedStreamSink<64> usb_cdc_stdout_sink(usb_cdc_tx_multiplexer); // Used in communication.cpp

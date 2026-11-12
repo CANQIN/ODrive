@@ -2,7 +2,7 @@
 #define __ASCII_PROTOCOL_HPP
 
 #include <fibre/async_stream.hpp>
-#include <fibre/../../stream_utils.hpp>
+#include <fibre/stream_utils.hpp>
 
 #define MAX_LINE_LENGTH ((size_t)256)
 

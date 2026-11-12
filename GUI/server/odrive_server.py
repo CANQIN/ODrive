@@ -72,7 +72,7 @@ def start_discovery():
     print("starting disco loop...")
     log = fibre.Logger(verbose = False)
 
-    domain = fibre.Domain("usb:idVendor=0x1209,idProduct=0x0D32,bInterfaceClass=0,bInterfaceSubClass=1,bInterfaceProtocol=0")
+    domain = odrive.pyfibre.Domain("usb:idVendor=0x1209,idProduct=0x0D32,bInterfaceClass=0,bInterfaceSubClass=1,bInterfaceProtocol=0")
     domain = domain.__enter__()
     discovery = domain.run_discovery(discovered_device)
 

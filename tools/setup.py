@@ -50,6 +50,7 @@ bump_rev = not is_post_release and not is_release
 from setuptools import setup
 import os
 import sys
+import runpy
 
 if sys.version_info < (3, 3):
   import exceptions
@@ -58,20 +59,25 @@ if sys.version_info < (3, 3):
 creating_package = "sdist" in sys.argv
 
 # Load version from Git tag
-import odrive.version
-version = odrive.version.get_version_str(
-    git_only=creating_package,
-    is_post_release=is_post_release,
-    bump_rev=bump_rev,
-    release_override=is_release)
+version_module = runpy.run_path(os.path.join(os.path.dirname(__file__), 'odrive', 'version.py'))
+package_version = os.environ.get('ODRIVE_PACKAGE_VERSION')
+if package_version:
+  version = package_version
+else:
+  version = version_module['get_version_str'](
+      git_only=creating_package,
+      is_post_release=is_post_release,
+      bump_rev=bump_rev,
+      release_override=is_release)
 
 # If we're currently creating the package we need to autogenerate
 # a file that contains the version string
 if creating_package:
-  if is_post_release:
-    version += str(post_rel_num)
-  elif (devnum > 0):
-    version += str(devnum)
+  if not package_version:
+    if is_post_release:
+      version += str(post_rel_num)
+    elif (devnum > 0):
+      version += str(devnum)
 
   version_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'odrive', 'version.txt')
   with open(version_file_path, mode='w') as version_file:
@@ -82,14 +88,14 @@ if not creating_package:
   import platform
   if platform.system() == 'Linux':
     try:
-      odrive.version.setup_udev_rules(None)
+      version_module['setup_udev_rules'](None)
     except Exception:
       print("Warning: could not set up udev rules. Run `sudo odrivetool udev-setup` to try again.")
 
 try:
   setup(
     name = 'odrive',
-    packages = ['odrive', 'odrive.dfuse', 'odrive.pyfibre.fibre'],
+    packages = ['odrive', 'odrive.dfuse', 'odrive.pyfibre'],
     scripts = ['odrivetool', 'odrivetool.bat', 'odrive_demo.py'],
     version = version,
     description = 'Control utilities for the ODrive high performance motor controller',
@@ -99,8 +105,9 @@ try:
     url = 'https://github.com/odriverobotics/ODrive',
     keywords = ['odrive', 'motor', 'motor control'],
     install_requires = [
+      'fibre==0.1.4',
       'ipython',  # Used to do the interactive parts of the odrivetool
-      'PyUSB',    # Only required for DFU. Normal communication happens through libfibre.
+      'PyUSB',    # USB communication and DFU are implemented by the ODrive application.
       'requests', # Used to by DFU to load firmware files
       'IntelHex', # Used to by DFU to download firmware from github
       'matplotlib', # Required to run the liveplotter
@@ -108,12 +115,10 @@ try:
       'setuptools',  # ubuntu-latest on GitHub Actions fails to install odrive without this dependency
       'pywin32 >= 222; platform_system == "Windows"' # Required for fancy terminal features on Windows
     ],
-    package_data={'': [
-      'version.txt',
-      'pyfibre/fibre/*.so',
-      'pyfibre/fibre/*.dll',
-      'pyfibre/fibre/*.dylib'
-    ]},
+    package_data={
+      'odrive': ['version.txt'],
+      'odrive.pyfibre': ['runtime/*.so*', 'runtime/*.dll', 'runtime/*.dylib'],
+    },
     classifiers = [],
   )
 

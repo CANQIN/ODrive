@@ -86,19 +86,22 @@ USB Connectivity Issues
 Firmware Issues
 --------------------------------------------------------------------------------
 
-Failure to Build the Firmware when Running :code:`make`
+固件 CMake 构建失败
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Clear out temporary files from previous compiles by first running `make clean` to prevent conflicts.
-* **Windows users**: Confirm that tup has been correctly added to path by running :code:`env|grep PATH` in Git Bash. 
-  If you see no mention of tup then you must `add its location to your PATH environment variable. <https://docs.alfresco.com/4.2/tasks/fot-addpath.html>`_. 
-  Note that you may need to restart for the added path to take effect.
+* 确认 CMake、Ninja、ARM GCC 和 Python 生成器依赖已按 :ref:`开发指南 <dev-prereq>` 安装。
+  工具链不在 PATH 时，通过 ``ARM_TOOLCHAIN_DIR`` 指定安装目录。
+* 在仓库根目录重新运行 ``cmake -S . -B build -G Ninja``，再执行
+  ``cmake --build build --target firmware --parallel``。需要清理 MCU 产物时，先执行
+  ``cmake --build build/firmware --target clean``。
+* 查看第一条配置、编译或链接错误；Windows ``build.ps1`` 的构建日志位于 ``build/build.log``。
 
-Failure to Flash the Firmware When Running :code:`make flash`
+OpenOCD 手动烧录失败
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* If using an ST-link, confirm that the ST-link is connected the correct pins and that you have power supplied to the board. 
-  This can be by the 5V pin on the ST link or the main DC power jack. No power is supplied over the USB connection.
+* 按 :ref:`STLink 烧录流程 <flashing-with-an-stlink>` 选择对应目标配置，并确认指定的
+  ``build/firmware/ODriveFirmware.elf`` 已成功构建。
+* 确认 ST-Link 接线和板端供电。供电可来自 ST-Link 的 5V 引脚或主电源接口，USB 连接不为板端供电。
 
 Other Issues that `may not` produce an error code
 --------------------------------------------------------------------------------

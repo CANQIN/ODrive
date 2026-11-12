@@ -29,7 +29,7 @@ void start_usb_server(void);
 
 
 #ifdef __cplusplus
-#include <fibre/../../stream_utils.hpp>
+#include <fibre/stream_utils.hpp>
 extern fibre::BufferedStreamSink<64> usb_cdc_stdout_sink;
 extern bool usb_cdc_stdout_pending;
 #endif

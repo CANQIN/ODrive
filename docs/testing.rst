@@ -198,7 +198,7 @@ To run a test:
 
        .. code:: Bash
 
-              rsync -avh -e ssh /path/to/ODriveFirmware/ odrv:/opt/odrivetest --exclude="Firmware/build" --exclude="Firmware/.tup" --exclude=".git" --exclude="GUI" --delete
+              rsync -avh -e ssh /path/to/ODriveFirmware/ odrv:/opt/odrivetest --exclude="/build/" --exclude=".git" --exclude="GUI" --delete
 
        .. code:: Bash
 

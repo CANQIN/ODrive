@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/fibreTargets.cmake")
+set(FIBRE_INTERFACE_GENERATOR "@PACKAGE_CMAKE_INSTALL_DATADIR@/fibre/codegen/interface_generator.py")
+set(FIBRE_INTERFACE_TEMPLATES "@PACKAGE_CMAKE_INSTALL_DATADIR@/fibre/codegen/templates")
+include("${CMAKE_CURRENT_LIST_DIR}/FibreGenerate.cmake")
