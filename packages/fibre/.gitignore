@@ -1,5 +1,8 @@
 /build*/
 /install*/
+/examples/**/build/
+/examples/**/.mxproject
+/examples/**/MXTmpFiles/
 /bindings/python/build/
 /bindings/python/dist/
 *.egg-info/

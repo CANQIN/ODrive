@@ -2,7 +2,7 @@
 
 包含 MCU 服务端、上位机客户端、C ABI、Python 绑定和接口生成器，保持 Fibre v0.1 线协议。整个目录可以复制到其他工程独立构建。
 
-核心只提供协议与抽象接口，不包含 USB、串口、TCP 或操作系统事件循环实现。`examples/` 单独提供桌面 UDP、TCP 适配，供两端独立运行，不参与核心库构建或安装。包内没有预编译库或平台交叉构建配置。C++ 核心依赖标准 C++17；Python 绑定依赖标准库。动态库格式和符号导出由调用方工具链及 CMake 生成，协议代码不选择操作系统。
+核心只提供协议与抽象接口，不包含 USB、串口、TCP 或操作系统事件循环实现。`examples/` 按 UDP、TCP、USB、UART 分组，包含桌面示例和 STM32 CubeMX 示例，不参与核心库构建或安装。包内没有预编译库；交叉构建配置与硬件驱动只存在于 MCU 示例中。C++ 核心依赖标准 C++17；Python 绑定依赖标准库。动态库格式和符号导出由调用方工具链及 CMake 生成，协议代码不选择操作系统。
 
 ## 需要应用实现什么
 
@@ -28,10 +28,10 @@ fibre/
   codegen/             Python 接口生成器及依赖
   codegen/templates/   接口生成模板
   bindings/python/     Python 绑定包
-  examples/fibre_server/        下位机业务、接口定义及独立构建
-  examples/fibre_server/desktop/ 无 MCU 时的桌面模拟入口和收发适配
-  examples/fibre_client/cpp/    C++ 上位机及自身 transports/ 适配
-  examples/fibre_client/python/ Python 客户端及原生库构建工程
+  examples/udp/        UDP 整包示例：server、client/cpp、client/python
+  examples/tcp/        TCP 字节流示例：server、client/cpp、client/python
+  examples/usb/        MCU USB Bulk 示例：CubeMX server、PyUSB client
+  examples/uart/       MCU 串口示例：CubeMX server、pyserial client
 ```
 
 ## 构建
@@ -45,7 +45,7 @@ cmake --build build
 cmake --install build --prefix install
 ```
 
-按[示例说明](examples/README.md)分别构建服务端、C++ 客户端或 Python 客户端工程，可通过本地 UDP、TCP 演示真实对象发现、属性读写、setter 副作用和函数调用。示例各自构建，不随核心库默认构建。
+按[示例说明](examples/README.md)选择通信方式，再分别构建该组的服务端和客户端。UDP、TCP 可在本机演示；USB、UART 提供实际 MCU 工程。所有示例演示相同的对象发现、属性读写、setter 副作用和函数调用，各自构建，不随核心库默认构建。
 
 | CMake 目标 | 内容 |
 | --- | --- |
@@ -73,7 +73,7 @@ fibre::LegacyProtocolStreamBased protocol(&rx, &tx, &fibre::endpoint_server);
 protocol.start({});
 ```
 
-`rx`、`tx` 由应用实现；接口实现和缓冲区在异步完成前须有效。示例服务端的 `device.cpp`、`device.hpp` 和 `device.yaml` 可作为业务层移植；`examples/fibre_server/desktop/` 仅用于电脑模拟，其中的 `tcp_transport.hpp` 演示字节流收发、短读写和取消。MCU 适配契约见[示例说明](examples/README.md#如何迁移到-mcu)。
+`rx`、`tx` 由应用实现；接口实现和缓冲区在异步完成前须有效。`examples/usb/server/App/` 和 `examples/uart/server/App/` 提供完整 MCU 接入，业务定义、协议适配和 CubeMX 生成代码分开管理。适配契约见[示例说明](examples/README.md#mcu-与电脑的边界)。
 
 ## C/C++ 客户端接入
 
@@ -101,7 +101,7 @@ with fibre.Domain(transport=my_packets) as domain:
     print(device.add(2.0))
 ```
 
-`my_packets` 提供 `mtu`、`async read_packet(capacity)`、`async write_packet(packet)` 和 `async close()`。协程在 Fibre 的 asyncio 线程中运行。`examples/fibre_client/python/` 提供可直接连接示例服务端的 UDP、TCP 实现，具体 I/O 留在应用中。
+`my_packets` 提供 `mtu`、`async read_packet(capacity)`、`async write_packet(packet)` 和 `async close()`。协程在 Fibre 的 asyncio 线程中运行。各组 `examples/<通信方式>/client/python/` 提供实际收发实现，具体 I/O 和第三方传输依赖留在应用中。
 
 详见 [Python 说明](bindings/python/README.md) 与 [示例说明](examples/README.md)。
 

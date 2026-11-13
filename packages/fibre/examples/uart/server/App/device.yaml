@@ -1,0 +1,17 @@
+version: 0.0.1
+ns: example
+summary: Fibre UDP / TCP 示例设备
+dictionary: [ExampleDevice]
+
+interfaces:
+  ExampleDevice:
+    c_is_class: true
+    attributes:
+      value: {type: float32, c_setter: set_value}
+      setter_count: readonly uint32
+    functions:
+      add:
+        in:
+          delta: float32
+        out:
+          result: float32

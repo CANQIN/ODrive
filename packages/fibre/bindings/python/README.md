@@ -33,4 +33,4 @@ with fibre.Domain(transport=my_packets) as domain:
 
 `Domain` 退出时先停止所属发现并取消、等待后台发现回调，再取消并等待包收发任务，关闭原生通道、调用应用的 `close()`，最后关闭 Domain。退出后再次调用 `Discovery.stop()` 不会访问已释放的句柄。包收发异常会中止发现或远程调用。
 
-[Python 示例工程](../../examples/fibre_client/python/) 提供完整 UDP、TCP 传输及业务调用，可按[运行说明](../../examples/README.md)连接同一示例服务端。Python 绑定仅提供通用调度与定时器，不注册操作系统文件描述符。`Domain(path)` 仍可用于应用自行扩展了后端的原生库；默认原生核心没有内置后端。
+[示例工程](../../examples/README.md) 按 UDP、TCP、USB、UART 分组，每组的 `client/python/` 提供对应传输及业务调用。USB 和串口示例分别通过 PyUSB、pyserial 连接 MCU。Python 绑定仅提供通用调度与定时器，不注册操作系统文件描述符。`Domain(path)` 仍可用于应用自行扩展了后端的原生库；默认原生核心没有内置后端。
