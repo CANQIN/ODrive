@@ -17,7 +17,6 @@ import yaml
 from inspect import signature
 import itertools
 import time
-import tempfile
 import io
 import re
 import datetime
@@ -414,105 +413,6 @@ class CanInterfaceComponent(Component):
         import can
         self.handle = can.interface.Bus(bustype='socketcan', channel=self.yaml['interface'], bitrate=250000)
 
-class TeensyGpio(Component):
-    def __init__(self, parent: Component, num: int):
-        Component.__init__(self, parent)
-        self.num = num
-
-class TeensyComponent(Component):
-    def __init__(self, testrig, yaml: dict):
-        self.testrig = testrig
-        self.yaml = yaml
-        if self.yaml['board-version'] == 'teensy:avr:teensy40':
-            self.gpios = [TeensyGpio(self, i) for i in range(24)]
-        elif self.yaml['board-version'] == 'teensy:avr:teensy41':
-            self.gpios = [TeensyGpio(self, i) for i in range(42)]
-        else:
-            raise Exception(f"unknown Arduino board {self.yaml['board-version']}")
-        self.routes = []
-        self.previous_routes = object()
-
-    def get_subcomponents(self):
-        for i, gpio in enumerate(self.gpios):
-            yield ('gpio' + str(i)), gpio
-        yield 'program', Component(self)
-
-    def add_route(self, input: TeensyGpio, output: TeensyGpio, noise_enable: TeensyGpio):
-        self.routes.append((input, output, noise_enable))
-
-    def commit_routing_config(self, logger: Logger):
-        if self.previous_routes == self.routes:
-            self.routes = []
-            return
-
-        code = ''
-        code += 'bool noise = false;\n'
-        code += 'void setup() {\n'
-        for i, o, n in self.routes:
-            code += '  pinMode({}, OUTPUT);\n'.format(o.num)
-        code += '}\n'
-        code += 'void loop() {\n'
-        code += '  noise = !noise;\n'
-        for i, o, n in self.routes:
-            if n:
-                # with noise enable
-                code += '  digitalWrite({}, digitalRead({}) ? noise : digitalRead({}));\n'.format(o.num, n.num, i.num)
-            else:
-                # no noise enable
-                code += '  digitalWrite({}, digitalRead({}));\n'.format(o.num, i.num)
-        code += '}\n'
-
-        self.compile_and_program(code)
-
-        self.previous_routes = self.routes
-        self.routes = []
-
-    def compile(self, sketchfile, hexfile):
-        env = os.environ.copy()
-        env['ARDUINO_COMPILE_DESTINATION'] = hexfile
-        run_shell(
-            ['arduino', '--board', self.yaml['board-version'], '--verify', sketchfile],
-            logger, env = env, timeout = 120)
-
-    def program(self, hex_file_path: str, logger: Logger):
-        """
-        Programs the specified hex file onto the Teensy.
-        To reset the Teensy, a GPIO of the local system must be connected to the
-        Teensy's "Program" pin.
-        """
-
-        # todo: this should be treated like a regular setup resource
-        program_gpio = self.testrig.get_directly_connected_components(self.testrig.get_component_name(self) + '.program')[0]
-
-        # Put Teensy into program mode by pulling it's program pin down
-        program_gpio.config(output = True)
-        program_gpio.write(False)
-        time.sleep(0.1)
-        program_gpio.write(True)
-        
-        run_shell(["teensy-loader-cli", "-mmcu=" + self.yaml['board-version'].rpartition(':')[2].upper(), "-w", hex_file_path], logger, timeout = 5)
-        time.sleep(0.5) # give it some time to boot
-
-    def compile_and_program(self, code: str):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with open(os.path.join(temp_dir, 'code.ino'), 'w+') as code_fp:
-                code_fp.write(code)
-                code_fp.flush()
-                code_fp.seek(0)
-                print('Writing code to teensy: ')
-                print(code_fp.read())
-                with tempfile.NamedTemporaryFile(suffix='.hex') as hex_fp:
-                    self.compile(code_fp.name, hex_fp.name)
-                    self.program(hex_fp.name, logger)
-
-class LowPassFilterComponent(Component):
-    def __init__(self, parent: Component):
-        Component.__init__(self, parent)
-        self.en = Component(self)
-
-    def get_subcomponents(self):
-        yield 'en', self.en
-
 class TestFixture(object):
     """
     Base class for test fixtures. A test fixture is what defines the
@@ -559,19 +459,6 @@ class CompositeTestFixture(TestFixture):
     def __init__(self, subfixtures: list):
         self._subfixtures = subfixtures
 
-
-class TeensyForwardingFixture(TestFixture):
-    def __init__(self, teensy: TeensyComponent, high_z: TeensyGpio, low_z: TeensyGpio):
-        self.teensy = teensy
-        self.high_z = high_z
-        self.low_z = low_z
-        self.noise_enable = None
-    
-    def prepare(self, logger: Logger):
-        self.teensy.add_route(self.high_z, self.low_z, self.noise_enable)
-
-    def get_resources(self):
-        return [(self.teensy, False), (self.high_z, True), (self.low_z, True), (self.noise_enable, True)]
 
 class ClosedLoopControlFixture(TestFixture):
     def __init__(self, axis_ctx: ODriveAxisComponent, motor_ctx: MotorComponent, enc_ctx: EncoderComponent):
@@ -648,14 +535,10 @@ class TestRig():
                 add_component(component_yaml['name'], ODriveComponent(component_yaml))
             elif component_yaml['type'] == 'generalpurpose':
                 add_component(component_yaml['name'], GeneralPurposeComponent(component_yaml))
-            elif component_yaml['type'] == 'arduino':
-                add_component(component_yaml['name'], TeensyComponent(self, component_yaml))
             elif component_yaml['type'] == 'motor':
                 add_component(component_yaml['name'], MotorComponent(component_yaml))
             elif component_yaml['type'] == 'encoder':
                 add_component(component_yaml['name'], EncoderComponent(self, component_yaml))
-            elif component_yaml['type'] == 'lpf':
-                add_component(component_yaml['name'], LowPassFilterComponent(self))
             else:
                 logger.warn('test rig has unsupported component ' + component_yaml['type'])
                 continue
@@ -695,43 +578,15 @@ class TestRig():
             test_fixture = TestFixture.all_of(tf1, tf2)
             yield axis, motor, encoder, test_fixture
     
-    def check_connection(self, component1: Component, component2: Component, mode: str = 'indirect'):
-        """
-        Checks if the specified components are connected or connectable through
-        a test fixture.
+    def check_connection(self, component1: Component, component2: Component):
+        """Check whether both components share a declared physical connection."""
+        net = self.net_by_component.get(component1, {component1})
+        return component2 in net, None
 
-        If there are one-directional connections, they must point from
-        component1 to component2.
-
-        Returns: A tuple (connectable: bool, text_fixture: TestFixture). If
-                 connectable is True then the test_fixture, if not None, must
-                 be prepared before the components are actually connected.
-        """
-        assert(mode in ['direct', 'indirect'])
-
-        net1 = self.net_by_component.get(component1, set([component1]))
-        if component2 in net1:
-            return True, None # The components are directly connected
-        if mode == 'direct':
-            return False, None
-        
-        net2 = self.net_by_component.get(component2, set([component2]))
-
-        possible_test_fixtures = []
-
-        for port1, port2 in itertools.product(net1, net2):
-            if (isinstance(port1, TeensyGpio) and isinstance(port2, TeensyGpio) and port1.parent == port2.parent):
-                possible_test_fixtures.append(TeensyForwardingFixture(port1.parent, port1, port2))
-        
-        if not len(possible_test_fixtures):
-            return False, None # no forwarding is possible between the two components
-        else:
-            return True, TestFixture.any_of(*possible_test_fixtures)
-
-    def check_connections(self, components: list, mode: str = 'indirect'):
+    def check_connections(self, components: list):
         tfs = []
         for component1, component2 in components:
-            is_connected, tf = self.check_connection(component1, component2, mode)
+            is_connected, tf = self.check_connection(component1, component2)
             if not is_connected:
                 return False, None
             tfs.append(tf)
@@ -760,16 +615,14 @@ class TestRig():
 
     def get_connected_components(self, src: Union[dict, Tuple[Union[Component, str], bool]], comp_type: type = None):
         """
-        Returns all components that are either directly or indirectly (through a
-        Teensy) connected to the specified component(s).
+        Returns all components connected to the specified component(s) by the
+        physical connections declared in the test rig.
 
         component: Either:
             - A component object.
             - A component name given as string.
             - A tuple of the form (comp, dir) where comp is a component object
               or name and dir specifies the data direction.
-              The direction is required if routing through a Teensy should be
-              considered.
             - A dict {sumcomponent: val} where subcomponent is a string
               such as 'tx' or 'rx' and val is of one of the forms described above.
         
@@ -947,24 +800,16 @@ def run(tests):
             # Prepare all components
             # TODO: less hardcoded priority assignment
 
-            teensies = set()
             for param in params:
                 #if isinstance(param, ProxiedComponent):
                 #    continue
                 if hasattr(param, 'prepare'):
                     param.prepare(logger)
             
-            teensies = set()
             for tf in test_fixture:
                 if isinstance(tf, ClosedLoopControlFixture):
                     continue
                 tf.prepare(logger)
-                if isinstance(tf, TeensyForwardingFixture):
-                    teensies.add(tf.teensy)
-
-            # Post-prepare step required if teensy-forwarding is involved
-            for teensy in teensies:
-                teensy.commit_routing_config(logger)
 
             for tf in test_fixture:
                 if not isinstance(tf, ClosedLoopControlFixture):
@@ -1046,18 +891,6 @@ if args.setup_host:
     for port in testrig.get_components(SerialPortComponent):
         logger.debug('changing permissions on ' + port.yaml['port'] + '...')
         os.chmod(port.yaml['port'], stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-
-    if len(list(testrig.get_components(TeensyComponent))):
-        # This breaks the annoying teensy loader that shows up on every compile
-        logger.debug('modifying teensyduino installation...')
-        if not os.path.isfile('/usr/share/arduino/hardware/tools/teensy_post_compile_old'):
-            os.rename('/usr/share/arduino/hardware/tools/teensy_post_compile', '/usr/share/arduino/hardware/tools/teensy_post_compile_old')
-        with open('/usr/share/arduino/hardware/tools/teensy_post_compile', 'w') as scr:
-            scr.write('#!/usr/bin/env bash\n')
-            scr.write('if [ "$ARDUINO_COMPILE_DESTINATION" != "" ]; then\n')
-            scr.write('  cp -r ${2#-path=}/*.ino.hex ${ARDUINO_COMPILE_DESTINATION}\n')
-            scr.write('fi\n')
-        os.chmod('/usr/share/arduino/hardware/tools/teensy_post_compile', stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     # Bring up CAN interface(s)
     for intf in testrig.get_components(CanInterfaceComponent):

@@ -6,7 +6,6 @@
 #include "interface_usb.h"
 #include "interface_uart.h"
 #include "interface_can.hpp"
-#include "interface_i2c.h"
 
 #include "odrive_main.h"
 #include "freertos_vars.h"
@@ -51,12 +50,8 @@ void init_communication(void) {
 
     start_usb_server();
 
-    if (odrv.config_.enable_i2c_a) {
-        start_i2c_server();
-    }
-
     if (odrv.config_.enable_can_a) {
-        odrv.can_.start_server(&hcan1);
+        odrv.can_.start_server(can_a);
     }
 }
 

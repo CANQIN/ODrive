@@ -17,15 +17,9 @@ Sending Commands
       Once you know the name, you can use :code:`screen /dev/ttyACM0` (with the correct name) to send commands manually or open the device using your favorite programming language. 
       Serial ports on Unix can be opened, written to and read from like a normal file.
  * **Via UART:** Connect the ODrive's TX (GPIO1) to your host's RX. Connect your ODrive's RX (GPIO2) to your host's TX. See :ref:`UART <uart-doc>` for more info.
-    * **Arduino:** You can use the `ODrive Arduino library <https://github.com/madcowswe/ODrive/tree/master/Arduino/ODriveArduino>`_ to talk to the ODrive.
     * **Windows/Linux/macOS:** You can use an FTDI USB-UART cable to connect to the ODrive.
 
 The ODrive does not echo commands. That means that when you type commands into a program like :code:`screen`, the characters you type won't show up in the console.
-
-.. admonition:: Arduino
-
-   There is an Arduino library that gives some examples on how to use the ASCII protocol to communicate with the ODrive. 
-   Check it out `here <../Arduino/ODriveArduino>`.
 
 Command Format
 -------------------------------------------------------------------------------

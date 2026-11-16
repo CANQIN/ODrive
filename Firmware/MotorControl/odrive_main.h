@@ -6,7 +6,6 @@
 
 #ifdef __cplusplus
 #include <communication/interface_usb.h>
-#include <communication/interface_i2c.h>
 #include <communication/interface_uart.h>
 #include <task_timer.hpp>
 extern "C" {
@@ -50,7 +49,6 @@ typedef struct {
     int32_t prio_analog;
 
     USBStats_t& usb = usb_stats_;
-    I2CStats_t& i2c = i2c_stats_;
 } SystemStats_t;
 
 struct PWMMapping_t {
@@ -72,7 +70,6 @@ struct BoardConfig_t {
     uint32_t uart_b_baudrate = 115200;
     uint32_t uart_c_baudrate = 115200;
     bool enable_can_a = true;
-    bool enable_i2c_a = false;
     ODriveIntf::StreamProtocolType uart0_protocol = ODriveIntf::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT;
     ODriveIntf::StreamProtocolType uart1_protocol = ODriveIntf::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT;
     ODriveIntf::StreamProtocolType uart2_protocol = ODriveIntf::STREAM_PROTOCOL_TYPE_ASCII_AND_STDOUT;

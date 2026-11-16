@@ -15,7 +15,7 @@
                 "interface/stlink-v2.cfg",
                 "target/stm32f4x_stlink.cfg",
             ],
-            "svdFile": "${workspaceRoot}/Board/v3/STM32F40x.svd",
+            "svdFile": "${workspaceRoot}/Boards/v3.6-56V/STM32F40x.svd",
             "cwd": "${workspaceRoot}"
         },
         {
@@ -30,7 +30,7 @@
                 "interface/stlink-v2.cfg",
                 "target/stm32f4x_stlink.cfg",
             ],
-            "svdFile": "${workspaceRoot}/Board/v3/STM32F40x.svd",
+            "svdFile": "${workspaceRoot}/Boards/v3.6-56V/STM32F40x.svd",
             "cwd": "${workspaceRoot}"
         },
         {
@@ -49,7 +49,7 @@
                 "interface/stlink-v2.cfg",
                 "target/stm32f4x_stlink.cfg",
             ],
-            "svdFile": "${workspaceRoot}/Board/v3/STM32F40x.svd",
+            "svdFile": "${workspaceRoot}/Boards/v3.6-56V/STM32F40x.svd",
             "cwd": "${workspaceRoot}"
         },
         {

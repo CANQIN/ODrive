@@ -1,4 +1,3 @@
-
 #include "interface_uart.h"
 
 #include "ascii_protocol.hpp"
@@ -117,7 +116,7 @@ AsciiProtocol ascii_over_uart(&uart_rx_stream, &uart_tx_multiplexer);
 
 bool uart0_stdout_pending = false;
 
-static void uart_server_thread(void * ctx) {
+static void uart_server_thread(const void * ctx) {
     (void) ctx;
 
     if (odrv.config_.uart0_protocol == ODrive::STREAM_PROTOCOL_TYPE_FIBRE) {
@@ -190,8 +189,11 @@ void start_uart_server(UART_HandleTypeDef* huart) {
     dma_last_rcv_idx = 0;
 
     // Start UART communication thread
-    osThreadDef(uart_server_thread_def, uart_server_thread, osPriorityNormal, 0, stack_size_uart_thread / sizeof(StackType_t) /* the ascii protocol needs considerable stack space */);
-    uart_thread = osThreadCreate(osThread(uart_server_thread_def), NULL);
+    static char thread_name[] = "uart_server_thread_def";
+    const osThreadDef_t thread_def = {
+        thread_name, uart_server_thread, osPriorityNormal, 0,
+        stack_size_uart_thread / sizeof(StackType_t)};
+    uart_thread = osThreadCreate(&thread_def, NULL);
 }
 
 void uart_poll() {

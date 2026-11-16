@@ -38,8 +38,8 @@ static inline IRQn_Type get_irq_number(uint16_t pin_number) {
     }
 }
 
-#define GPIO_MODE             0x00000003U
-#define GPIO_OUTPUT_TYPE      0x00000010U
+#define ODRIVE_GPIO_MODE_MASK         0x00000003U
+#define ODRIVE_GPIO_OUTPUT_TYPE_MASK  0x00000010U
 
 
 bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) {
@@ -70,7 +70,7 @@ bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) {
     /* Configure IO Direction mode (Input, Output, Alternate or Analog) */
     uint32_t temp = port_->MODER;
     temp &= ~(GPIO_MODER_MODER0 << (position * 2U));
-    temp |= ((mode & GPIO_MODE) << (position * 2U));
+    temp |= ((mode & ODRIVE_GPIO_MODE_MASK) << (position * 2U));
     port_->MODER = temp;
 
     /* In case of Output or Alternate function mode selection */
@@ -88,7 +88,7 @@ bool Stm32Gpio::config(uint32_t mode, uint32_t pull, uint32_t speed) {
         /* Configure the IO Output Type */
         temp = port_->OTYPER;
         temp &= ~(GPIO_OTYPER_OT_0 << position) ;
-        temp |= (((mode & GPIO_OUTPUT_TYPE) >> 4U) << position);
+        temp |= (((mode & ODRIVE_GPIO_OUTPUT_TYPE_MASK) >> 4U) << position);
         port_->OTYPER = temp;
     }
 

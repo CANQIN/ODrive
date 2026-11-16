@@ -74,5 +74,5 @@ If isolators are not an option, you can use series resistors to limit the inject
 4.7kOhms is a good value, but anything from 3.3kOhms to 10kOhms should work. Series resistors offer some protection for the ODrive, but the ground loop problem can still cause the GPIOs to be pulled high or low for short periods of time. 
 The ODrive and your other device will most likely be safe but communications might be interrupted.
 
-As an example, for UART, you would place a resistor close to the RX pin of the ODrive and another one close to the RX pin of the other device (like an Arduino). 
+As an example, for UART, you would place a resistor close to the RX pin of the ODrive and another one close to the RX pin of the other controller.
 This allows the driving side, the TX pins, to adequately drive the bus capacitance.

@@ -33,11 +33,14 @@ bool ODriveCAN::start_server(CAN_HandleTypeDef* handle) {
         return false;
     }
 
-    auto wrapper = [](void* ctx) {
-        ((ODriveCAN*)ctx)->can_server_thread();
+    auto wrapper = [](const void* ctx) {
+        ((ODriveCAN*)const_cast<void*>(ctx))->can_server_thread();
     };
-    osThreadDef(can_server_thread_def, wrapper, osPriorityNormal, 0, stack_size_ / sizeof(StackType_t));
-    thread_id_ = osThreadCreate(osThread(can_server_thread_def), this);
+    static char thread_name[] = "can_server_thread_def";
+    const osThreadDef_t thread_def = {
+        thread_name, wrapper, osPriorityNormal, 0,
+        stack_size_ / sizeof(StackType_t)};
+    thread_id_ = osThreadCreate(&thread_def, this);
 
     return true;
 }

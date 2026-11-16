@@ -2,7 +2,7 @@
 * Flash-based Non-Volatile Memory (NVM)
 * 
 * This file supports storing and loading persistent configuration based on
-* the STM32 builtin flash memory.
+* the STM32 builtin flash memory. The board supplies its erase-sector layout.
 *
 * The STM32F405xx has 12 flash sectors of heterogeneous size. We use the last
 * two sectors for configuration data. These pages have a size of 128kB each.
@@ -35,17 +35,10 @@
 #include <string.h>
 
 
-#include <stm32f405xx.h>
+#include <stm32f4xx.h>
 #include <stm32f4xx_hal.h>
 
-// refer to page 75 of datasheet:
-// http://www.st.com/content/ccc/resource/technical/document/reference_manual/3d/6d/5a/66/b4/99/40/d4/DM00031020.pdf/files/DM00031020.pdf/jcr:content/translations/en.DM00031020.pdf
-#define FLASH_SECTOR_A FLASH_SECTOR_10
-#define FLASH_SECTOR_A_BASE (const volatile uint8_t*)0x80C0000UL
-#define FLASH_SECTOR_A_SIZE 0x20000UL
-#define FLASH_SECTOR_B FLASH_SECTOR_11
-#define FLASH_SECTOR_B_BASE (const volatile uint8_t*)0x80E0000UL
-#define FLASH_SECTOR_B_SIZE 0x20000UL
+#include "nvm_config.h"
 
 
 typedef enum {
@@ -64,17 +57,17 @@ typedef struct {
 } sector_t;
 
 sector_t sectors[] = { {
-    .sector_id = FLASH_SECTOR_A,
-    .n_data = FLASH_SECTOR_A_SIZE >> 3,
-    .n_reserved = (FLASH_SECTOR_A_SIZE >> 3) >> 5,
-    .alloc_table = FLASH_SECTOR_A_BASE,
-    .data = (uint64_t *)FLASH_SECTOR_A_BASE
+    .sector_id = ODRIVE_NVM_SECTOR_A,
+    .n_data = ODRIVE_NVM_SECTOR_A_SIZE >> 3,
+    .n_reserved = (ODRIVE_NVM_SECTOR_A_SIZE >> 3) >> 5,
+    .alloc_table = ODRIVE_NVM_SECTOR_A_BASE,
+    .data = (uint64_t *)ODRIVE_NVM_SECTOR_A_BASE
 }, {
-    .sector_id = FLASH_SECTOR_B,
-    .n_data = FLASH_SECTOR_B_SIZE >> 3,
-    .n_reserved = (FLASH_SECTOR_B_SIZE >> 3) >> 5,
-    .alloc_table = FLASH_SECTOR_B_BASE,
-    .data = (uint64_t *)FLASH_SECTOR_B_BASE
+    .sector_id = ODRIVE_NVM_SECTOR_B,
+    .n_data = ODRIVE_NVM_SECTOR_B_SIZE >> 3,
+    .n_reserved = (ODRIVE_NVM_SECTOR_B_SIZE >> 3) >> 5,
+    .alloc_table = ODRIVE_NVM_SECTOR_B_BASE,
+    .data = (uint64_t *)ODRIVE_NVM_SECTOR_B_BASE
 }};
 
 uint8_t read_sector_; // 0 or 1 to indicate which sector to read from and which to write to

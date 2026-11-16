@@ -384,7 +384,7 @@ static void update_analog_endpoint(const struct PWMMapping_t *map, int gpio)
     fibre::set_endpoint_from_float(map->endpoint, value);
 }
 
-static void analog_polling_thread(void *)
+static void analog_polling_thread(const void *)
 {
     while (true) {
         for (int i = 0; i < GPIO_COUNT; i++) {
@@ -398,6 +398,9 @@ static void analog_polling_thread(void *)
 }
 
 void start_analog_thread() {
-    osThreadDef(analog_thread_def, analog_polling_thread, osPriorityLow, 0, stack_size_analog_thread / sizeof(StackType_t));
-    analog_thread = osThreadCreate(osThread(analog_thread_def), NULL);
+    static char thread_name[] = "analog_thread_def";
+    const osThreadDef_t thread_def = {
+        thread_name, analog_polling_thread, osPriorityLow, 0,
+        stack_size_analog_thread / sizeof(StackType_t)};
+    analog_thread = osThreadCreate(&thread_def, NULL);
 }

@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-declare -a tests=('analog_input_test.py'
-                  'calibration_test.py'
+declare -a tests=('calibration_test.py'
                   'can_test.py'
                   'closed_loop_test.py'
-                  'encoder_test.py'
                   'fibre_test.py'
                   'integration_test.py'
                   'nvm_test.py'
-                  'pwm_input_test.py'
                   'sensor_test.py'
                   'step_dir_test.py'
                   'uart_ascii_test.py'

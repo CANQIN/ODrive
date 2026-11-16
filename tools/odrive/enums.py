@@ -14,7 +14,6 @@ GPIO_MODE_UART_A                         = 4
 GPIO_MODE_UART_B                         = 5
 GPIO_MODE_UART_C                         = 6
 GPIO_MODE_CAN_A                          = 7
-GPIO_MODE_I2C_A                          = 8
 GPIO_MODE_SPI_A                          = 9
 GPIO_MODE_PWM                            = 10
 GPIO_MODE_ENC0                           = 11
@@ -176,7 +175,6 @@ class GpioMode(enum.Enum):
     UART_B                                   = 5
     UART_C                                   = 6
     CAN_A                                    = 7
-    I2C_A                                    = 8
     SPI_A                                    = 9
     PWM                                      = 10
     ENC0                                     = 11

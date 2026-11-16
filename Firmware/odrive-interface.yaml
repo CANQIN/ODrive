@@ -162,13 +162,6 @@ interfaces:
               rx_cnt: readonly uint32
               tx_cnt: readonly uint32
               tx_overrun_cnt: readonly uint32
-          i2c:
-            c_is_class: False
-            attributes:
-              addr: readonly uint8
-              addr_match_cnt: readonly uint32
-              rx_cnt: readonly uint32
-              error_cnt: readonly uint32
       user_config_loaded: readonly uint32
       misconfigured:
         # TODO: make this a system error
@@ -307,12 +300,6 @@ interfaces:
         type: bool
         doc: |
           Enables CAN. Changing this setting requires a reboot.
-      enable_i2c_a:
-        type: bool
-        doc: |
-          Enables I2C. The I2C pins on ODrive v3.6-56V are in conflict with CAN.
-          This setting has no effect if `enable_can_a` is also true.
-          Changing this setting requires a reboot.
       usb_cdc_protocol:
         type: StreamProtocolType
         doc: |
@@ -1472,8 +1459,8 @@ valuetypes:
       UART_B: {doc: This mode is not supported on ODrive v3.6-56V.}
       UART_C: {doc: This mode is not supported on ODrive v3.6-56V.}
       CAN_A: {doc: See `config.enable_can_a`.}
-      I2C_A: {doc: See `config.enable_i2c_a`.}
-      SPI_A: {doc: Note that the SPI pins on ODrive v3.6-56V are hardwired so they
+      # Value 8 is reserved; keep the remaining wire values stable.
+      SPI_A: {value: 9, doc: Note that the SPI pins on ODrive v3.6-56V are hardwired so they
         cannot be configured through software. Consequently, even though SPI_A
         is exposed, this mode is of no use on ODrive v3.6-56V.}
       PWM: {doc: See `config.gpio1_pwm_mapping`.}

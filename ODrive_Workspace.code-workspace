@@ -13,9 +13,6 @@
 			"path": "analysis"
 		},
 		{
-			"path": "Arduino"
-		},
-		{
 			"path": "GUI"
 		}
 	],

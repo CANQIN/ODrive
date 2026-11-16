@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(ODriveFirmware LANGUAGES C CXX ASM)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_C_COMPILER MATCHES "arm-none-eabi")
     message(FATAL_ERROR "固件需要 ARM GCC；请使用 cmake/arm-none-eabi.cmake 工具链")
@@ -84,19 +85,17 @@ set(odrive_sources
     communication/ascii_protocol.cpp
     communication/interface_uart.cpp
     communication/interface_usb.cpp
-    communication/interface_i2c.cpp
     FreeRTOS-openocd.c)
 set(_freertos_units croutine event_groups list queue stream_buffer tasks timers)
 foreach(unit IN LISTS _freertos_units)
-    list(APPEND odrive_sources "ThirdParty/FreeRTOS/Source/${unit}.c")
+    list(APPEND odrive_sources "${odrive_rtos_dir}/${unit}.c")
 endforeach()
 list(APPEND odrive_sources
-    ThirdParty/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c
-    ThirdParty/FreeRTOS/Source/portable/MemMang/heap_4.c
-    ThirdParty/STM32_USB_Device_Library/Core/Src/usbd_core.c
-    ThirdParty/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
-    ThirdParty/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
-    ThirdParty/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c)
+    ${odrive_rtos_dir}/CMSIS_RTOS/cmsis_os.c
+    ${odrive_rtos_dir}/portable/MemMang/heap_4.c
+    ${odrive_usb_dir}/Core/Src/usbd_core.c
+    ${odrive_usb_dir}/Core/Src/usbd_ctlreq.c
+    ${odrive_usb_dir}/Core/Src/usbd_ioreq.c)
 
 add_executable(ODriveFirmware ${odrive_sources} ${odrive_board_sources} ${odrive_hal_sources})
 set_target_properties(ODriveFirmware PROPERTIES SUFFIX .elf
@@ -106,12 +105,10 @@ target_include_directories(ODriveFirmware BEFORE PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/MotorControl"
     ${odrive_board_includes}
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FreeRTOS/Source/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FreeRTOS/Source/CMSIS_RTOS"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Device/ST/STM32F4xx/Include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/STM32_USB_Device_Library/Core/Inc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/STM32_USB_Device_Library/Class/CDC/Inc")
+    "${odrive_rtos_dir}/include" "${odrive_rtos_dir}/CMSIS_RTOS"
+    ${odrive_cmsis_includes}
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS_DSP/Include"
+    "${odrive_usb_dir}/Core/Inc")
 
 fibre_generate_interfaces(ODriveFirmware
     DEFINITIONS "${CMAKE_CURRENT_SOURCE_DIR}/odrive-interface.yaml"
@@ -138,7 +135,7 @@ target_sources(ODriveFirmware PRIVATE "${version_source}")
 add_dependencies(ODriveFirmware odrive_version)
 
 target_link_libraries(ODriveFirmware PRIVATE fibre::server
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Lib/GCC/lib${odrive_math_library}.a"
+    "${odrive_dsp_library}"
     c m nosys)
 target_link_options(ODriveFirmware PRIVATE
     -mthumb -mfloat-abi=hard ${odrive_cpu_options}

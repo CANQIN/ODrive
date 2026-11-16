@@ -34,6 +34,7 @@ if(ODRIVE_BUILD_HOST)
             "-DCMAKE_INSTALL_PREFIX:PATH=${ODRIVE_HOST_INSTALL}"
             "-DPython3_EXECUTABLE:FILEPATH=${Python3_EXECUTABLE}"
             "-DODRIVE_BUILD_TESTS:BOOL=${ODRIVE_BUILD_TESTS}"
+            "-DODRIVE_BOARD_VERSION:STRING=${ODRIVE_BOARD_VERSION}"
         BUILD_ALWAYS TRUE
         CONFIGURE_HANDLED_BY_BUILD TRUE)
 endif()
@@ -70,18 +71,15 @@ endif()
 set(interface_generator "${CMAKE_CURRENT_SOURCE_DIR}/packages/fibre/codegen/interface_generator.py")
 set(interface_definitions "${CMAKE_CURRENT_SOURCE_DIR}/Firmware/odrive-interface.yaml")
 set(python_enums "${CMAKE_BINARY_DIR}/generated/python/enums.py")
-set(arduino_enums "${CMAKE_BINARY_DIR}/generated/arduino/ODriveEnums.h")
-add_custom_command(OUTPUT "${python_enums}" "${arduino_enums}"
+add_custom_command(OUTPUT "${python_enums}"
     COMMAND ${CMAKE_COMMAND} -E make_directory
-        "${CMAKE_BINARY_DIR}/generated/python" "${CMAKE_BINARY_DIR}/generated/arduino"
+        "${CMAKE_BINARY_DIR}/generated/python"
     COMMAND Python3::Interpreter "${interface_generator}" --definitions "${interface_definitions}"
         --template "${CMAKE_CURRENT_SOURCE_DIR}/tools/enums_template.j2" --output "${python_enums}"
-    COMMAND Python3::Interpreter "${interface_generator}" --definitions "${interface_definitions}"
-        --template "${CMAKE_CURRENT_SOURCE_DIR}/tools/arduino_enums_template.j2" --output "${arduino_enums}"
     DEPENDS "${interface_generator}" "${interface_definitions}"
-        tools/enums_template.j2 tools/arduino_enums_template.j2
+        tools/enums_template.j2
     VERBATIM)
-add_custom_target(interfaces ALL DEPENDS "${python_enums}" "${arduino_enums}")
+add_custom_target(interfaces ALL DEPENDS "${python_enums}")
 
 if(ODRIVE_BUILD_TOOLS)
     if(NOT ODRIVE_BUILD_HOST)

@@ -20,14 +20,11 @@ The testing facility consists of the following components:
 The Tests
 ********************************************************************************
 
- * :code:`analog_input_test.py`: Analog Input
  * :code:`calibration_test.py`: Motor calibration, encoder offset calibration, encoder direction find, encoder index search
  * :code:`can_test.py`: Partial coverage of the commands described in :ref:`CAN Protocol. <can-protocol>`
  * :code:`closed_loop_test.py`: Velocity control, position control (TODO: sensorless control), brake regen current hard limit, current control with velocity limiting
- * :code:`encoder_test.py`: Incremental encoder, hall effect encoder, sin/cos encoder, SPI encoders (AMS, CUI)
  * :code:`fibre_test.py`: General USB protocol tests
  * :code:`nvm_test.py`: Configuration storage
- * :code:`pwm_input_test.py`: PWM input
  * :code:`step_dir_test.py`: Step/dir input
  * :code:`uart_ascii_test.py`: Partial coverage of the commands described in :ref:`ASCII Protocol <ascii-protocol>`
 
@@ -45,12 +42,12 @@ Our Test Rig
 Our test rig essentially consists of the following components:
 
  * an ODrive as the test subject
- * a Teensy 4.0 to emulate external hardware such as encoders
  * a Motor + Encoder pair for closed loop control tests
  * a Raspberry Pi 4.0 as test host
  * a CAN hat for the Raspberry Pi for CAN tests
 
-This document is therefore centered around this test rig layout.
+Signal connections must be wired directly and declared in the test rig YAML.
+Tests whose required connections are absent are skipped.
 If your test rig differs, you may be able to run some but not all of the tests.
 
 How to set up a Raspberry Pi as testing host
@@ -92,69 +89,6 @@ I used the `NOOBS Lite installer <https://www.raspberrypi.org/downloads/noobs/>`
               sudo apt-get install ipython3 python3-appdirs python3-yaml python3-jinja2 python3-usb python3-serial python3-can python3-scipy python3-matplotlib python3-ipdb git openocd
               # Optionally, to be able to compile the firmware:
               sudo apt-get install gcc-arm-none-eabi
-
-#. Install Teensyduino and teensy-loader-cli:
-
-       .. code:: Bash
-
-              sudo apt-get install libfontconfig libxft2 libusb-dev
-
-       .. code:: Bash
-
-              wget https://downloads.arduino.cc/arduino-1.8.13-linuxarm.tar.xz
-
-       .. code:: Bash
-
-             tar -xf arduino-1.8.13-linuxarm.tar.xz
-
-       .. code:: Bash
-
-             wget https://www.pjrc.com/teensy/td_153/TeensyduinoInstall.linuxarm
-
-       .. code:: Bash
-
-             chmod +x TeensyduinoInstall.linuxarm
-
-       .. code:: Bash
-
-             ./TeensyduinoInstall.linuxarm --dir=arduino-1.8.13
-
-       .. code:: Bash
-
-             sudo cp -R arduino-1.8.13 /usr/share/arduino
-
-       .. code:: Bash
-
-             sudo ln -s /usr/share/arduino/arduino /usr/bin/arduino
-        
-
-       .. code:: Bash
-
-             git clone https://github.com/PaulStoffregen/teensy_loader_cli
-
-       .. code:: Bash
-
-             pushd teensy_loader_cli
-
-       .. code:: Bash
-
-             make
-
-       .. code:: Bash
-
-             sudo cp teensy_loader_cli /usr/bin/
-
-       .. code:: Bash
-
-             sudo ln -s /usr/bin/teensy_loader_cli /usr/bin/teensy-loader-cli
-
-       .. code:: Bash
-
-             popd
-
-       .. code:: Bash
-
-             curl https://www.pjrc.com/teensy/49-teensy.rules | sudo tee /etc/udev/rules.d/49-teensy.rules
 
 #. Add the following lines to :code:`/etc/udev/rules.d/49-stlinkv2.rules`:
 

@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [ValidateSet('v3.6-56V')]
+    [ValidatePattern('^[A-Za-z0-9_.-]+$')]
     [string]$BoardVersion,
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',

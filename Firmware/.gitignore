@@ -22,8 +22,8 @@ Odrive.xml
 # VSCode stuff
 /.vscode/.cortex-debug.*.state.json
 
-# STM32CubeMX (in case you put it in this folder, or a symlink)
-STM32CubeMX
+# CubeMX sources are versioned; only its local build output is ignored.
+/Boards/*/CubeMX*/build/
 
 #gdb log
 openocd.log

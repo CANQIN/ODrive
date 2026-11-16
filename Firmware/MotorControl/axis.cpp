@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <functional>
 #include <bitset>
@@ -99,15 +98,19 @@ void Axis::clear_config() {
     config_.can.node_id = axis_num_;
 }
 
-static void run_state_machine_loop_wrapper(void* ctx) {
-    reinterpret_cast<Axis*>(ctx)->run_state_machine_loop();
-    reinterpret_cast<Axis*>(ctx)->thread_id_valid_ = false;
+static void run_state_machine_loop_wrapper(const void* ctx) {
+    auto* axis = static_cast<Axis*>(const_cast<void*>(ctx));
+    axis->run_state_machine_loop();
+    axis->thread_id_valid_ = false;
 }
 
 // @brief Starts run_state_machine_loop in a new thread
 void Axis::start_thread() {
-    osThreadDef(thread_def, run_state_machine_loop_wrapper, thread_priority_, 0, stack_size_ / sizeof(StackType_t));
-    thread_id_ = osThreadCreate(osThread(thread_def), this);
+    static char thread_name[] = "thread_def";
+    const osThreadDef_t thread_def = {
+        thread_name, run_state_machine_loop_wrapper, thread_priority_, 0,
+        stack_size_ / sizeof(StackType_t)};
+    thread_id_ = osThreadCreate(&thread_def, this);
     thread_id_valid_ = true;
 }
 

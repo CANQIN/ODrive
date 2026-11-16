@@ -1,4 +1,3 @@
-
 #include "interface_usb.h"
 #include "ascii_protocol.hpp"
 
@@ -147,7 +146,7 @@ AsciiProtocol ascii_over_cdc(&usb_cdc_rx_stream, &usb_cdc_tx_multiplexer);
 
 bool usb_cdc_stdout_pending = false;
 
-static void usb_server_thread(void * ctx) {
+static void usb_server_thread(const void * ctx) {
     (void) ctx;
  
     for (;;) {
@@ -225,6 +224,9 @@ void usb_rx_process_packet(uint8_t *buf, uint32_t len, uint8_t endpoint_pair) {
 
 void start_usb_server() {
     // Start USB communication thread
-    osThreadDef(usb_server_thread_def, usb_server_thread, osPriorityNormal, 0, stack_size_usb_thread / sizeof(StackType_t));
-    usb_thread = osThreadCreate(osThread(usb_server_thread_def), NULL);
+    static char thread_name[] = "usb_server_thread_def";
+    const osThreadDef_t thread_def = {
+        thread_name, usb_server_thread, osPriorityNormal, 0,
+        stack_size_usb_thread / sizeof(StackType_t)};
+    usb_thread = osThreadCreate(&thread_def, NULL);
 }

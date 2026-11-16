@@ -73,12 +73,12 @@ VSCode 根目录或 Firmware 目录的默认构建任务都使用此入口；构
 
 * 固件：``build/firmware/ODriveFirmware.{elf,hex,bin,map}``。
 * 主机 SDK：``build/host/install/``。
-* Python 和 Arduino 枚举：``build/generated/python/``、``build/generated/arduino/``。
+* Python 枚举：``build/generated/python/``。
 
 常用选项：
 
 * ``ODRIVE_BUILD_FIRMWARE``、``ODRIVE_BUILD_HOST``：默认 ``ON``，按需关闭某一侧。
-* ``ODRIVE_BOARD_VERSION``：仅支持 ``v3.6-56V``（STM32F405），其他值会在配置阶段报错。
+* ``ODRIVE_BOARD_VERSION``：自动发现 ``Firmware/Boards`` 中的完整板型配置；当前实现 ``v3.6-56V``（STM32F405）。
 * ``CMAKE_BUILD_TYPE``：``Release`` 或 ``Debug``。
 * ``ODRIVE_USE_LTO``、``ODRIVE_STRICT``：默认 ``OFF``，分别控制链接优化与警告视为错误。
 * ``ARM_TOOLCHAIN_DIR``、``Python3_EXECUTABLE``：显式选择 ARM 工具链和 Python。
@@ -155,68 +155,107 @@ It is also possible to use Eclipse. If you'd like to go that route, please see t
 STM32CubeMX
 --------------------------------------------------------------------------------
 
-This project uses the STM32CubeMX tool to generate startup code and to ease the configuration of the peripherals. 
-You can download it from `here <http://www2.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-configurators-and-code-generators/stm32cubemx.html?icmp=stm32cubemx_pron_pr-stm32cubef2_apr2014&sc=stm32cube-pr2>`___. 
-All CubeMX related files are in :code:`Firmware/Board/v3`.
+The v3.6-56V project is generated with **STM32CubeMX 6.18.1** and
+**STM32CubeF4 1.28.3**, targeting STM32F405RGT6. The firmware package includes
+HAL, CMSIS device/core headers, FreeRTOS 10.3.1 (CMSIS-RTOS v1), and USB Device Core.
+Generated files are checked in, so normal CMake builds do not require CubeMX.
 
-You will likely want the pinout for this process. It is available `here <https://docs.google.com/spreadsheets/d/1QXDCs1IRtUyG__M_9WruWOheywb-GhOwFtfPcHuN2Fg/edit#gid=404444347>`__.
-
-Maintaining Modified Generated Code
+Ownership and layout
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When generating the code, STM32CubeMX will nuke everything except some special sections that they provide. 
-These sections are marked like `USER CODE BEGIN`...`USER CODE END`.
-We used to try to make sure all edits we made to the generated code would only go in these sections, so some code structrure may reflect that.
-However over time we realized this will not be tenable, so instead we use git to rebase all changes of the generated code whenever we need to regenerate it.
-We use two special branches that will help us to do this, they are :code:`STM32CubeMX-start` and :code:`STM32CubeMX-end`.
-How to use these is shown in the following example.
+* ``Firmware/Boards/<board>/board.json`` records the MCU, pinned tool versions,
+  IOC configuration. CMake discovers these
+  profiles automatically; select one with ``ODRIVE_BOARD_VERSION``.
+* ``Firmware/Boards/v3.6-56V/CubeMX/CubeMX.ioc`` owns clocks, pins, peripheral
+  initialization, DMA/NVIC priorities and RTOS configuration. Its ``Core``,
+  ``Drivers``, ``Middlewares`` and ``USB_DEVICE`` contain actual generated code.
+  Edits to generated files belong only in ``USER CODE`` sections.
+* ``board.cpp`` maps application objects to generated handles, applies runtime
+  baud/GPIO settings and implements motor sampling/control interrupts.
+  ``board.cmake`` selects generated sources and the MCU platform. The board also
+  owns its linker script, small hardware hooks and ``verify.py`` invariants.
+* ``Firmware/Platform/STM32`` contains RTOS support and ODrive's CDC + native USB
+  class (VID/PID 1209:0D32, WinUSB). USB device startup, PCD/MSP and HAL callbacks
+  use generated code; a small LL-init wrapper adds the board's native EP3 FIFO
+  allocation, for which the F4 CubeMX template has no USER CODE hook.
+* ``Firmware/Platform/STM32F4`` selects the F4 platform and fault handling.
+  ``Firmware/ThirdParty/CMSIS_DSP`` retains the DSP 1.5.3 headers and M4 hard-float
+  math archive to avoid changing motor math during this migration.
 
-.. note:: 
-  Due to how this rebasing is done, all development that changes the generated code should be done directly on :code:`STM32CubeMX-end`, and not based on :code:`devel`, then follow step 4 below to carry them over to your feature branch. If you did some changes to the generated code based from :code:`devel`, you need to cherry pick just those changes over to :code:`STM32CubeMX-end`.
+The generated main function is renamed; application startup and task creation
+remain in ``MotorControl/main.cpp``. Default RTOS tasks and USB class/descriptor
+skeletons are removed by the regeneration script, since the application supplies
+those pieces. There are no parallel handwritten CAN/UART initialization files.
+TIM5 supplies a generated base timer, with PWM capture channels selected at runtime.
 
-#. **Ensuring a clean slate**
+Configuration format changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * We do all changes to the STM32CubeMX config and regenerate the code on top of :code:`STM32CubeMX-start`.
-    * :code:`git checkout STM32CubeMX-start`
+Removal of the obsolete bus interface changes the byte offsets in ``BoardConfig_t``.
+NVM configuration version is now 2; version 1 data is rejected and startup uses the
+default configuration. Reconfigure and save settings after installing this firmware.
+GPIO enum value 8 remains unused; the remaining mode values keep their wire IDs.
 
-  * Run stm32cubeMX and load the :code:`Firmware/Board/v3/Odrive.ioc` project file.
-    * If the tool asks if you wish to migrate to a new version, choose to download the old firmware package (unless you want to use the latest libraries)
-  
-  * Without changing any settings, press :code:`Project -> Generate code`.
-  * You may need to let it download some drivers and such.
-  * STM32CubeMX may now have a newer version of some of the libraries, so there may be changes to the generated code even though we didn't change any settings. We need to check that everything is still working, and hence check in the changes:
-  * :code:`git config --local core.autocrlf input` - This will tell git that all files should be checked in with LF endings (CubeMX generates CRLF endings).
-  * :code:`git diff` - Ignore the pile of line ending warnings.
-  * If you feel qualified: you can now ispect if CubeMX introduced something stupid. If there were any changes, and they look acceptable, we should commit them:
-    
-    * :code:`git commit -am "Run STM32CubeMX v1.21"` - Replace with actual version of CubeMX
+Adding a board
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. **Making Changes to the STM32CubeMX Config**
+See ``Firmware/Boards/README.md`` for the profile contract and onboarding steps.
+Add a profile with its own IOC, board mapping, CMake source list, linker layout and
+validation. Use a separate build directory and ``-DODRIVE_BOARD_VERSION=<board>``.
+The current platform supports STM32F4/Cortex-M4F; a different MCU family or motor
+sampling architecture requires a platform/control port in addition to CubeMX.
+Only v3.6-56V is currently implemented.
 
-  * After completing the above steps, make sure the working directory is clean:
-    * :code:`git status` should include "nothing to commit, working tree clean"
+Regeneration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * Make your changes in STM32CubeMX, save the project and generate the code. (:code:`Project -> Generate code`)
-  * :code:`git diff` - Check that the introduced changes are as expected
-  * If everything looks ok, you can commit your changes.
+Install CubeMX 6.18.1 and STM32CubeF4 1.28.3 using the CubeMX package manager.
+Open ``Firmware/Boards/v3.6-56V/CubeMX/CubeMX.ioc`` to edit the configuration, save it,
+then run from the repository root:
 
-#. **Rebasing the Modifications to the Generated Code**
+.. code:: powershell
 
-  * :code:`git checkout STM32CubeMX-end`
-  * :code:`git rebase STM32CubeMX-start`
-  * Make sure the rebase finishes, fixing any conflicts that may arise
+   ./scripts/regenerate-cubemx.ps1 -Board v3.6-56V -CubeMXPath D:/STM32CubeMX/STM32CubeMX.exe
+   cmake --build build --target firmware tests --parallel 8
 
-#. **Merge New STM32CubeMX Code to your Feature Branch**
+``STM32CUBEMX_PATH`` can also identify the executable or its installation directory.
+Enable ``ODRIVE_BUILD_TESTS=ON`` and ``ODRIVE_STRICT=ON`` when configuring CMake for
+validation. Generation logs are written to ``build/cubemx/<board>``. The script uses the
+bundled Java CLI, preserves USER CODE, removes unused vendor documentation/device
+examples and generic build files, then runs ``scripts/check-cubemx.py``. Build and
+flash only the CMake firmware, which uses the ODrive linker/memory layout.
 
-  Simply merge the new state at:code: `STM32CubeMX-end` into your feature branch.
-  * :code:`git checkout your-feature`
-  * :code:`git merge STM32CubeMX-end`
+Keep the firmware package pinned (``LastFirmware=false``), library copy mode at
+"copy all", and "Keep User Code" enabled.
+The former STM32CubeMX-start/end branch-rebase workflow is no longer needed.
 
-#. **Pushing back Upstream**
+Configuration invariants
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * Generate a PR like normal for your feature.
-  * Make sure youhave pushed to the :code:`STM32CubeMX-start` and :code:`STM32CubeMX-end` branches on your fork.
-  * Make a note in your PR to the maintainer that they need to update the STM32CubeMX branches when they merge the PR.
+The checked configuration keeps 168 MHz system/PWM clocks, 84 MHz APB1 timer
+clocks, TIM1/8 period 3500, repetition counter 2 and dead time 20. TIM13 has ARR
+10499; its integer expression divides after multiplication to avoid truncating
+the APB1/PWM clock ratio to zero. Timing constants live in IOC ``Mcu.UserConstants``
+and are emitted into ``Core/Inc/main.h``.
+
+SPI TX/RX DMA IRQ priorities remain 3/4, with high/medium DMA arbitration.
+TIM5 has priority 1, TIM8/TIM13 priority 0, control-loop IRQ priority 5, USB and
+HAL tick priority 6, CAN priority 9, and UART priority 10. High-priority ISRs do
+not use FreeRTOS APIs: leave "Uses FreeRTOS functions" unchecked for them in CubeMX.
+ADC DMA is polled and its interrupt must remain disabled.
+
+USER CODE hooks retain SPI DMA alignment when switching between 8-bit and 16-bit
+transactions, PWM shutdown on fatal initialization errors, the 64 KB application
+heap in CCM, and the FreeRTOS tick mapping. The shared platform supplies the SysTick wrapper. GPIO runtime configuration is applied
+after the generated peripheral setup. FLASH remains 768 KB plus 256 KB reserved
+NVM, SRAM 128 KB, and CCM 64 KB. The custom linker and ``USER_VECT_TAB_ADDRESS``
+compile definition preserve the application vector table at FLASH base.
+
+Host tests cover the generated configuration and the actual custom USB class
+against the new ST core (enumeration, interface 2, WinUSB, two bulk endpoint pairs,
+and zero-length packet completion). They do not replace hardware validation:
+check USB/UART/CAN communication, encoder SPI, PWM/ADC synchronization, configuration
+save/reboot, and motor operation on a v3.6-56V board before deployment.
 
 Troubleshooting
 --------------------------------------------------------------------------------
@@ -336,5 +375,5 @@ When filing a PR please go through this checklist:
  * Also, for each removed/moved/renamed API item use your IDE's search feature to search for occurrences of this name. Update the places you found (this will usually be documentation and test scripts).
  * If you added things to :code:`odrive-interface.yaml` make sure the new things have decent documentation in the YAML file. We don't expect 100% coverage but use good sense of what to document.
  * Make sure your PR doesn't contain spurious changes that unnecessarily add or remove whitespace. These add noise and make the reviewer's lifes harder.
- * If you changed any enums in :code:`odrive-interface.yaml`, make sure you update `enums.py <https://github.com/odriverobotics/ODrive/blob/master/tools/odrive/enums.py>`_ and `ODriveEnums.h <https://github.com/odriverobotics/ODrive/blob/master/Arduino/ODriveArduino/ODriveEnums.h>`_. 
+ * If you changed any enums in :code:`odrive-interface.yaml`, regenerate ``tools/odrive/enums.py`` and the GUI enums from that definition.
    The file includes instructions on how to do this. Check the diff to verify that none of the existing enumerators changed their value.

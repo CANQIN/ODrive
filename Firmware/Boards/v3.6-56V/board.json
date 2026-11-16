@@ -1,0 +1,13 @@
+{
+  "name": "ODrive v3.6-56V",
+  "mcu": "STM32F405xx",
+  "part": "STM32F405RGT6",
+  "family": "STM32F4",
+  "cmsis_device": "STM32F4xx",
+  "cube_project": "CubeMX/CubeMX.ioc",
+  "cube_version": "6.18.1",
+  "firmware_package": "STM32Cube FW_F4 V1.28.3",
+  "startup": "startup_stm32f405xx.s",
+  "linker_script": "STM32F405RGTx_FLASH.ld",
+  "hardware": {"major": 3, "minor": 6, "voltage": 56}
+}

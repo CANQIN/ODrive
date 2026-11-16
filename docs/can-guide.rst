@@ -10,7 +10,7 @@ CAN Bus Guide for ODrive
    
 ODrive v3 supports CAN 2.0b. We've built a :ref:`simple protocol <can-protocol>` (named CANSimple) so that most ODrive functions can be controlled without a full CAN Open or similar stack.  
 This guide is intended for beginners to set up CAN on the ODrive and on their host device.  
-We will be focusing on Raspberry Pi and Arduino-compatible devices using the MCP2515 CAN Controller.
+We will be focusing on Raspberry Pi devices using the MCP2515 CAN Controller.
 
 What is CAN bus?
 --------------------------------------------------------------------------------

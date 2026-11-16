@@ -50,13 +50,6 @@ interfaces:
               rx_cnt: readonly uint32
               tx_cnt: readonly uint32
               tx_overrun_cnt: readonly uint32
-          i2c:
-            c_is_class: False
-            attributes:
-              addr: readonly uint8
-              addr_match_cnt: readonly uint32
-              rx_cnt: readonly uint32
-              error_cnt: readonly uint32
       config:
         c_is_class: False
         attributes:
@@ -87,9 +80,6 @@ interfaces:
 
               For more information refer to Section 30.3.4 and Table 142 (the column with f_PCLK = 42 MHz) in the STM datasheet:
               https://www.st.com/content/ccc/resource/technical/document/reference_manual/3d/6d/5a/66/b4/99/40/d4/DM00031020.pdf/files/DM00031020.pdf/jcr:content/translations/en.DM00031020.pdf"
-          enable_i2c_instead_of_can:
-            type: bool
-            doc: 'Changing this requires a reboot'
           enable_ascii_protocol_on_usb: bool
           max_regen_current: float32
           brake_resistance:

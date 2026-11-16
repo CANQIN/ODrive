@@ -1,7 +1,7 @@
 #ifndef __STM32_SYSTEM_H
 #define __STM32_SYSTEM_H
 
-#include <stm32f405xx.h>
+#include <stm32f4xx.h>
 
 // C/C++ definitions
 

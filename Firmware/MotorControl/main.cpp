@@ -1,4 +1,3 @@
-
 #define __MAIN_CPP__
 #include "odrive_main.h"
 #include "nvm_config.hpp"
@@ -8,7 +7,6 @@
 #include "usb_device.h"
 #include <communication/interface_usb.h>
 #include <communication/interface_uart.h>
-#include <communication/interface_i2c.h>
 #include <communication/interface_can.hpp>
 
 osSemaphoreId sem_usb_irq;
@@ -490,7 +488,7 @@ uint32_t ODrive::get_gpio_states() {
 /**
  * @brief Main thread started from main().
  */
-static void rtos_main(void*) {
+static void rtos_main(const void*) {
     // Init USB device
     MX_USB_DEVICE_Init();
 
@@ -743,14 +741,6 @@ extern "C" int main(void) {
                     odrv.misconfigured_ = true;
                 }
             } break;
-            case ODriveIntf::GPIO_MODE_I2C_A: {
-                GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-                GPIO_InitStruct.Pull = GPIO_PULLUP;
-                GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-                if (!odrv.config_.enable_i2c_a) {
-                    odrv.misconfigured_ = true;
-                }
-            } break;
             //case ODriveIntf::GPIO_MODE_SPI_A: { // TODO
             //} break;
             case ODriveIntf::GPIO_MODE_PWM: {
@@ -810,8 +800,11 @@ extern "C" int main(void) {
     osSemaphoreWait(sem_can, 0);
 
     // Create main thread
-    osThreadDef(defaultTask, rtos_main, osPriorityNormal, 0, stack_size_default_task / sizeof(StackType_t));
-    defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+    static char thread_name[] = "defaultTask";
+    const osThreadDef_t thread_def = {
+        thread_name, rtos_main, osPriorityNormal, 0,
+        stack_size_default_task / sizeof(StackType_t)};
+    defaultTaskHandle = osThreadCreate(&thread_def, NULL);
 
     // Start scheduler
     osKernelStart();

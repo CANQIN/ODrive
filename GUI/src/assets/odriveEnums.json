@@ -7,7 +7,6 @@
     "GPIO_MODE_UART_B": 5,
     "GPIO_MODE_UART_C": 6,
     "GPIO_MODE_CAN_A": 7,
-    "GPIO_MODE_I2C_A": 8,
     "GPIO_MODE_SPI_A": 9,
     "GPIO_MODE_PWM": 10,
     "GPIO_MODE_ENC0": 11,

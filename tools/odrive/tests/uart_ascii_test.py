@@ -44,8 +44,7 @@ class UartTest():
             yield AnyTestCase(*[(odrive, 0, 1, 2, port, tf) for port, tf in ports])
 
             # Enable the line below to manually test UART_B. For this you need
-            # to manually move to the wires go to GPIO1/2 to GPIO3/4. The ones
-            # that normally go to GPIO3/4 have a low pass filter.
+            # to move the UART wires from GPIO1/2 to GPIO3/4.
             #yield (odrive, 1, 3, 4, ports)
 
     def prepare(self, odrive: ODriveComponent, uart_num: int, tx_gpio: list, rx_gpio: list, logger: Logger):
@@ -239,87 +238,10 @@ class TestUartBurnIn(UartTest):
             test_assert_eq(response, odrive.handle.vbus_voltage, accuracy=0.1)
 
 
-class TestUartNoise(UartTest):
-    """
-    Tests if the UART can handle invalid signals.
-    """
-    
-    def get_test_cases(self, testrig: TestRig):
-        for odrive in testrig.get_components(ODriveComponent):
-            uart_num, tx_gpio, rx_gpio = (0, 1, 2)
-
-            alternatives = []
-
-            # Find a Teensy that sits between a linux serial port and the ODrive
-            # with an additional wire that runs to the linux PC and will be used
-            # as noise-enable line
-
-            for teensy in testrig.get_components(TeensyComponent):
-                for port in testrig.get_components(SerialPortComponent):
-                    gpio_conns = [
-                        testrig.net_by_component.get(getattr(odrive, f'gpio{tx_gpio}'), set()).intersection(set(teensy.gpios)),
-                        testrig.net_by_component.get(getattr(odrive, f'gpio{rx_gpio}'), set()).intersection(set(teensy.gpios)),
-                        testrig.net_by_component.get(port.tx, set()).intersection(set(teensy.gpios)),
-                        testrig.net_by_component.get(port.rx, set()).intersection(set(teensy.gpios)),
-                        teensy.gpios
-                    ]
-
-                    for gpio1, gpio2, gpio3, gpio4, gpio5 in itertools.product(*gpio_conns):
-                        for noise_ctrl_gpio, tf3 in testrig.get_connected_components(gpio5, LinuxGpioComponent):
-                            tf1 = TeensyForwardingFixture(teensy, gpio3, gpio2)
-                            tf2 = TeensyForwardingFixture(teensy, gpio1, gpio4)
-                            tf1.noise_enable = gpio5
-                            alternatives.append((odrive, uart_num, tx_gpio, rx_gpio, port, noise_ctrl_gpio, TestFixture.all_of(tf1, tf2, tf3)))
-
-            yield AnyTestCase(*alternatives)
-
-    def run_test(self, odrive: ODriveComponent, uart_num: int, tx_gpio: list, rx_gpio: list, port: SerialPortComponent, noise_enable: LinuxGpioComponent, logger: Logger):
-        noise_enable.config(output=True)
-        noise_enable.write(False)
-        time.sleep(0.1)
-
-        self.prepare(odrive, uart_num, tx_gpio, rx_gpio, logger)
-
-        with port.open(115200) as ser:
-            # reset port to known state
-            reset_state(ser)
-
-            # First try
-            ser.write(b'r vbus_voltage\n')
-            response = float(ser.readline().strip())
-            test_assert_eq(response, odrive.handle.vbus_voltage, accuracy=0.1)
-
-            # Enable square wave of ~1.6MHz on the ODrive's RX line
-            noise_enable.write(True)
-
-            time.sleep(0.1)
-            reset_state(ser)
-
-            time.sleep(1.0)
-
-            # Read an attribute (should fail because the command is not passed through)
-            ser.write(b'r vbus_voltage\n')
-            test_assert_eq(ser.readline(), b'')
-
-            # Disable square wave
-            noise_enable.write(False)
-
-            # Give receiver some time to recover
-            time.sleep(0.1)
-
-            # reset port to known state
-            reset_state(ser)
-
-            # Try again
-            ser.write(b'r vbus_voltage\n')
-            response = float(ser.readline().strip())
-            test_assert_eq(response, odrive.handle.vbus_voltage, accuracy=0.1)
-
 tests = [
     TestUartAscii(),
     TestUartBaudrate(),
-    TestUartBurnIn(),
-    TestUartNoise()
+    TestUartBurnIn()
 ]
 
 if __name__ == '__main__':
