@@ -1,6 +1,18 @@
 ## 文件作用
 
-该文件实现 PMSM 的无位置传感器估算器：
+`Firmware/MotorControl/sensorless_estimator.c/.h` 实现独立的 C99 无感估算算法。`Axis::update_sensorless_estimator()` 负责采样、端口有效性和错误上报。
+
+| 接口数据 | 内容 |
+| --- | --- |
+| `sensorless_config_t` | 观测器增益、PLL 带宽、永磁磁链 |
+| `sensorless_motor_t` | 相电阻、相电感、极对数 |
+| `sensorless_input_t` | αβ 电流、电流有效标志、最新 αβ 电压反馈 |
+| `sensorless_state_t` | 磁链、电压延迟、PLL 角度和上一拍角速度 |
+| `sensorless_output_t` | 磁链角度、PLL 角度、电角速度、机械转速 |
+
+调用 `sensorless_estimator_update()` 时显式传入上述输入、状态、配置和以秒为单位的 `dt`。状态由调用方按值持有，算法无堆分配、全局实例或硬件依赖。
+
+算法流程如下：
 
 ```text
 三相电流
@@ -27,7 +39,7 @@
 
 ## 主要状态和参数
 
-头文件定义了三个配置参数：
+应用层为三个配置参数提供默认值，C 算法通过参数接收配置：
 
 ```cpp
 float observer_gain = 1000.0f;
@@ -39,7 +51,7 @@ float pm_flux_linkage = 1.58e-3f;
 
 - `observer_gain`：非线性磁链观测器增益。越大，磁链幅值收敛越快，但过大会放大噪声并可能造成离散系统振荡。
 - `pll_bandwidth`：PLL 带宽，决定速度估算的响应速度和噪声。
-- `pm_flux_linkage`：永磁体磁链，单位相当于 `V·s` 或 `Wb`。注释中给出的 KV 换算公式为：
+- `pm_flux_linkage`：永磁体磁链，单位相当于 `V·s` 或 `Wb`。常用的 KV 换算公式为：
 
 \[
 \lambda_m \approx
@@ -50,38 +62,39 @@ float pm_flux_linkage = 1.58e-3f;
 
 内部状态包括：
 
-- `flux_state_[2]`：α、β 轴总定子磁链估计值。
-- `V_alpha_beta_memory_[2]`：与当前电流采样时刻对应的历史施加电压。
-- `pll_pos_`：PLL 内部跟踪的电角度。
-- `phase_`：输出电角度，单位 rad。
-- `phase_vel_`：输出电角速度，单位 rad/s。
-- `vel_estimate_`：机械转速，单位 turns/s。
+- `state->flux[2]`：α、β 轴总定子磁链估计值。
+- `state->voltage_memory[2]`：与当前电流采样时刻对应的历史施加电压。
+- `state->pll_pos`：PLL 跟踪的电角度。
+- `state->phase_vel`：上一拍电角速度，进入算法前由 Axis 同步端口有效值。
+- `output->phase`：输出电角度，单位 rad。
+- `output->phase_vel`：输出电角速度，单位 rad/s。
+- `output->vel_estimate`：机械转速，单位 turns/s。
 
 ---
 
-## `reset()`：复位观测器
+## `sensorless_estimator_reset()`：复位观测器
 
 ```cpp
-void SensorlessEstimator::reset()
+void sensorless_estimator_reset(sensorless_state_t *state);
 ```
 
 它把以下内部状态清零：
 
 - PLL 角度
-- 机械转速输出
+- PLL 角速度
 - 历史 αβ 电压
 - αβ 磁链积分状态
 
-注意，`error_` 不会被这里清除，因此错误是锁存的，需要由外部错误清除流程处理。
+更新失败时，C 算法清零状态和输出并返回状态码。Axis 将状态码映射为原有通信错误位并锁存，同时清零机械速度和 PLL 角度；本周期不发布相位和角速度端口。错误仍由外部清除流程处理。
 
 ---
 
-## `update()`：一次估算过程
+## `sensorless_estimator_update()`：一次估算过程
 
 ### 1. 计算 PLL 增益
 
 ```cpp
-float pll_kp = 2.0f * config_.pll_bandwidth;
+float pll_kp = 2.0f * config->pll_bandwidth;
 float pll_ki = 0.25f * (pll_kp * pll_kp);
 ```
 
@@ -100,7 +113,7 @@ K_i = B^2
 随后检查离散时间稳定条件：
 
 ```cpp
-if (!(current_meas_period * pll_kp < 1.0f))
+if (!(dt * pll_kp < 1.0f))
 ```
 
 即：
@@ -109,46 +122,17 @@ if (!(current_meas_period * pll_kp < 1.0f))
 T_sK_p < 1
 \]
 
-不满足时设置：
-
-- `ERROR_UNSTABLE_GAIN`
-- Axis 的 `ERROR_SENSORLESS_ESTIMATOR_FAILED`
-
-然后复位观测器并返回 `false`。
+不满足时复位状态和输出，返回 `SENSORLESS_UNSTABLE_GAIN`。Axis 锁存 `ERROR_UNSTABLE_GAIN`，控制循环记录 `ERROR_SENSORLESS_ESTIMATOR_FAILED`。
 
 ---
 
 ### 2. 获取三相电流
 
-```cpp
-auto current_meas = axis_->motor_.current_meas_;
-```
+Axis 在临界区内一起读取三相电流、使能状态、最新电压反馈和电机参数，计算在临界区外执行。
 
-如果电机未使能：
+未使能时，应用层提供有效的零电流。使能但采样无效时，`input->current_valid` 为 `false`，算法返回 `SENSORLESS_CURRENT_MISSING` 并复位状态；Axis 映射为 `ERROR_UNKNOWN_CURRENT_MEASUREMENT`。
 
-```cpp
-if (!axis_->motor_.is_armed_) {
-    current_meas = {0.0f, 0.0f};
-}
-```
-
-因为未使能时电流采样可能无效，代码直接假定电流为零。
-
-如果电机使能但没有有效电流：
-
-```cpp
-if (!current_meas.has_value())
-```
-
-则报告：
-
-```cpp
-ERROR_UNKNOWN_CURRENT_MEASUREMENT
-```
-
-并复位观测器。
-
-源码中的 TODO 还指出：这里读取的电流会被更高优先级中断修改，目前不是严格线程安全的。
+增益稳定性检查先于电流有效性检查，保留原来的故障优先级。
 
 ---
 
@@ -171,7 +155,7 @@ I_\alpha = I_A
 I_\beta = \frac{I_B-I_C}{\sqrt{3}}
 \]
 
-把三相静止坐标系电流转换为二维 αβ 静止坐标系电流。
+Axis 把三相静止坐标系电流转换为二维 αβ 电流，填入 `input.current[0]` 和 `input.current[1]`，算法不接触 ADC 或电机对象。
 
 ---
 
@@ -200,9 +184,9 @@ R\boldsymbol{i}
 ```cpp
 float y =
     -phase_resistance * I_alpha_beta[i]
-    + V_alpha_beta_memory_[i];
+    + state->voltage_memory[i];
 
-flux_state_[i] += y * current_meas_period;
+state->flux[i] += y * dt;
 ```
 
 因此：
@@ -215,7 +199,7 @@ flux_state_[i] += y * current_meas_period;
 T_s(v-Ri)
 \]
 
-这里的 `flux_state_` 是总定子磁链，包含：
+这里的 `state->flux` 是总定子磁链，包含：
 
 - 电感磁链 \(L i\)
 - 永磁体磁链 \(\psi_m\)
@@ -226,7 +210,7 @@ T_s(v-Ri)
 
 ```cpp
 eta[i] =
-    flux_state_[i]
+    state->flux[i]
     - phase_inductance * I_alpha_beta[i];
 ```
 
@@ -269,14 +253,14 @@ L\boldsymbol{i}
 
 ```cpp
 float pm_flux_sqr =
-    config_.pm_flux_linkage * config_.pm_flux_linkage;
+    config->pm_flux_linkage * config->pm_flux_linkage;
 
 float est_pm_flux_sqr =
     eta[0] * eta[0] + eta[1] * eta[1];
 
 float eta_factor =
     0.5f
-    * (config_.observer_gain / pm_flux_sqr)
+    * (config->observer_gain / pm_flux_sqr)
     * (pm_flux_sqr - est_pm_flux_sqr);
 ```
 
@@ -295,8 +279,8 @@ float eta_factor =
 然后加入磁链状态：
 
 ```cpp
-flux_state_[i] +=
-    eta_factor * eta[i] * current_meas_period;
+state->flux[i] +=
+    eta_factor * eta[i] * dt;
 ```
 
 其作用非常直观：
@@ -312,11 +296,9 @@ flux_state_[i] +=
 ### 7. 保存与电流采样对应的历史电压
 
 ```cpp
-V_alpha_beta_memory_[0] =
-    axis_->motor_.current_control_.final_v_alpha_;
+state->voltage_memory[0] = input->voltage[0];
 
-V_alpha_beta_memory_[1] =
-    axis_->motor_.current_control_.final_v_beta_;
+state->voltage_memory[1] = input->voltage[1];
 ```
 
 控制循环的调用顺序是：
@@ -328,7 +310,7 @@ V_alpha_beta_memory_[1] =
 → 电流控制器
 ```
 
-因此执行估算器时，`final_v_alpha_` 和 `final_v_beta_` 还是上一控制周期产生的电压。再通过 `V_alpha_beta_memory_` 延迟一次，使电压与当前 ADC 电流采样的实际 PWM 周期对齐。
+因此执行估算器时，`final_v_alpha_` 和 `final_v_beta_` 还是上一控制周期产生的电压。再通过 `state->voltage_memory` 延迟一次，使电压与当前 ADC 电流采样的实际 PWM 周期对齐。
 
 这是很重要的时序补偿。如果电压和电流错开一个周期，磁链积分会产生明显的相位和幅值误差。
 
@@ -337,7 +319,7 @@ V_alpha_beta_memory_[1] =
 ### 8. 根据磁链方向计算电角度
 
 ```cpp
-float phase = fast_atan2(eta[1], eta[0]);
+float phase = _sensorless_atan2(eta[1], eta[0]);
 ```
 
 即：
@@ -361,21 +343,18 @@ float phase = fast_atan2(eta[1], eta[0]);
 首先使用上一周期速度预测 PLL 角度：
 
 ```cpp
-float phase_vel =
-    phase_vel_.previous().value_or(0.0f);
-
-pll_pos_ =
-    wrap_pm_pi(pll_pos_ + Ts * phase_vel);
+float predicted =
+    _sensorless_wrap_phase(state->pll_pos + dt * state->phase_vel);
 ```
 
 然后计算观测角度与 PLL 角度之间的最短角度误差：
 
 ```cpp
 float delta_phase =
-    wrap_pm_pi(phase - pll_pos_);
+    _sensorless_wrap_phase(phase - predicted);
 ```
 
-`wrap_pm_pi()` 很重要。例如：
+`_sensorless_wrap_phase()` 很重要。例如：
 
 - 当前角度接近 \(+\pi\)
 - PLL 角度接近 \(-\pi\)
@@ -385,8 +364,8 @@ float delta_phase =
 PLL 更新为：
 
 ```cpp
-pll_pos_ += Ts * pll_kp * delta_phase;
-phase_vel += Ts * pll_ki * delta_phase;
+state->pll_pos = _sensorless_wrap_phase(predicted + dt * pll_kp * delta_phase);
+state->phase_vel += dt * pll_ki * delta_phase;
 ```
 
 对应：
@@ -414,19 +393,18 @@ T_sK_i e_\theta
 一个值得注意的细节是：
 
 ```cpp
-phase_ = phase;
+output->phase = phase;
 ```
 
-输出给 FOC 的是 `atan2()` 得到的原始磁链角度，而不是 `pll_pos_`。PLL 主要用于产生平滑的速度估算和下一周期相位预测。
+输出给 FOC 的是 `atan2()` 得到的原始磁链角度，而不是 `output->pll_pos`。PLL 主要用于产生平滑的速度估算和下一周期相位预测。
 
 ---
 
 ### 10. 输出机械转速
 
 ```cpp
-vel_estimate_ =
-    phase_vel /
-    (pole_pairs * 2.0f * M_PI);
+output->vel_estimate = state->phase_vel
+    / (fmaxf((float)motor->pole_pairs, 1.0f) * 2.0f * 3.14159265358979323846f);
 ```
 
 电角速度和机械速度的关系为：
@@ -443,7 +421,7 @@ n_m
 \frac{\omega_e}{2\pi p}
 \]
 
-`std::max(pole_pairs, 1.0f)` 用来防止极对数配置为零时发生除零。
+`fmaxf((float)motor->pole_pairs, 1.0f)` 用来防止极对数配置为零时发生除零。
 
 ---
 

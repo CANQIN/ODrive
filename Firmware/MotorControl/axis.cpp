@@ -12,7 +12,6 @@ Axis::Axis(int axis_num,
            uint16_t default_dir_gpio_pin,
            osPriority thread_priority,
            Encoder& encoder,
-           SensorlessEstimator& sensorless_estimator,
            Controller& controller,
            Motor& motor,
            Endstop& min_endstop,
@@ -23,7 +22,6 @@ Axis::Axis(int axis_num,
       default_dir_gpio_pin_(default_dir_gpio_pin),
       thread_priority_(thread_priority),
       encoder_(encoder),
-      sensorless_estimator_(sensorless_estimator),
       controller_(controller),
       motor_(motor),
       min_endstop_(min_endstop),
@@ -190,6 +188,50 @@ bool Axis::watchdog_check() {
         error_ |= ERROR_WATCHDOG_TIMER_EXPIRED;
         return false;
     }
+}
+
+bool Axis::update_sensorless_estimator() {
+    auto& estimator = sensorless_estimator_;
+    sensorless_input_t input{};
+    sensorless_motor_t motor_model{};
+    std::optional<Iph_ABC_t> current;
+    bool is_armed = false;
+
+    // 一次性读取同一周期的采样和参数，计算放在临界区外。
+    CRITICAL_SECTION() {
+        current = motor_.current_meas_;
+        is_armed = motor_.is_armed_;
+        input.voltage[0] = motor_.current_control_.final_v_alpha_;
+        input.voltage[1] = motor_.current_control_.final_v_beta_;
+        motor_model = {
+            motor_.config_.phase_resistance,
+            motor_.config_.phase_inductance,
+            motor_.config_.pole_pairs};
+    }
+    if (!is_armed) {
+        current = {0.0f, 0.0f, 0.0f};
+    }
+    input.current_valid = current.has_value();
+    if (input.current_valid) {
+        input.current[0] = current->phA;
+        input.current[1] = one_by_sqrt3 * (current->phB - current->phC);
+    }
+
+    estimator.state_.phase_vel = estimator.phase_vel_.previous().value_or(0.0f);
+    sensorless_output_t output{};
+    const sensorless_status_t status = sensorless_estimator_update(
+        &estimator.state_, &estimator.config_, &motor_model, &input, current_meas_period, &output);
+    estimator.pll_pos_ = output.pll_pos;
+    estimator.vel_estimate_ = output.vel_estimate;
+    if (status != SENSORLESS_OK) {
+        estimator.error_ |= status == SENSORLESS_UNSTABLE_GAIN
+                          ? SensorlessEstimator_t::ERROR_UNSTABLE_GAIN
+                          : SensorlessEstimator_t::ERROR_UNKNOWN_CURRENT_MEASUREMENT;
+        return false;
+    }
+    estimator.phase_ = output.phase;
+    estimator.phase_vel_ = output.phase_vel;
+    return true;
 }
 
 void Axis::update_open_loop_controller(uint32_t timestamp) {

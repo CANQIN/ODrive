@@ -72,7 +72,7 @@ static void config_clear_all() {
     odrv.can_.config_ = {};
     for (size_t i = 0; i < AXIS_COUNT; ++i) {
         encoders[i].config_ = {};
-        axes[i].sensorless_estimator_.config_ = {};
+        axes[i].sensorless_estimator_.config_ = Axis::SensorlessEstimator_t::default_config;
         axes[i].controller_.config_ = {};
         axes[i].controller_.config_.load_encoder_axis = i;
         axes[i].trap_traj_.config_ = {};
@@ -161,7 +161,7 @@ bool ODrive::any_error() {
         || std::any_of(axes.begin(), axes.end(), [](Axis& axis){
             return axis.error_ != Axis::ERROR_NONE
                 || axis.motor_.error_ != Motor::ERROR_NONE
-                || axis.sensorless_estimator_.error_ != SensorlessEstimator::ERROR_NONE
+                || axis.sensorless_estimator_.error_ != Axis::SensorlessEstimator_t::ERROR_NONE
                 || axis.encoder_.error_ != Encoder::ERROR_NONE
                 || axis.controller_.error_ != Controller::ERROR_NONE;
         });
@@ -181,7 +181,7 @@ void ODrive::clear_errors() {
     for (auto& axis: axes) {
         axis.motor_.error_ = Motor::ERROR_NONE;
         axis.controller_.error_ = Controller::ERROR_NONE;
-        axis.sensorless_estimator_.error_ = SensorlessEstimator::ERROR_NONE;
+        axis.sensorless_estimator_.error_ = Axis::SensorlessEstimator_t::ERROR_NONE;
         axis.encoder_.error_ = Encoder::ERROR_NONE;
         axis.encoder_.spi_error_rate_ = 0.0f;
         axis.error_ = Axis::ERROR_NONE;
@@ -379,34 +379,7 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
 
     for (auto& axis: axes) {
         MEASURE_TIME(axis.task_times_.sensorless_estimator_update) {
-            SensorlessEstimator::Input input;
-            SensorlessEstimator::MotorModel motor_model{};
-            std::optional<Iph_ABC_t> current;
-            bool is_armed = false;
-            // Capture related inputs together; keep the observer math outside
-            // the critical section and before this cycle's motor/FOC updates.
-            CRITICAL_SECTION() {
-                current = axis.motor_.current_meas_;
-                is_armed = axis.motor_.is_armed_;
-                input.voltage_feedback = {
-                    axis.motor_.current_control_.final_v_alpha_,
-                    axis.motor_.current_control_.final_v_beta_};
-                motor_model = {
-                    axis.motor_.config_.phase_resistance,
-                    axis.motor_.config_.phase_inductance,
-                    axis.motor_.config_.pole_pairs};
-            }
-            if (!is_armed) {
-                // Preserve the zero-current assumption while disarmed.
-                current = {0.0f, 0.0f, 0.0f};
-            }
-            if (current.has_value()) {
-                // Clarke transform at the system/algorithm boundary.
-                input.current = SensorlessEstimator::AlphaBeta{
-                    current->phA,
-                    one_by_sqrt3 * (current->phB - current->phC)};
-            }
-            if (!axis.sensorless_estimator_.update(input, motor_model, current_meas_period)) {
+            if (!axis.update_sensorless_estimator()) {
                 axis.error_ |= Axis::ERROR_SENSORLESS_ESTIMATOR_FAILED;
             }
         }
@@ -545,7 +518,7 @@ static void rtos_main(const void*) {
     }
 
     for (auto& axis: axes) {
-        axis.sensorless_estimator_.error_ &= ~SensorlessEstimator::ERROR_UNKNOWN_CURRENT_MEASUREMENT;
+        axis.sensorless_estimator_.error_ &= ~Axis::SensorlessEstimator_t::ERROR_UNKNOWN_CURRENT_MEASUREMENT;
     }
 
     // Start state machine threads. Each thread will go through various calibration

@@ -71,7 +71,7 @@ set(odrive_sources
     MotorControl/foc.cpp
     MotorControl/open_loop_controller.c
     MotorControl/oscilloscope.cpp
-    MotorControl/sensorless_estimator.cpp
+    MotorControl/sensorless_estimator.c
     MotorControl/trap_traj.c
     MotorControl/pwm_input.cpp
     MotorControl/main.cpp

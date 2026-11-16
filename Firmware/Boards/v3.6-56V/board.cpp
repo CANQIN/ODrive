@@ -113,7 +113,6 @@ Encoder encoders[AXIS_COUNT] = {
 Endstop endstops[2 * AXIS_COUNT];
 MechanicalBrake mechanical_brakes[AXIS_COUNT];
 
-SensorlessEstimator sensorless_estimators[AXIS_COUNT];
 Controller controllers[AXIS_COUNT];
 
 std::array<Axis, AXIS_COUNT> axes{{
@@ -123,7 +122,6 @@ std::array<Axis, AXIS_COUNT> axes{{
         2, // dir_gpio_pin
         (osPriority)(osPriorityHigh + (osPriority)1), // thread_priority
         encoders[0], // encoder
-        sensorless_estimators[0], // sensorless_estimator
         controllers[0], // controller
         motors[0], // motor
         endstops[0], endstops[1], // min_endstop, max_endstop
@@ -135,7 +133,6 @@ std::array<Axis, AXIS_COUNT> axes{{
         8, // dir_gpio_pin
         osPriorityHigh, // thread_priority
         encoders[1], // encoder
-        sensorless_estimators[1], // sensorless_estimator
         controllers[1], // controller
         motors[1], // motor
         endstops[2], endstops[3], // min_endstop, max_endstop

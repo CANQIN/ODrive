@@ -99,7 +99,7 @@ public:
      * 
      * This function is thread-safe if load/store operations of T are atomic.
      */
-    std::optional<T> any() {
+    std::optional<T> any() const {
         return content_;
     }
     

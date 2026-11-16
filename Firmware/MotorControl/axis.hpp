@@ -5,7 +5,7 @@ class Axis;
 
 #include "encoder.hpp"
 #include "acim_estimator.hpp"
-#include "sensorless_estimator.hpp"
+#include "sensorless_estimator.h"
 #include "controller.hpp"
 #include "open_loop_controller.h"
 #include "trap_traj.h"
@@ -145,12 +145,22 @@ public:
         OutputPort<float> total_distance_ = 0.0f;
     };
 
+    struct SensorlessEstimator_t : public ODriveIntf::SensorlessEstimatorIntf {
+        static constexpr sensorless_config_t default_config{1000.0f, 1000.0f, 1.58e-3f};
+        sensorless_config_t config_ = default_config;
+        sensorless_state_t state_{};
+        Error error_ = ERROR_NONE;
+        float pll_pos_ = 0.0f;
+        OutputPort<float> phase_ = 0.0f;
+        OutputPort<float> phase_vel_ = 0.0f;
+        OutputPort<float> vel_estimate_ = 0.0f;
+    };
+
     Axis(int axis_num,
             uint16_t default_step_gpio_pin,
             uint16_t default_dir_gpio_pin,
             osPriority thread_priority,
             Encoder& encoder,
-            SensorlessEstimator& sensorless_estimator,
             Controller& controller,
             Motor& motor,
             Endstop& min_endstop,
@@ -183,6 +193,7 @@ public:
                 std::function<bool(bool)> loop_cb = {} );
     bool run_closed_loop_control_loop();
     bool update_encoder();
+    bool update_sensorless_estimator();
     void update_open_loop_controller(uint32_t timestamp);
     bool run_index_search();
     bool run_direction_find();
@@ -207,7 +218,7 @@ public:
 
     Encoder& encoder_;
     AcimEstimator acim_estimator_;
-    SensorlessEstimator& sensorless_estimator_;
+    SensorlessEstimator_t sensorless_estimator_;
     Controller& controller_;
     OpenLoopControl_t open_loop_controller_;
     Motor& motor_;
