@@ -23,6 +23,7 @@ if(ODRIVE_BUILD_TESTS)
     set(firmware "${CMAKE_CURRENT_LIST_DIR}/../../Firmware")
     add_executable(odrive_tests
         "${firmware}/Tests/test_runner.cpp"
+        "${firmware}/Tests/test_acim_estimator.cpp"
         "${firmware}/Tests/test_can.cpp"
         "${firmware}/Tests/test_nvm_config.cpp"
         "${firmware}/Tests/test_open_loop_controller.cpp"
@@ -32,7 +33,8 @@ if(ODRIVE_BUILD_TESTS)
         "${firmware}/Tests/test_trap_traj.cpp"
         "${firmware}/MotorControl/trap_traj.c"
         "${firmware}/MotorControl/open_loop_controller.c"
-        "${firmware}/MotorControl/sensorless_estimator.c")
+        "${firmware}/MotorControl/sensorless_estimator.c"
+        "${firmware}/MotorControl/acim_estimator.c")
     target_compile_features(odrive_tests PRIVATE c_std_99 cxx_std_17)
     target_include_directories(odrive_tests PRIVATE "${firmware}"
         "${firmware}/MotorControl" "${CMAKE_CURRENT_LIST_DIR}/../../packages/fibre/include"

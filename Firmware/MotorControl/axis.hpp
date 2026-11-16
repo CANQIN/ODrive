@@ -4,7 +4,7 @@
 class Axis;
 
 #include "encoder.hpp"
-#include "acim_estimator.hpp"
+#include "acim_estimator.h"
 #include "sensorless_estimator.h"
 #include "controller.hpp"
 #include "open_loop_controller.h"
@@ -145,6 +145,20 @@ public:
         OutputPort<float> total_distance_ = 0.0f;
     };
 
+    struct AcimEstimator_t {
+        acim_config_t config_{14.706f};
+        InputPort<float> rotor_phase_src_;
+        InputPort<float> rotor_phase_vel_src_;
+        InputPort<float2D> idq_src_;
+        bool active_ = false;
+        uint32_t last_timestamp_ = 0;
+        float rotor_flux_ = 0.0f;
+        float phase_offset_ = 0.0f;
+        OutputPort<float> slip_vel_ = 0.0f;
+        OutputPort<float> stator_phase_vel_ = 0.0f;
+        OutputPort<float> stator_phase_ = 0.0f;
+    };
+
     struct SensorlessEstimator_t : public ODriveIntf::SensorlessEstimatorIntf {
         static constexpr sensorless_config_t default_config{1000.0f, 1000.0f, 1.58e-3f};
         sensorless_config_t config_ = default_config;
@@ -194,6 +208,7 @@ public:
     bool run_closed_loop_control_loop();
     bool update_encoder();
     bool update_sensorless_estimator();
+    void update_acim_estimator(uint32_t timestamp);
     void update_open_loop_controller(uint32_t timestamp);
     bool run_index_search();
     bool run_direction_find();
@@ -217,7 +232,7 @@ public:
     Config_t config_;
 
     Encoder& encoder_;
-    AcimEstimator acim_estimator_;
+    AcimEstimator_t acim_estimator_;
     SensorlessEstimator_t sensorless_estimator_;
     Controller& controller_;
     OpenLoopControl_t open_loop_controller_;

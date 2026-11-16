@@ -557,7 +557,7 @@ void Motor::update(uint32_t timestamp) {
     // A cleaner fix would be to take the feedforward calculation out of here
     // and turn it into a separate component.
     MEASURE_TIME(axis_->task_times_.acim_estimator_update)
-        axis_->acim_estimator_.update(timestamp);
+        axis_->update_acim_estimator(timestamp);
 
     float vd = 0.0f;
     float vq = 0.0f;

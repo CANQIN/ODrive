@@ -234,6 +234,38 @@ bool Axis::update_sensorless_estimator() {
     return true;
 }
 
+void Axis::update_acim_estimator(uint32_t timestamp) {
+    auto& estimator = acim_estimator_;
+    const auto rotor_phase = estimator.rotor_phase_src_.present();
+    const auto rotor_phase_vel = estimator.rotor_phase_vel_src_.present();
+    const auto idq = estimator.idq_src_.present();
+
+    if (!rotor_phase.has_value() || !rotor_phase_vel.has_value() || !idq.has_value()) {
+        estimator.active_ = false;
+        return;
+    }
+
+    const float dt = static_cast<float>(timestamp - estimator.last_timestamp_)
+                   / static_cast<float>(TIM_1_8_CLOCK_HZ);
+    estimator.last_timestamp_ = timestamp;
+    if (!estimator.active_) {
+        // 首次或恢复输入时只复位状态，本周期不发布输出。
+        estimator.rotor_flux_ = 0.0f;
+        estimator.phase_offset_ = 0.0f;
+        estimator.active_ = true;
+        return;
+    }
+
+    const acim_input_t input{*rotor_phase, *rotor_phase_vel, idq->first, idq->second};
+    const acim_state_t previous{estimator.rotor_flux_, estimator.phase_offset_};
+    const acim_output_t output = acim_estimator_step(&input, &estimator.config_, &previous, dt);
+    estimator.rotor_flux_ = output.rotor_flux;
+    estimator.phase_offset_ = output.phase_offset;
+    estimator.slip_vel_ = output.slip_vel;
+    estimator.stator_phase_vel_ = output.stator_phase_vel;
+    estimator.stator_phase_ = output.stator_phase;
+}
+
 void Axis::update_open_loop_controller(uint32_t timestamp) {
     auto& open_loop = open_loop_controller_;
     const open_loop_state_t previous{

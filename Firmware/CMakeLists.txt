@@ -65,7 +65,7 @@ set(odrive_sources
     MotorControl/encoder_sincos.cpp
     MotorControl/encoder_spi.cpp
     MotorControl/endstop.cpp
-    MotorControl/acim_estimator.cpp
+    MotorControl/acim_estimator.c
     MotorControl/mechanical_brake.cpp
     MotorControl/controller.cpp
     MotorControl/foc.cpp
