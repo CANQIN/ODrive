@@ -194,16 +194,16 @@ bool Axis::watchdog_check() {
 
 void Axis::update_open_loop_controller(uint32_t timestamp) {
     auto& open_loop = open_loop_controller_;
-    const OpenLoopController::State previous{
+    const open_loop_state_t previous{
         open_loop.Idq_setpoint_.previous().value_or(float2D{0.0f, 0.0f}).first,
         open_loop.Vdq_setpoint_.previous().value_or(float2D{0.0f, 0.0f}).first,
         open_loop.phase_.previous().value_or(open_loop.initial_phase_),
         open_loop.phase_vel_.previous().value_or(0.0f),
         open_loop.total_distance_.previous().value_or(0.0f)
     };
-    // Unsigned subtraction preserves elapsed time across timer wraparound.
+    // 无符号差值兼容计时器回绕。
     const float dt = static_cast<float>(timestamp - open_loop.timestamp_) / static_cast<float>(TIM_1_8_CLOCK_HZ);
-    const auto next = open_loop.algorithm_.update(previous, dt);
+    const open_loop_state_t next = open_loop_step(&open_loop.input_, &open_loop.limits_, &previous, dt);
     open_loop.Idq_setpoint_ = {next.current, 0.0f};
     open_loop.Vdq_setpoint_ = {next.voltage, 0.0f};
     open_loop.phase_ = next.phase;
@@ -221,12 +221,12 @@ bool Axis::run_lockin_spin(const LockinConfig_t &lockin_config, bool remain_arme
         open_loop_controller_.phase_ = 0.0f;
         open_loop_controller_.phase_vel_ = 0.0f;
 
-        open_loop_controller_.algorithm_.max_current_ramp_ = lockin_config.current / lockin_config.ramp_time;
-        open_loop_controller_.algorithm_.max_voltage_ramp_ = lockin_config.current / lockin_config.ramp_time;
-        open_loop_controller_.algorithm_.max_phase_vel_ramp_ = lockin_config.accel;
-        open_loop_controller_.algorithm_.target_current_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? lockin_config.current : 0.0f;
-        open_loop_controller_.algorithm_.target_voltage_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? 0.0f : lockin_config.current;
-        open_loop_controller_.algorithm_.target_vel_ = lockin_config.vel;
+        open_loop_controller_.limits_.max_current_ramp = lockin_config.current / lockin_config.ramp_time;
+        open_loop_controller_.limits_.max_voltage_ramp = lockin_config.current / lockin_config.ramp_time;
+        open_loop_controller_.limits_.max_phase_vel_ramp = lockin_config.accel;
+        open_loop_controller_.input_.target_current = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? lockin_config.current : 0.0f;
+        open_loop_controller_.input_.target_voltage = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? 0.0f : lockin_config.current;
+        open_loop_controller_.input_.target_phase_vel = lockin_config.vel;
         open_loop_controller_.total_distance_ = 0.0f;
 
         motor_.current_control_.enable_current_control_src_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL;
@@ -810,12 +810,12 @@ bool Axis::run_offset_calibration() {
         open_loop_controller_.phase_vel_ = 0.0f;
 
         float max_current_ramp = motor_.config_.calibration_current / start_lock_duration * 2.0f;
-        open_loop_controller_.algorithm_.max_current_ramp_ = max_current_ramp;
-        open_loop_controller_.algorithm_.max_voltage_ramp_ = max_current_ramp;
-        open_loop_controller_.algorithm_.max_phase_vel_ramp_ = INFINITY;
-        open_loop_controller_.algorithm_.target_current_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? motor_.config_.calibration_current : 0.0f;
-        open_loop_controller_.algorithm_.target_voltage_ = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? 0.0f : motor_.config_.calibration_current;
-        open_loop_controller_.algorithm_.target_vel_ = 0.0f;
+        open_loop_controller_.limits_.max_current_ramp = max_current_ramp;
+        open_loop_controller_.limits_.max_voltage_ramp = max_current_ramp;
+        open_loop_controller_.limits_.max_phase_vel_ramp = INFINITY;
+        open_loop_controller_.input_.target_current = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? motor_.config_.calibration_current : 0.0f;
+        open_loop_controller_.input_.target_voltage = motor_.config_.motor_type != Motor::MOTOR_TYPE_GIMBAL ? 0.0f : motor_.config_.calibration_current;
+        open_loop_controller_.input_.target_phase_vel = 0.0f;
         open_loop_controller_.total_distance_ = 0.0f;
         open_loop_controller_.phase_ = open_loop_controller_.initial_phase_ = wrap_pm_pi(0 - encoder_.config_.calib_scan_distance / 2.0f);
 
@@ -852,7 +852,7 @@ bool Axis::run_offset_calibration() {
     int64_t encvaluesum = 0;
 
     CRITICAL_SECTION() {
-        open_loop_controller_.algorithm_.target_vel_ = encoder_.config_.calib_scan_omega;
+        open_loop_controller_.input_.target_phase_vel = encoder_.config_.calib_scan_omega;
         open_loop_controller_.total_distance_ = 0.0f;
     }
 
@@ -892,7 +892,7 @@ bool Axis::run_offset_calibration() {
     }
 
     CRITICAL_SECTION() {
-        open_loop_controller_.algorithm_.target_vel_ = -encoder_.config_.calib_scan_omega;
+        open_loop_controller_.input_.target_phase_vel = -encoder_.config_.calib_scan_omega;
     }
 
     // scan backwards

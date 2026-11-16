@@ -1,4 +1,4 @@
-#include "MotorControl/trapTraj.hpp"
+#include "MotorControl/trap_traj.h"
 
 #include <doctest.h>
 #include <algorithm>
@@ -14,55 +14,56 @@ void run_trajectory_test(float goal, float position, float velocity, float Vmax,
     float t = 0.0f;
     float Vmax_test = std::max(Vmax, std::abs(velocity));
 
-    TrapezoidalTrajectory traj{};
+    trap_traj_t traj{};
 
     int replan_counter = 0;
 
     do {
         if (replan_counter <= 0) {
-            CHECK(traj.planTrapezoidal(goal, position, velocity, Vmax, Amax, Dmax));
+            const trap_traj_input_t input{position, velocity, goal, Vmax, Amax, Dmax};
+            trap_traj_plan(&traj, &input);
             t = 0.0f;
             replan_counter = replan_interval;
         } else {
             replan_counter--;
         }
 
-        TrapezoidalTrajectory::Step_t step = traj.eval(t);
+        const trap_traj_output_t step = trap_traj_eval(&traj, t);
         t += dt;
 
-        //std::cerr << "vel: " << step.Yd << ", pos: " << step.Y << "\n";
+        //std::cerr << "vel: " << step.velocity << ", pos: " << step.position << "\n";
         
         // Check if acceleration within bounds
         if (velocity >= 0.0f) {
-            CHECK(step.Ydd <= Amax);
-            CHECK(step.Ydd >= -Dmax);
-            CHECK((step.Yd - velocity) / dt <= Amax * 1.002f);
-            CHECK((step.Yd - velocity) / dt >= -Dmax * 1.002f);
+            CHECK(step.acceleration <= Amax);
+            CHECK(step.acceleration >= -Dmax);
+            CHECK((step.velocity - velocity) / dt <= Amax * 1.002f);
+            CHECK((step.velocity - velocity) / dt >= -Dmax * 1.002f);
         } else {
-            CHECK(step.Ydd <= Dmax);
-            CHECK(step.Ydd >= -Amax);
-            CHECK((step.Yd - velocity) / dt <= Dmax * 1.002f);
-            CHECK((step.Yd - velocity) / dt >= -Amax * 1.002f);
+            CHECK(step.acceleration <= Dmax);
+            CHECK(step.acceleration >= -Amax);
+            CHECK((step.velocity - velocity) / dt <= Dmax * 1.002f);
+            CHECK((step.velocity - velocity) / dt >= -Amax * 1.002f);
         }
 
         // Check if velocity within bounds
-        CHECK(step.Yd >= -Vmax_test);
-        CHECK(step.Yd <= Vmax_test);
-        CHECK((step.Y - position) / dt >= -Vmax_test * 1.002f);
-        CHECK((step.Y - position) / dt <= Vmax_test * 1.002f);
-        velocity = step.Yd;
+        CHECK(step.velocity >= -Vmax_test);
+        CHECK(step.velocity <= Vmax_test);
+        CHECK((step.position - position) / dt >= -Vmax_test * 1.002f);
+        CHECK((step.position - position) / dt <= Vmax_test * 1.002f);
+        velocity = step.velocity;
 
         // Check if position is making progress
         // TODO: the trajectory planner currently needs three "warm-up" iterations
         // until its position makes progress. This should probably be revisited.
         // TODO: this is disabled currently because there are legitimate trajectories
         // where the position first moves in the wrong direction.
-        //if ((replan_counter < replan_interval - 2) && (t <= traj.Tf_)) {
-        //    CHECK(std::abs(step.Y - goal) < std::abs(position - goal));
+        //if ((replan_counter < replan_interval - 2) && (t <= trap_traj_duration(&traj))) {
+        //    CHECK(std::abs(step.position - goal) < std::abs(position - goal));
         //}
-        position = step.Y;
+        position = step.position;
 
-    } while (t <= traj.Tf_);
+    } while (t <= trap_traj_duration(&traj));
 
     CHECK(position >= goal - 1.0f);
     CHECK(position <= goal + 1.0f);
@@ -72,22 +73,45 @@ void run_trajectory_test(float goal, float position, float velocity, float Vmax,
 
 
 TEST_SUITE("Trajectory Planner") {
-    TEST_CASE("trapezoid-phase-boundaries-and-independent-evaluation") {
-        TrapezoidalTrajectory traj{};
-        REQUIRE(traj.planTrapezoidal(10.0f, 0.0f, 0.0f, 2.0f, 1.0f, 1.0f));
-        CHECK(traj.Ta_ == doctest::Approx(2.0f));
-        CHECK(traj.Tv_ == doctest::Approx(3.0f));
-        CHECK(traj.Td_ == doctest::Approx(2.0f));
-        CHECK(traj.Tf_ == doctest::Approx(7.0f));
+    TEST_CASE("plans-can-be-copied-and-replanned-independently") {
+        trap_traj_t trajectory{};
+        const trap_traj_input_t forward{0.0f, 0.0f, 10.0f, 2.0f, 1.0f, 1.0f};
+        trap_traj_plan(&trajectory, &forward);
+        const trap_traj_t saved = trajectory;
 
-        const auto& planned = traj;
+        const trap_traj_input_t reverse{0.0f, 0.0f, -1.0f, 2.0f, 1.0f, 1.0f};
+        trap_traj_plan(&trajectory, &reverse);
+        CHECK(trap_traj_duration(&saved) == doctest::Approx(7.0f));
+        CHECK(trap_traj_duration(&trajectory) == doctest::Approx(2.0f));
+        CHECK(trap_traj_eval(&saved, 1.0f).position == doctest::Approx(0.5f));
+        CHECK(trap_traj_eval(&trajectory, 1.0f).position == doctest::Approx(-0.5f));
+    }
+
+    TEST_CASE("stationary-plan-has-zero-duration") {
+        trap_traj_t trajectory{};
+        const trap_traj_input_t input{3.5f, 0.0f, 3.5f, 2.0f, 1.0f, 1.0f};
+        trap_traj_plan(&trajectory, &input);
+        CHECK(trap_traj_duration(&trajectory) == doctest::Approx(0.0f));
+        const trap_traj_output_t output = trap_traj_eval(&trajectory, 0.0f);
+        CHECK(output.position == doctest::Approx(3.5f));
+        CHECK(output.velocity == doctest::Approx(0.0f));
+        CHECK(output.acceleration == doctest::Approx(0.0f));
+    }
+
+    TEST_CASE("trapezoid-phase-boundaries-and-independent-evaluation") {
+        trap_traj_t traj{};
+        const trap_traj_input_t input{0.0f, 0.0f, 10.0f, 2.0f, 1.0f, 1.0f};
+        trap_traj_plan(&traj, &input);
+        CHECK(trap_traj_duration(&traj) == doctest::Approx(7.0f));
+
+        const trap_traj_t& planned = traj;
         const auto check_step = [&planned](float t, float pos, float vel, float accel) {
-            const auto step = planned.eval(t);
-            CHECK(step.Y == doctest::Approx(pos));
-            CHECK(step.Yd == doctest::Approx(vel));
-            CHECK(step.Ydd == doctest::Approx(accel));
+            const auto step = trap_traj_eval(&planned, t);
+            CHECK(step.position == doctest::Approx(pos));
+            CHECK(step.velocity == doctest::Approx(vel));
+            CHECK(step.acceleration == doctest::Approx(accel));
         };
-        // Query out of order and repeat: evaluation must not change playback state.
+        // 乱序和重复求值不改变轨迹。
         check_step(7.0f, 10.0f, 0.0f, 0.0f);
         check_step(1.0f, 0.5f, 1.0f, 1.0f);
         check_step(-1.0f, 0.0f, 0.0f, 0.0f);
@@ -100,20 +124,18 @@ TEST_SUITE("Trajectory Planner") {
     }
 
     TEST_CASE("triangle-phase-boundaries") {
-        TrapezoidalTrajectory traj{};
-        REQUIRE(traj.planTrapezoidal(1.0f, 0.0f, 0.0f, 2.0f, 1.0f, 1.0f));
-        CHECK(traj.Ta_ == doctest::Approx(1.0f));
-        CHECK(traj.Tv_ == doctest::Approx(0.0f));
-        CHECK(traj.Td_ == doctest::Approx(1.0f));
-        CHECK(traj.Tf_ == doctest::Approx(2.0f));
-        const auto peak = traj.eval(1.0f);
-        CHECK(peak.Y == doctest::Approx(0.5f));
-        CHECK(peak.Yd == doctest::Approx(1.0f));
-        CHECK(peak.Ydd == doctest::Approx(-1.0f));
-        const auto end = traj.eval(2.0f);
-        CHECK(end.Y == doctest::Approx(1.0f));
-        CHECK(end.Yd == doctest::Approx(0.0f));
-        CHECK(end.Ydd == doctest::Approx(0.0f));
+        trap_traj_t traj{};
+        const trap_traj_input_t input{0.0f, 0.0f, 1.0f, 2.0f, 1.0f, 1.0f};
+        trap_traj_plan(&traj, &input);
+        CHECK(trap_traj_duration(&traj) == doctest::Approx(2.0f));
+        const auto peak = trap_traj_eval(&traj, 1.0f);
+        CHECK(peak.position == doctest::Approx(0.5f));
+        CHECK(peak.velocity == doctest::Approx(1.0f));
+        CHECK(peak.acceleration == doctest::Approx(-1.0f));
+        const auto end = trap_traj_eval(&traj, 2.0f);
+        CHECK(end.position == doctest::Approx(1.0f));
+        CHECK(end.velocity == doctest::Approx(0.0f));
+        CHECK(end.acceleration == doctest::Approx(0.0f));
     }
 
     // these form a triangle trajectory because 2*v^2/(2*a) = 2 * 27712^2 / (2*22288) = 34456 > 16384

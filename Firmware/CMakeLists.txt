@@ -69,10 +69,10 @@ set(odrive_sources
     MotorControl/mechanical_brake.cpp
     MotorControl/controller.cpp
     MotorControl/foc.cpp
-    MotorControl/open_loop_controller.cpp
+    MotorControl/open_loop_controller.c
     MotorControl/oscilloscope.cpp
     MotorControl/sensorless_estimator.cpp
-    MotorControl/trapTraj.cpp
+    MotorControl/trap_traj.c
     MotorControl/pwm_input.cpp
     MotorControl/main.cpp
     Drivers/STM32/stm32_system.cpp

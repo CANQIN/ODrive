@@ -7,8 +7,8 @@ class Axis;
 #include "acim_estimator.hpp"
 #include "sensorless_estimator.hpp"
 #include "controller.hpp"
-#include "open_loop_controller.hpp"
-#include "trapTraj.hpp"
+#include "open_loop_controller.h"
+#include "trap_traj.h"
 #include "endstop.hpp"
 #include "mechanical_brake.hpp"
 #include "low_level.h"
@@ -119,7 +119,7 @@ public:
         uint32_t last_bus_vi = 0;
     };
 
-    // Application configuration and playback state stay outside the planner.
+    // 应用配置和轨迹运行时间。
     struct TrapTrajectory_t {
         struct Config_t {
             float vel_limit = 2.0f;   // [turn/s]
@@ -128,13 +128,14 @@ public:
         };
 
         Config_t config_;
-        TrapezoidalTrajectory trajectory_;
+        trap_traj_t trajectory_{};
         float t_ = 0.0f;
     };
 
-    // Port freshness and hardware timestamps belong to the control loop.
+    // 控制周期的时间戳和输出端口。
     struct OpenLoopControl_t {
-        OpenLoopController algorithm_;
+        open_loop_input_t input_{};
+        open_loop_limits_t limits_{INFINITY, INFINITY, INFINITY};
         float initial_phase_ = 0.0f;
         uint32_t timestamp_ = 0;
         OutputPort<float2D> Idq_setpoint_ = {{0.0f, 0.0f}};

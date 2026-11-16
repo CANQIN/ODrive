@@ -30,10 +30,14 @@ void Controller::set_error(Error error) {
 
 void Controller::move_to_pos(float goal_point) {
     auto& trap = axis_->trap_traj_;
-    trap.trajectory_.planTrapezoidal(goal_point, pos_setpoint_, vel_setpoint_,
-                                   trap.config_.vel_limit,
-                                   trap.config_.accel_limit,
-                                   trap.config_.decel_limit);
+    trap_traj_input_t input{};
+    input.initial_position = pos_setpoint_;
+    input.initial_velocity = vel_setpoint_;
+    input.target_position = goal_point;
+    input.max_velocity = trap.config_.vel_limit;
+    input.max_acceleration = trap.config_.accel_limit;
+    input.max_deceleration = trap.config_.decel_limit;
+    trap_traj_plan(&trap.trajectory_, &input);
     trap.t_ = 0.0f;
     trajectory_done_ = false;
 }
@@ -253,18 +257,18 @@ bool Controller::update() {
                 break;
             
             auto& trap = axis_->trap_traj_;
-            if (trap.t_ > trap.trajectory_.Tf_) {
+            const trap_traj_output_t traj_step = trap_traj_eval(&trap.trajectory_, trap.t_);
+            if (trap.t_ > trap_traj_duration(&trap.trajectory_)) {
                 // Drop into position control mode when done to avoid problems on loop counter delta overflow
                 config_.control_mode = CONTROL_MODE_POSITION_CONTROL;
-                pos_setpoint_ = trap.trajectory_.Xf_;
+                pos_setpoint_ = traj_step.position;
                 vel_setpoint_ = 0.0f;
                 torque_setpoint_ = 0.0f;
                 trajectory_done_ = true;
             } else {
-                TrapezoidalTrajectory::Step_t traj_step = trap.trajectory_.eval(trap.t_);
-                pos_setpoint_ = traj_step.Y;
-                vel_setpoint_ = traj_step.Yd;
-                torque_setpoint_ = traj_step.Ydd * config_.inertia;
+                pos_setpoint_ = traj_step.position;
+                vel_setpoint_ = traj_step.velocity;
+                torque_setpoint_ = traj_step.acceleration * config_.inertia;
                 trap.t_ += current_meas_period;
             }
             anticogging_pos_estimate = pos_setpoint_; // FF the position setpoint instead of the pos_estimate
