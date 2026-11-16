@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 /* 位置单位为圈，时间单位为秒；输入须为有限值，三个限值须大于 0。 */
-struct trap_traj_input
+typedef struct trap_traj_input
 {
     float initial_position;
     float initial_velocity;
@@ -14,18 +14,16 @@ struct trap_traj_input
     float max_velocity;
     float max_acceleration;
     float max_deceleration;
-};
-typedef struct trap_traj_input trap_traj_input_t;
+} trap_traj_input_t;
 
-struct trap_traj_output
+typedef struct trap_traj_output
 {
     float position;     /* 圈 */
     float velocity;     /* 圈/s */
     float acceleration; /* 圈/s^2 */
-};
-typedef struct trap_traj_output trap_traj_output_t;
+} trap_traj_output_t;
 
-struct trap_traj
+typedef struct trap_traj
 {
     float initial_position;
     float target_position;
@@ -38,8 +36,7 @@ struct trap_traj
     float decel_time;
     float duration;
     float accel_end_position;
-};
-typedef struct trap_traj trap_traj_t;
+} trap_traj_t;
 
 void trap_traj_plan(trap_traj_t *trajectory, const trap_traj_input_t *input);
 
