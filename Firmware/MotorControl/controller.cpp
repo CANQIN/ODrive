@@ -29,11 +29,12 @@ void Controller::set_error(Error error) {
 
 
 void Controller::move_to_pos(float goal_point) {
-    axis_->trap_traj_.planTrapezoidal(goal_point, pos_setpoint_, vel_setpoint_,
-                                 axis_->trap_traj_.config_.vel_limit,
-                                 axis_->trap_traj_.config_.accel_limit,
-                                 axis_->trap_traj_.config_.decel_limit);
-    axis_->trap_traj_.t_ = 0.0f;
+    auto& trap = axis_->trap_traj_;
+    trap.trajectory_.planTrapezoidal(goal_point, pos_setpoint_, vel_setpoint_,
+                                   trap.config_.vel_limit,
+                                   trap.config_.accel_limit,
+                                   trap.config_.decel_limit);
+    trap.t_ = 0.0f;
     trajectory_done_ = false;
 }
 
@@ -251,19 +252,20 @@ bool Controller::update() {
             if (trajectory_done_)
                 break;
             
-            if (axis_->trap_traj_.t_ > axis_->trap_traj_.Tf_) {
+            auto& trap = axis_->trap_traj_;
+            if (trap.t_ > trap.trajectory_.Tf_) {
                 // Drop into position control mode when done to avoid problems on loop counter delta overflow
                 config_.control_mode = CONTROL_MODE_POSITION_CONTROL;
-                pos_setpoint_ = axis_->trap_traj_.Xf_;
+                pos_setpoint_ = trap.trajectory_.Xf_;
                 vel_setpoint_ = 0.0f;
                 torque_setpoint_ = 0.0f;
                 trajectory_done_ = true;
             } else {
-                TrapezoidalTrajectory::Step_t traj_step = axis_->trap_traj_.eval(axis_->trap_traj_.t_);
+                TrapezoidalTrajectory::Step_t traj_step = trap.trajectory_.eval(trap.t_);
                 pos_setpoint_ = traj_step.Y;
                 vel_setpoint_ = traj_step.Yd;
                 torque_setpoint_ = traj_step.Ydd * config_.inertia;
-                axis_->trap_traj_.t_ += current_meas_period;
+                trap.t_ += current_meas_period;
             }
             anticogging_pos_estimate = pos_setpoint_; // FF the position setpoint instead of the pos_estimate
         } break;

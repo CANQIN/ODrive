@@ -27,7 +27,8 @@ if(ODRIVE_BUILD_TESTS)
         "${firmware}/Tests/test_nvm_config.cpp"
         "${firmware}/Tests/test_rotate.cpp"
         "${firmware}/Tests/test_timer.cpp"
-        "${firmware}/Tests/test_trap_traj.cpp")
+        "${firmware}/Tests/test_trap_traj.cpp"
+        "${firmware}/MotorControl/trapTraj.cpp")
     target_compile_features(odrive_tests PRIVATE cxx_std_17)
     target_include_directories(odrive_tests PRIVATE "${firmware}"
         "${firmware}/MotorControl" "${CMAKE_CURRENT_LIST_DIR}/../../packages/fibre/include"

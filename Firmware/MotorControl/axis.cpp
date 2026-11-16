@@ -15,7 +15,6 @@ Axis::Axis(int axis_num,
            SensorlessEstimator& sensorless_estimator,
            Controller& controller,
            Motor& motor,
-           TrapezoidalTrajectory& trap,
            Endstop& min_endstop,
            Endstop& max_endstop,
            MechanicalBrake& mechanical_brake)
@@ -27,7 +26,6 @@ Axis::Axis(int axis_num,
       sensorless_estimator_(sensorless_estimator),
       controller_(controller),
       motor_(motor),
-      trap_traj_(trap),
       min_endstop_(min_endstop),
       max_endstop_(max_endstop),
       mechanical_brake_(mechanical_brake)
@@ -46,7 +44,6 @@ Axis::Axis(int axis_num,
     }, this);
     controller_.axis_ = this;
     motor_.axis_ = this;
-    trap_traj_.axis_ = this;
     min_endstop_.axis_ = this;
     max_endstop_.axis_ = this;
     mechanical_brake_.axis_ = this;

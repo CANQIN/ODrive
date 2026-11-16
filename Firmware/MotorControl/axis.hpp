@@ -119,6 +119,19 @@ public:
         uint32_t last_bus_vi = 0;
     };
 
+    // Application configuration and playback state stay outside the planner.
+    struct TrapTrajectory_t {
+        struct Config_t {
+            float vel_limit = 2.0f;   // [turn/s]
+            float accel_limit = 0.5f; // [turn/s^2]
+            float decel_limit = 0.5f; // [turn/s^2]
+        };
+
+        Config_t config_;
+        TrapezoidalTrajectory trajectory_;
+        float t_ = 0.0f;
+    };
+
     Axis(int axis_num,
             uint16_t default_step_gpio_pin,
             uint16_t default_dir_gpio_pin,
@@ -127,7 +140,6 @@ public:
             SensorlessEstimator& sensorless_estimator,
             Controller& controller,
             Motor& motor,
-            TrapezoidalTrajectory& trap,
             Endstop& min_endstop,
             Endstop& max_endstop,
             MechanicalBrake& mechanical_brake);
@@ -185,7 +197,7 @@ public:
     Controller& controller_;
     OpenLoopController open_loop_controller_;
     Motor& motor_;
-    TrapezoidalTrajectory& trap_traj_;
+    TrapTrajectory_t trap_traj_;
     Endstop& min_endstop_;
     Endstop& max_endstop_;
     MechanicalBrake& mechanical_brake_;

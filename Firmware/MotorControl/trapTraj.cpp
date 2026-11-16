@@ -1,11 +1,7 @@
-#include <cmath>
-#include "odrive_main.h"
-#include "utils.hpp"
+#include "trapTraj.hpp"
 
-// A sign function where input 0 has positive sign (not 0)
-float sign_hard(float val) {
-    return (std::signbit(val)) ? -1.0f : 1.0f;
-}
+#include <algorithm>
+#include <cmath>
 
 // Symbol                     Description
 // Ta, Tv and Td              Duration of the stages of the AL profile
@@ -20,7 +16,7 @@ bool TrapezoidalTrajectory::planTrapezoidal(float Xf, float Xi, float Vi,
     float dX = Xf - Xi;  // Distance to travel
     float stop_dist = (Vi * Vi) / (2.0f * Dmax); // Minimum stopping distance
     float dXstop = std::copysign(stop_dist, Vi); // Minimum stopping displacement
-    float s = sign_hard(dX - dXstop); // Sign of coast velocity (if any)
+    float s = std::signbit(dX - dXstop) ? -1.0f : 1.0f; // Sign of coast velocity (if any)
     Ar_ = s * Amax;  // Maximum Acceleration (signed)
     Dr_ = -s * Dmax; // Maximum Deceleration (signed)
     Vr_ = s * Vmax;  // Maximum Velocity (signed)
@@ -42,7 +38,7 @@ bool TrapezoidalTrajectory::planTrapezoidal(float Xf, float Xi, float Vi,
     // Are we displacing enough to reach cruising speed?
     if (s*dX < s*dXmin) {
         // Short move (triangle profile)
-        Vr_ = s * std::sqrt(std::max((Dr_*SQ(Vi) + 2*Ar_*Dr_*dX) / (Dr_ - Ar_), 0.0f));
+        Vr_ = s * std::sqrt(std::max((Dr_*(Vi*Vi) + 2*Ar_*Dr_*dX) / (Dr_ - Ar_), 0.0f));
         Ta_ = std::max(0.0f, (Vr_ - Vi) / Ar_);
         Td_ = std::max(0.0f, -Vr_ / Dr_);
         Tv_ = 0.0f;
@@ -56,19 +52,19 @@ bool TrapezoidalTrajectory::planTrapezoidal(float Xf, float Xi, float Vi,
     Xi_ = Xi;
     Xf_ = Xf;
     Vi_ = Vi;
-    yAccel_ = Xi + Vi*Ta_ + 0.5f*Ar_*SQ(Ta_); // pos at end of accel phase
+    yAccel_ = Xi + Vi*Ta_ + 0.5f*Ar_*(Ta_*Ta_); // pos at end of accel phase
 
     return true;
 }
 
-TrapezoidalTrajectory::Step_t TrapezoidalTrajectory::eval(float t) {
+TrapezoidalTrajectory::Step_t TrapezoidalTrajectory::eval(float t) const {
     Step_t trajStep;
     if (t < 0.0f) {  // Initial Condition
         trajStep.Y   = Xi_;
         trajStep.Yd  = Vi_;
         trajStep.Ydd = 0.0f;
     } else if (t < Ta_) {  // Accelerating
-        trajStep.Y   = Xi_ + Vi_*t + 0.5f*Ar_*SQ(t);
+        trajStep.Y   = Xi_ + Vi_*t + 0.5f*Ar_*(t*t);
         trajStep.Yd  = Vi_ + Ar_*t;
         trajStep.Ydd = Ar_;
     } else if (t < Ta_ + Tv_) {  // Coasting
@@ -77,7 +73,7 @@ TrapezoidalTrajectory::Step_t TrapezoidalTrajectory::eval(float t) {
         trajStep.Ydd = 0.0f;
     } else if (t < Tf_) {  // Deceleration
         float td     = t - Tf_;
-        trajStep.Y   = Xf_ + 0.5f*Dr_*SQ(td);
+        trajStep.Y   = Xf_ + 0.5f*Dr_*(td*td);
         trajStep.Yd  = Dr_*td;
         trajStep.Ydd = Dr_;
     } else if (t >= Tf_) {  // Final Condition
