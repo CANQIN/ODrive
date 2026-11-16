@@ -238,16 +238,11 @@ class ODriveComponent(Component):
         self.handle = None
         self.yaml = yaml
 
-        if yaml['board-version'].startswith("v3."):
-            self.encoders = [ODriveEncoderComponent(self, 0, yaml['encoder0']), ODriveEncoderComponent(self, 1, yaml['encoder1'])]
-            self.axes = [ODriveAxisComponent(self, 0, yaml['motor0']), ODriveAxisComponent(self, 1, yaml['motor1'])]
-            gpio_nums = range(1,9)
-        elif yaml['board-version'].startswith("v4."):
-            self.encoders = [ODriveEncoderComponent(self, 0, yaml['encoder0'])]
-            self.axes = [ODriveAxisComponent(self, 0, yaml['motor0'])]
-            gpio_nums = range(23)
-        else:
-            raise Exception("unknown board version {}".format(yaml['board-version']))
+        if yaml['board-version'] != 'v3.6-56V':
+            raise ValueError("Only v3.6-56V is supported, got {}".format(yaml['board-version']))
+        self.encoders = [ODriveEncoderComponent(self, 0, yaml['encoder0']), ODriveEncoderComponent(self, 1, yaml['encoder1'])]
+        self.axes = [ODriveAxisComponent(self, 0, yaml['motor0']), ODriveAxisComponent(self, 1, yaml['motor1'])]
+        gpio_nums = range(1,9)
 
         for i in gpio_nums:
             self.__setattr__('gpio' + str(i), Component(self))

@@ -43,7 +43,7 @@ Wiring up the ODrive
 
 .. warning:: Make sure you have a good mechanical connection between the encoder and the motor, slip can cause disastrous oscillations or runaway.
 
-All non-power I/O is 3.3V output and 5V tolerant on input, on ODrive v3.3 and newer.
+All non-power I/O is 3.3V output and 5V tolerant on input, on ODrive v3.6-56V.
 
 Wiring up the motors
 ********************************************************************************
@@ -207,13 +207,7 @@ Firmware
 
 To simplify the start up procedure we suggest using the latest firmware verion. Please follow the instructions :ref:`here <firmware-update>` to make sure your firmware is up to date.
 
-.. admonition:: **ODrive v3.5 and later**
-
-    Your board should come preflashed with the latest firmware. If you run into problems, check your firmware version and upgrade if possible.
-
-.. admonition:: **ODrive v3.4 and earlier**
-
-    Your board does **not** come preflashed with any firmware. Follow the instructions :ref:`here <st-link-flash>` on the ST Link procedure before you continue.
+This project supports only ODrive v3.6-56V. Use firmware built for this board.
 
 
 .. _odrivetool-startup:

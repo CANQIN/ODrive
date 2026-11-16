@@ -213,11 +213,9 @@ class TestFlashAndErase(ODriveTest):
         run(shlex.join(['cmake', '--build', str(build), '--target', 'firmware',
                         '--parallel']), logger, timeout=300)
         programmer = ['-c', 'hla_serial ' + odrv_ctx.yaml['programmer']]
-        target = 'stm32f4x.cfg' if board.startswith('v3.') else 'stm32f7x.cfg'
-        reset = [] if board.startswith('v3.') else ['-c', 'reset_config none separate']
         firmware = (build / 'firmware' / 'ODriveFirmware.elf').as_posix()
         run(shlex.join(['openocd', '-f', 'interface/stlink.cfg'] + programmer +
-                       ['-f', 'target/' + target] + reset +
+                       ['-f', 'target/stm32f4x.cfg'] +
                        ['-c', 'program {' + firmware + '} verify reset exit']),
             logger, timeout=20)
 

@@ -37,25 +37,16 @@ class UartTest():
 
     def get_test_cases(self, testrig: TestRig):
         for odrive in testrig.get_components(ODriveComponent):
-            if odrive.yaml['board-version'].startswith('v3.'):
-                ports = testrig.get_connected_components({
-                    'rx': (odrive.gpio1, True),
-                    'tx': (odrive.gpio2, False)
-                }, SerialPortComponent)
-                yield AnyTestCase(*[(odrive, 0, 1, 2, port, tf) for port, tf in ports])
+            ports = testrig.get_connected_components({
+                'rx': (odrive.gpio1, True),
+                'tx': (odrive.gpio2, False)
+            }, SerialPortComponent)
+            yield AnyTestCase(*[(odrive, 0, 1, 2, port, tf) for port, tf in ports])
 
-                # Enable the line below to manually test UART_B. For this you need
-                # to manually move to the wires go to GPIO1/2 to GPIO3/4. The ones
-                # that normally go to GPIO3/4 have a low pass filter.
-                #yield (odrive, 1, 3, 4, ports)
-            elif odrive.yaml['board-version'].startswith('v4.'):
-                ports = list(testrig.get_connected_components({
-                    'rx': (odrive.gpio15, True),
-                    'tx': (odrive.gpio14, False)
-                }, SerialPortComponent))
-                yield AnyTestCase(*[(odrive, 0, 15, 14, port, tf) for port, tf in ports])
-            else:
-                raise TestFailed("unknown board version")
+            # Enable the line below to manually test UART_B. For this you need
+            # to manually move to the wires go to GPIO1/2 to GPIO3/4. The ones
+            # that normally go to GPIO3/4 have a low pass filter.
+            #yield (odrive, 1, 3, 4, ports)
 
     def prepare(self, odrive: ODriveComponent, uart_num: int, tx_gpio: list, rx_gpio: list, logger: Logger):
         logger.debug('Enabling UART {}...'.format(chr(ord('A') + uart_num)))
@@ -255,10 +246,7 @@ class TestUartNoise(UartTest):
     
     def get_test_cases(self, testrig: TestRig):
         for odrive in testrig.get_components(ODriveComponent):
-            if odrive.yaml['board-version'].startswith('v3.'):
-                uart_num, tx_gpio, rx_gpio = (0, 1, 2)
-            elif odrive.yaml['board-version'].startswith('v4.'):
-                uart_num, tx_gpio, rx_gpio = (0, 15, 14)
+            uart_num, tx_gpio, rx_gpio = (0, 1, 2)
 
             alternatives = []
 

@@ -78,8 +78,7 @@ VSCode 根目录或 Firmware 目录的默认构建任务都使用此入口；构
 常用选项：
 
 * ``ODRIVE_BUILD_FIRMWARE``、``ODRIVE_BUILD_HOST``：默认 ``ON``，按需关闭某一侧。
-* ``ODRIVE_BOARD_VERSION``：默认 ``v3.6-56V``，支持原有 v3 系列板型。
-  v4 板型需要未随公开仓库提供的 ``Private`` 配置，缺失时配置阶段明确报错。
+* ``ODRIVE_BOARD_VERSION``：仅支持 ``v3.6-56V``（STM32F405），其他值会在配置阶段报错。
 * ``CMAKE_BUILD_TYPE``：``Release`` 或 ``Debug``。
 * ``ODRIVE_USE_LTO``、``ODRIVE_STRICT``：默认 ``OFF``，分别控制链接优化与警告视为错误。
 * ``ARM_TOOLCHAIN_DIR``、``Python3_EXECUTABLE``：显式选择 ARM 工具链和 Python。
@@ -254,40 +253,6 @@ This happens from time to time.
 #. Plug in the STLink into your computer
 #. Power on the ODrive
 #. Run OpenOCD 手动烧录命令 again
-
-:code:`Cannot identify target as a STM32 family` when flashing using openocd
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Problem:** When I try to flash ODrive v4.1 with OpenOCD 手动烧录命令 then I get:
-
-.. code:: Bash
-
-  [...]
-  ** Programming Started **
-  auto erase enabled
-  Info : device id = 0x10006452
-  Warn : Cannot identify target as a STM32 family.
-  Error: auto_probe failed
-  embedded:startup.tcl:487: Error: ** Programming Failed **
-  in procedure 'program' 
-  in procedure 'program_error' called at file "embedded:startup.tcl", line 543
-  at file "embedded:startup.tcl", line 487
-
-
-**Solution:**
-Compile and install a recent version of openocd from source. 
-The latest official release (0.10.0 as of Nov 2020) doesn't support the STM32F722 yet.
-
-.. code:: Bash
-
-  sudo apt-get install libtool libusb-1.0
-  git clone https://git.code.sf.net/p/openocd/code openocd
-  cd openocd/
-  ./bootstrap
-  ./configure --enable-stlink
-  make
-  sudo make install
-
 
 Documentation
 --------------------------------------------------------------------------------

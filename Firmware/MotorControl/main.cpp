@@ -16,10 +16,8 @@ osMessageQId uart_event_queue;
 osMessageQId usb_event_queue;
 osSemaphoreId sem_can;
 
-#if defined(STM32F405xx)
 // Place FreeRTOS heap in core coupled memory for better performance
 __attribute__((section(".ccmram")))
-#endif
 uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
 uint32_t _reboot_cookie __attribute__ ((section (".noinit")));
@@ -30,58 +28,6 @@ ODrive odrv{};
 
 
 ConfigManager config_manager;
-
-class StatusLedController {
-public:
-    void update();
-};
-
-StatusLedController status_led_controller;
-
-void StatusLedController::update() {
-#if HW_VERSION_MAJOR == 4
-    uint32_t t = HAL_GetTick();
-
-    bool is_booting = std::any_of(axes.begin(), axes.end(), [](Axis& axis){
-        return axis.current_state_ == Axis::AXIS_STATE_UNDEFINED;
-    });
-
-    if (is_booting) {
-        return;
-    }
-
-    bool is_armed = std::any_of(axes.begin(), axes.end(), [](Axis& axis){
-        return axis.motor_.is_armed_;
-    });
-    bool any_error = odrv.any_error();
-
-    if (is_armed) {
-        // Fast green pulsating
-        const uint32_t period_ms = 256;
-        const uint8_t min_brightness = 0;
-        const uint8_t max_brightness = 255;
-        uint32_t brightness = std::abs((int32_t)(t % period_ms) - (int32_t)(period_ms / 2)) * (max_brightness - min_brightness) / (period_ms / 2) + min_brightness;
-        brightness = (brightness * brightness) >> 8; // eye response very roughly sqrt
-        status_led.set_color(rgb_t{(uint8_t)(any_error ? brightness / 2 : 0), (uint8_t)brightness, 0});
-    } else if (any_error) {
-        // Red pulsating
-        const uint32_t period_ms = 1024;
-        const uint8_t min_brightness = 0;
-        const uint8_t max_brightness = 255;
-        uint32_t brightness = std::abs((int32_t)(t % period_ms) - (int32_t)(period_ms / 2)) * (max_brightness - min_brightness) / (period_ms / 2) + min_brightness;
-        brightness = (brightness * brightness) >> 8; // eye response very roughly sqrt
-        status_led.set_color(rgb_t{(uint8_t)brightness, 0, 0});
-    } else {
-        // Slow blue pulsating
-        const uint32_t period_ms = 4096;
-        const uint8_t min_brightness = 50;
-        const uint8_t max_brightness = 160;
-        uint32_t brightness = std::abs((int32_t)(t % period_ms) - (int32_t)(period_ms / 2)) * (max_brightness - min_brightness) / (period_ms / 2) + min_brightness;
-        brightness = (brightness * brightness) >> 8; // eye response very roughly sqrt
-        status_led.set_color(rgb_t{0, 0, (uint8_t)brightness});
-    }
-#endif
-}
 
 static bool config_read_all() {
     bool success = board_read_config() &&
@@ -285,8 +231,6 @@ void vApplicationIdleHook(void) {
         odrv.system_stats_.prio_startup = osThreadGetPriority(defaultTaskHandle);
         odrv.system_stats_.prio_can = osThreadGetPriority(odrv.can_.thread_id_);
         odrv.system_stats_.prio_analog = osThreadGetPriority(analog_thread);
-
-        status_led_controller.update();
     }
 }
 }

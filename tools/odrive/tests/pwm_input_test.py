@@ -44,25 +44,16 @@ class TestPwmInput():
     The Teensy generates a PWM signal that goes from 0% (1ms high) to 100% (2ms high)
     in 1 second and then resumes at 0%.
 
-    Note: this test is currently only written for ODrive 3.6 (or similar GPIO layout).
+    This test uses the GPIO layout of ODrive v3.6-56V.
     """
 
     def get_test_cases(self, testrig: TestRig):
         for odrive in testrig.get_components(ODriveComponent):
-            if odrive.yaml['board-version'].startswith('v3.'):
-                # Run a separate test for each PWM-capable GPIO. Use different min/max settings for each test.
-                test_cases = [(1, -50, 200, odrive.gpio1),
-                              (2, 20, 400, odrive.gpio2),
-                              (3, -1000, 0, odrive.gpio3),
-                              (4, -20000, 20000, odrive.gpio4)]
-            elif odrive.yaml['board-version'].startswith('v4.'):
-                # Run a separate test for each PWM-capable GPIO. Use different min/max settings for each test.
-                test_cases = [(14, -50, 200, odrive.gpio14),
-                              (19, 20, 400, odrive.gpio19),
-                              (20, -20000, 20000, odrive.gpio20),
-                              (21, -1000, 0, odrive.gpio21)]
-            else:
-                raise Exception(f"unknown board version {odrive.yaml['board-version']}")
+            # Run a separate test for each PWM-capable GPIO. Use different min/max settings for each test.
+            test_cases = [(1, -50, 200, odrive.gpio1),
+                          (2, 20, 400, odrive.gpio2),
+                          (3, -1000, 0, odrive.gpio3),
+                          (4, -20000, 20000, odrive.gpio4)]
 
             for test_case in test_cases:
                 yield AnyTestCase(*[(odrive,) + tuple(test_case[:-1]) + (teensy_gpio,tf,) for teensy_gpio, tf in testrig.get_connected_components(test_case[-1], TeensyGpio)])

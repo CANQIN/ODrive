@@ -1,13 +1,7 @@
 #ifndef __STM32_SYSTEM_H
 #define __STM32_SYSTEM_H
 
-#if defined(STM32F405xx)
 #include <stm32f405xx.h>
-#elif defined(STM32F722xx)
-#include <stm32f722xx.h>
-#else
-#error "unknown STM32 microcontroller"
-#endif
 
 // C/C++ definitions
 

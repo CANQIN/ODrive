@@ -75,7 +75,7 @@ Note: If developing on Windows, you should have :code:`arm-none-eabi-gdb` and :c
     再执行 :code:`cmake --build build --target firmware --parallel`。
     Windows 也可使用 :code:`./build.ps1 -Configuration Debug -Target firmware`。
   * Flash the board with the newest code (starting debug session doesn't do this)
-  * 在 **Run** 页签 (:kbd:`Ctrl` **+** :kbd:`Shift` **+** :kbd:`D`) 选择对应板型配置，例如 "Debug ODrive v3.x - ST-Link"。
+  * 在 **Run** 页签 (:kbd:`Ctrl` **+** :kbd:`Shift` **+** :kbd:`D`) 选择 "Debug ODrive v3.6-56V - ST-Link"。
   * Press **Start Debugging** (or press :kbd:`F5`)
   * The processor will reset and halt.
   * Set your breakpoints. Note: you can only set breakpoints when the processor is halted, if you set them during run mode, they won't get applied.

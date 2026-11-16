@@ -1,9 +1,13 @@
 /*
-* @brief Contains board specific configuration for ODrive v3.x
+* @brief Contains board specific configuration for ODrive v3.6-56V
 */
 
 #ifndef __BOARD_CONFIG_H
 #define __BOARD_CONFIG_H
+
+#if HW_VERSION_MAJOR != 3 || HW_VERSION_MINOR != 6 || HW_VERSION_VOLTAGE != 56
+#error "This firmware only supports ODrive v3.6-56V"
+#endif
 
 #include <stdbool.h>
 
@@ -22,26 +26,16 @@
 
 #include <Drivers/STM32/stm32_system.h>
 
-#if HW_VERSION_MINOR <= 3
-#define SHUNT_RESISTANCE (675e-6f)
-#else
 #define SHUNT_RESISTANCE (500e-6f)
-#endif
 
 #define AXIS_COUNT (2)
 
 // Total count of GPIOs, including encoder pins, CAN pins and a dummy GPIO0.
-// ODrive v3.4 and earlier don't have GPIOs 6, 7 and 8 but to keep the numbering
-// consistent we just leave a gap in the counting scheme.
 #define GPIO_COUNT  (17)
 
 #define CAN_FREQ (2000000UL)
 
-#if HW_VERSION_MINOR >= 5 && HW_VERSION_VOLTAGE >= 48
 #define DEFAULT_BRAKE_RESISTANCE (2.0f) // [ohm]
-#else
-#define DEFAULT_BRAKE_RESISTANCE (0.47f) // [ohm]
-#endif
 
 #define DEFAULT_ERROR_PIN 0
 #define DEFAULT_MIN_DC_VOLTAGE 8.0f
@@ -121,13 +115,7 @@ static const float current_meas_period = CURRENT_MEAS_PERIOD;
 #define CURRENT_MEAS_HZ ( (float)(TIM_1_8_CLOCK_HZ) / (float)(2*TIM_1_8_PERIOD_CLOCKS*(TIM_1_8_RCR+1)) )
 static const int current_meas_hz = CURRENT_MEAS_HZ;
 
-#if HW_VERSION_VOLTAGE >= 48
 #define VBUS_S_DIVIDER_RATIO 19.0f
-#elif HW_VERSION_VOLTAGE == 24
-#define VBUS_S_DIVIDER_RATIO 11.0f
-#else
-#error "unknown board voltage"
-#endif
 
 // Linear range of the DRV8301 opamp output: 0.3V...5.7V. We set the upper limit
 // to 3.0V so that it's symmetric around the center point of 1.65V.

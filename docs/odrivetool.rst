@@ -84,7 +84,7 @@ Device Firmware Update
 
 .. attention:: 
 
-    DFU is not supported on ODrive v3.4 or earlier. You need to :ref:`flash with the external programmer <flashing-with-an-stlink>` instead.
+    This project supports only ODrive v3.6-56V. Select firmware for this exact hardware version.
 
 To update the ODrive to the newest firmware release, simply open up a terminal and run the following command:
 
@@ -98,7 +98,7 @@ You should then see
 
     ODrive control utility v0.3.7.dev
     Waiting for ODrive...
-    Found ODrive 308039673235 (v3.5-24V) with firmware v0.3.7-dev
+    Found ODrive 308039673235 (v3.6-56V) with firmware v0.3.7-dev
     Checking online for newest firmware... found v0.3.7
     Downloading firmware...
     Putting device 308039673235 into DFU mode...
@@ -149,18 +149,9 @@ On some machines you will need to unplug and plug back in the USB cable to make 
 
 If the DFU script can't find the device, try forcing it into DFU mode:
 
-.. tabs:: 
-    .. tab:: ODrive v3.5 and newer
-
-        Flick the DIP switch that says "DFU, RUN" to "DFU" and power cycle the board. 
-        If that alone doesn't work, also connect the pin "GPIO6" to "GND". 
-        After you're done upgrading firmware, don't forget to put the switch back into the "RUN" position and power cycle the board again.
-
-    .. tab:: ODrive v3.1, v3.2
-
-        Connect the pin "BOOT0" to "3.3V" and power cycle the board. 
-        If that alone doesn't work, also connect the pin "GPIO1" to "GND". 
-        After you're done, remove the wires and power cycle the board again.
+Flick the DIP switch that says "DFU, RUN" to "DFU" and power cycle the board.
+If that alone does not work, also connect the pin "GPIO6" to "GND".
+After upgrading firmware, put the switch back into the "RUN" position and power cycle the board again.
 
 
 .. _st-link-flash:
@@ -250,7 +241,7 @@ ST has a tool called STM32CubeProgrammer.
 
         .. code:: Bash
 
-            arm-none-eabi-objcopy -O binary ODriveFirmware_v3.5-48V.elf ODriveFirmware_v3.5-48V.bin
+            arm-none-eabi-objcopy -O binary ODriveFirmware_v3.6-56V.elf ODriveFirmware_v3.6-56V.bin
 
         Install :code:`dfu-util`
 
@@ -284,11 +275,11 @@ ST has a tool called STM32CubeProgrammer.
 
         .. code:: Bash
 
-            sudo dfu-util -S 388237123123 -a 0 -s 0x08000000 -D ODriveFirmware_v3.5-48V.bin
+            sudo dfu-util -S 388237123123 -a 0 -s 0x08000000 -D ODriveFirmware_v3.6-56V.bin
 
 Flashing with an STLink
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This procedure is only necessary for ODrive v3.4 or earlier. You will need an STLink/v2 or compatible programmer. You should have received one with your ODrive.
+You can also flash ODrive v3.6-56V with an STLink/v2 or compatible programmer.
 
 #. Install OpenOCD
     * **Windows:** `instructions <http://gnuarmeclipse.github.io/openocd/install/>`_ (also follow the instructions on the ST-LINK/V2 drivers)
@@ -306,17 +297,17 @@ This procedure is only necessary for ODrive v3.4 or earlier. You will need an ST
     and power up the ODrive.
 
 #. Open up a terminal and navigate to the directory where the firmware is.
-#. Run the following command (replace :code:`ODriveFirmware_v3.4-24V.elf` with the name of your firmware file):
+#. Run the following command (replace :code:`ODriveFirmware_v3.6-56V.elf` with the name of your firmware file):
 
     .. code:: Bash
 
-        openocd -f interface/stlink-v2.cfg -f target/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase ODriveFirmware_v3.4-24V.elf" -c "reset run" -c exit
+        openocd -f interface/stlink-v2.cfg -f target/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase ODriveFirmware_v3.6-56V.elf" -c "reset run" -c exit
 
     If everything worked correctly, you should see something similar to this towards the end of the printout:
 
     .. code:: Bash
 
-        wrote 262144 bytes from file ODriveFirmware_v3.4-24V.elf in 10.194110s (25.113 KiB/s)
+        wrote 262144 bytes from file ODriveFirmware_v3.6-56V.elf in 10.194110s (25.113 KiB/s)
 
     If something doesn't work, make sure :code:`openocd` is in your :code:`PATH` variable, check that the wires are connected properly and try with elevated privileges.
 

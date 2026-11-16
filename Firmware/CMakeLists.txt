@@ -22,7 +22,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ODRIVE_STRICT "将固件编译警告视为错误" OFF)
 option(ODRIVE_USE_LTO "启用链接时优化" OFF)
-option(ODRIVE_NO_DRM "禁用 DRM" OFF)
 option(ODRIVE_ENABLE_DISASM "输出反汇编文件" OFF)
 include(cmake/boards.cmake)
 
@@ -37,9 +36,6 @@ add_compile_options(-mthumb -mfloat-abi=hard ${odrive_cpu_options}
     $<$<NOT:$<CONFIG:Debug>>:-O2>)
 if(ODRIVE_STRICT)
     add_compile_options(-Werror)
-endif()
-if(ODRIVE_NO_DRM)
-    add_compile_definitions(NO_DRM)
 endif()
 if(ODRIVE_USE_LTO)
     add_compile_options(-flto)
@@ -113,7 +109,6 @@ target_include_directories(ODriveFirmware BEFORE PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FreeRTOS/Source/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FreeRTOS/Source/CMSIS_RTOS"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Device/ST/STM32F7xx/Include"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CMSIS/Device/ST/STM32F4xx/Include"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/STM32_USB_Device_Library/Core/Inc"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/STM32_USB_Device_Library/Class/CDC/Inc")

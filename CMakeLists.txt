@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(ODrive LANGUAGES NONE)
 
+include(cmake/board-version.cmake)
+
 include(ExternalProject)
 find_package(Python3 3.8 REQUIRED COMPONENTS Interpreter)
 find_program(ODRIVE_NINJA_EXECUTABLE NAMES ninja REQUIRED)
@@ -16,9 +18,7 @@ option(ODRIVE_GUI_INSTALL_DEPS "GUI 构建前运行 npm ci" OFF)
 option(ODRIVE_BUILD_TESTS "构建已有固件主机测试" OFF)
 option(ODRIVE_USE_LTO "固件启用 LTO" OFF)
 option(ODRIVE_STRICT "固件将警告视为错误" OFF)
-option(ODRIVE_NO_DRM "固件关闭 DRM" OFF)
 option(ODRIVE_ENABLE_DISASM "生成固件反汇编" OFF)
-set(ODRIVE_BOARD_VERSION v3.6-56V CACHE STRING "固件硬件版本")
 set(ARM_TOOLCHAIN_DIR "" CACHE PATH "ARM GCC 安装目录或 bin 目录")
 set(ODRIVE_HOST_INSTALL "${CMAKE_BINARY_DIR}/host/install")
 
@@ -61,7 +61,6 @@ if(ODRIVE_BUILD_FIRMWARE)
             "-DODRIVE_BOARD_VERSION:STRING=${ODRIVE_BOARD_VERSION}"
             "-DODRIVE_USE_LTO:BOOL=${ODRIVE_USE_LTO}"
             "-DODRIVE_STRICT:BOOL=${ODRIVE_STRICT}"
-            "-DODRIVE_NO_DRM:BOOL=${ODRIVE_NO_DRM}"
             "-DODRIVE_ENABLE_DISASM:BOOL=${ODRIVE_ENABLE_DISASM}"
         INSTALL_COMMAND ""
         BUILD_ALWAYS TRUE

@@ -1,30 +1,22 @@
 .. _pinout-chart:
 
 ================================================================================
-ODrive v3.x Pinout
+ODrive v3.6-56V Pinout
 ================================================================================
 
 .. contents::
    :depth: 1
    :local:
    
-.. ODrive v4.1
-.. --------------------------------------------------------------------------------
-
-.. **TODO**
-
-.. ODrive v3.x
-.. --------------------------------------------------------------------------------
-
 .. csv-table:: Pinout Table
    :file: figures/pinout.csv
    :header-rows: 1
 
 **key:**
 
-* **(*)** ODrive v3.5 and later.
+* **(*)** Available on ODrive v3.6-56V.
 
-* **(+)** On ODrive v3.5 and later these pins have noise suppression filters. This is useful for step/dir input.
+* **(+)** These pins have noise suppression filters. This is useful for step/dir input.
 
 Notes
 --------------------------------------------------------------------------------
@@ -35,5 +27,5 @@ Notes
 * When setting a GPIO to a special purpose mode (e.g. :code:`GPIO_MODE_UART_A`) you must also enable the corresponding feature (e.g. :code:`<odrv>.config.enable_uart_a`).
 * Digital mode is a general purpose mode that can be used for these functions: step, dir, enable, encoder index, hall effect encoder, SPI encoder nCS.
 * You must also connect GND between ODrive and your other board.
-* ODrive v3.3 and onward have 5V tolerant GPIO pins.
+* ODrive v3.6-56V has 5V tolerant GPIO pins.
 * Simultaneous operation of UART_A and UART_B is currently not supported.

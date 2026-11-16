@@ -185,7 +185,7 @@ interfaces:
              not enabled. Example: `GPIO_MODE_UART_A` was used without enabling
              `config.enable_uart_a`.
            - A feature was enabled which is not supported on this hardware.
-             Example: `config.enable_uart_c` set to true on ODrive v3.x.
+             Example: `config.enable_uart_c` set to true on ODrive v3.6-56V.
            - A GPIO was used as an interrupt input for two internal components
              or two GPIOs that are mutually exclusive in their interrupt
              capability were both used as interrupt input.
@@ -255,7 +255,7 @@ interfaces:
           You also need to set the corresponding GPIOs to GPIO_MODE_UART_B.
           Refer to [interfaces](interfaces.md) to see which pins support UART_B.
           Changing this requires a reboot.
-      enable_uart_c: {type: bool, doc: Not supported on ODrive v3.x.}
+      enable_uart_c: {type: bool, doc: Not supported on ODrive v3.6-56V.}
       uart_a_baudrate:
         type: uint32
         unit: baud/s
@@ -263,7 +263,7 @@ interfaces:
         doc: |
           Some baudrates will have a small timing error due to hardware limitations.
 
-          Here's an (incomplete) list of baudrates for ODrive v3.x:
+          Here's an (incomplete) list of baudrates for ODrive v3.6-56V:
           
           +-------------+---------------+-----------+
           | Configured  | Actual        | Error [%] |
@@ -302,7 +302,7 @@ interfaces:
         unit: baud/s
         brief: Defines the baudrate used on the UART interface.
         doc: See `uart_a_baudrate` for details.
-      uart_c_baudrate: {type: uint32, doc: Not supported on ODrive v3.x.}
+      uart_c_baudrate: {type: uint32, doc: Not supported on ODrive v3.6-56V.}
       enable_can_a:
         type: bool
         doc: |
@@ -310,9 +310,8 @@ interfaces:
       enable_i2c_a:
         type: bool
         doc: |
-          Enables I2C. The I2C pins on ODrive v3.x are in conflict with CAN.
+          Enables I2C. The I2C pins on ODrive v3.6-56V are in conflict with CAN.
           This setting has no effect if `enable_can_a` is also true.
-          This setting has no effect on ODrive v3.2 or earlier.
           Changing this setting requires a reboot.
       usb_cdc_protocol:
         type: StreamProtocolType
@@ -696,20 +695,6 @@ interfaces:
           DRV_FAULT:
             bit: 3
             brief: The gate driver chip reported an error.
-            doc: |
-              The ODrive v3.4 is known to have a hardware issue whereby the
-              motors would stop operating when applying high currents to M0. The
-              reported error of both motors in this case is `ERROR_DRV_FAULT`.
-
-              The conjecture is that the high switching current creates large
-              ripples in the power supply of the DRV8301 gate driver chips, thus
-              tripping its under-voltage fault detection.
-
-              To resolve this issue you can limit the M0 current to 40A. The
-              lowest current at which the DRV fault was observed is 45A on one
-              test motor and 50A on another test motor. Refer to
-              [this post](https://discourse.odriverobotics.com/t/drv-fault-on-odrive-v3-4/558)
-              for instructions for a hardware fix.
           CONTROL_DEADLINE_MISSED:
           MODULATION_MAGNITUDE:
             bit: 7
@@ -1484,17 +1469,17 @@ valuetypes:
           The pin can be used for one or more of these functions:
           Sin/cos encoders, analog input, `get_adc_voltage()`.
       UART_A: {doc: See `config.enable_uart_a`.}
-      UART_B: {doc: This mode is not supported on ODrive v3.x.}
-      UART_C: {doc: This mode is not supported on ODrive v3.x.}
+      UART_B: {doc: This mode is not supported on ODrive v3.6-56V.}
+      UART_C: {doc: This mode is not supported on ODrive v3.6-56V.}
       CAN_A: {doc: See `config.enable_can_a`.}
       I2C_A: {doc: See `config.enable_i2c_a`.}
-      SPI_A: {doc: Note that the SPI pins on ODrive v3.x are hardwired so they
+      SPI_A: {doc: Note that the SPI pins on ODrive v3.6-56V are hardwired so they
         cannot be configured through software. Consequently, even though SPI_A
-        is exposed, this mode is of no use on ODrive v3.x.}
+        is exposed, this mode is of no use on ODrive v3.6-56V.}
       PWM: {doc: See `config.gpio1_pwm_mapping`.}
       ENC0: {doc: The pin is used by quadrature encoder 0.}
       ENC1: {doc: The pin is used by quadrature encoder 1.}
-      ENC2: {doc: This mode is not supported on ODrive v3.x.}
+      ENC2: {doc: This mode is not supported on ODrive v3.6-56V.}
       MECH_BRAKE: {doc: This is to support external mechanical brakes.}
       STATUS: {doc: The pin is used for status output (see `config.error_gpio_pin`)}
 

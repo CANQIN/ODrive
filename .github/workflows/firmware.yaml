@@ -17,13 +17,6 @@ jobs:
         debug: [true]
 
         include:
-          - {os: ubuntu-latest, board_version: v3.2, debug: false}
-          - {os: ubuntu-latest, board_version: v3.3, debug: false}
-          - {os: ubuntu-latest, board_version: v3.4-24V, debug: false}
-          - {os: ubuntu-latest, board_version: v3.4-48V, debug: false}
-          - {os: ubuntu-latest, board_version: v3.5-24V, debug: false}
-          - {os: ubuntu-latest, board_version: v3.5-48V, debug: false}
-          - {os: ubuntu-latest, board_version: v3.6-24V, debug: false}
           - {os: ubuntu-latest, board_version: v3.6-56V, debug: false}
 
     runs-on: ${{ matrix.os }}
@@ -111,7 +104,7 @@ jobs:
           echo "::set-output name=formatted_board_version::$formatted_version"
 
       - name: Upload firmware to ODrive release system
-        if: ${{ steps.release-info.outputs.channel == 'master' && matrix.os == 'ubuntu-latest' && matrix.debug == false && (startsWith(matrix.board_version, 'v3.5-') || startsWith(matrix.board_version, 'v3.6-')) }}
+        if: ${{ steps.release-info.outputs.channel == 'master' && matrix.os == 'ubuntu-latest' && matrix.debug == false }}
         uses: ./.github/actions/upload-release
         with:
           release_type: firmware

@@ -192,7 +192,7 @@ To flash and start remote debugging:
       You can keep this open for multiple debug sessions. Press :kbd:`Ctrl` **+** :kbd:`C` to quit.
 
 #. Compile the firmware.
-#. In VSCode, select the run configuration "Debug ODrive v3.x/v4.x - Remote" and press Run. This will flash the new firmware before dropping you into the debugger.
+#. In VSCode, select the run configuration "Debug ODrive v3.6-56V - Remote" and press Run. This will flash the new firmware before dropping you into the debugger.
 
 To run a test:
 

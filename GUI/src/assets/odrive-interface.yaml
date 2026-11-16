@@ -142,9 +142,9 @@ interfaces:
             unit: A
             doc: Max current the power supply can sink. You most likely want a non-positive value here. Set to -INFINITY to disable.
 
-          gpio1_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[0]'} # TODO: disable for ODrive v3.2 and older
-          gpio2_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[1]'} # TODO: disable for ODrive v3.2 and older
-          gpio3_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[2]'} # TODO: disable for ODrive v3.2 and older
+          gpio1_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[0]'}
+          gpio2_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[1]'}
+          gpio3_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[2]'}
           gpio4_pwm_mapping: {type: Endpoint, c_name: 'pwm_mappings[3]'}
           gpio3_analog_mapping: {type: Endpoint, c_name: 'analog_mappings[2]'}
           gpio4_analog_mapping: {type: Endpoint, c_name: 'analog_mappings[3]'}

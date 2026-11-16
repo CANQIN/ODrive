@@ -9,11 +9,11 @@ Specifications
 Electrical Specifications
 --------------------------------------------------------------------------------
 
-Besides the input voltage range, (12V to 24V for ODrive v3.6 24V, 12V to 56V for ODrive v3.6 56V), the electrical specifications of both version of ODrive v3.6 are the same.
+This project supports ODrive v3.6-56V, with an input voltage range of 12V to 56V.
 
-.. note:: ODrive versions after v3.5 are closed-source with respect to board files and schematics.
+.. note:: ODrive v3.6 board files and schematics are not publicly available.
 
-ODrive v3.6 24V and 56V
+ODrive v3.6-56V
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Peak current per motor: 120 Amps
@@ -28,18 +28,8 @@ ODrive v3.6 24V and 56V
     * 35000 eRPM / # of motor pole pairs
     * (840M counts/minute) / encoder counts per revolution (for incremental encoders - 4 x pulses per revolution).
 
-Schematic
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The electrical schematic for ODrive v3.5 is available `here <https://github.com/madcowswe/ODriveHardware/blob/master/v3/v3.5docs/schematic_v3.5.pdf>`__ in PDF format.
-
 Mechanical Specifications
 --------------------------------------------------------------------------------
-
-STEP File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A step file for ODrive v3.5 is available `here <https://github.com/madcowswe/ODriveHardware/blob/master/v3/v3.5docs/PCB_v3.5.step>`__.
 
 Board Outline and Mounting Hole Dimensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

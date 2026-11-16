@@ -1,6 +1,6 @@
 ## Important Note
 
-The firmware in this repository is compatible with the ODrive v3.x (NRND) and is no longer under active development.
+The firmware in this repository is compatible only with the ODrive v3.6-56V (NRND) and is no longer under active development.
 
 Firmware for the new generation of ODrives ([ODrive Pro](https://odriverobotics.com/shop/odrive-pro), [S1](https://odriverobotics.com/shop/odrive-s1), [Micro](https://odriverobotics.com/shop/odrive-micro), etc.) is currently being actively maintained and developed, however its source code is currently not publicly available. Access may be available under NDA, please [reach out to us](mailto:info@odriverobotics.com) for inquiries.
 
@@ -17,7 +17,7 @@ cmake --build build --parallel
 
 默认构建 `firmware` 和 `host`：固件输出在 `build/firmware/`，新 Fibre 客户端安装在 `build/host/install/`。`tools` 通过包外 PyUSB 适配使用该客户端，GUI 继续调用 tools 的应用接口。固件与 tools 共用 [独立 Fibre 包](packages/fibre/README.md)。
 
-`ODRIVE_BOARD_VERSION` 默认 `v3.6-56V`。按需启用 `ODRIVE_BUILD_TOOLS` 生成 Python 分发包，启用 `ODRIVE_BUILD_GUI` 提供 `gui_web`、`gui_package`；GUI 依赖可通过 `gui_dependencies` 安装。打包文件写入 `build/dist/`，原生库对应本次 PC 工具链。
+本工程仅支持 `v3.6-56V`（STM32F405）。`ODRIVE_BOARD_VERSION` 仅接受该值，其他板型会在配置阶段报错。按需启用 `ODRIVE_BUILD_TOOLS` 生成 Python 分发包，启用 `ODRIVE_BUILD_GUI` 提供 `gui_web`、`gui_package`；GUI 依赖可通过 `gui_dependencies` 安装。打包文件写入 `build/dist/`，原生库对应本次 PC 工具链。
 
 具体配置见 [开发指南](docs/developer-guide.rst)。
 

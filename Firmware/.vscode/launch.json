@@ -9,7 +9,7 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "request": "launch",
-            "name": "Debug ODrive v3.x - ST-Link",
+            "name": "Debug ODrive v3.6-56V - ST-Link",
             "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
             "configFiles": [
                 "interface/stlink-v2.cfg",
@@ -23,24 +23,7 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "request": "launch",
-            "name": "Debug ODrive v4.x - ST-Link",
-            "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
-            "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32f7x.cfg",
-            ],
-            "openOCDLaunchCommands": [
-                "reset_config none separate"
-            ],
-            "svdFile": "${workspaceRoot}/Private/v4/STM32F722.svd",
-            "cwd": "${workspaceRoot}"
-        },
-        {
-            // For the Cortex-Debug extension
-            "type": "cortex-debug",
-            "servertype": "openocd",
-            "request": "launch",
-            "name": "Debug ODrive v3.x - ST-Link - FreeRTOS",
+            "name": "Debug ODrive v3.6-56V - ST-Link - FreeRTOS",
             "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
             "rtos": "FreeRTOS",
             "configFiles": [
@@ -60,7 +43,7 @@
                 "load"
             ],
             "request": "launch",
-            "name": "Debug ODrive v3.x - Remote",
+            "name": "Debug ODrive v3.6-56V - Remote",
             "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
             "configFiles": [
                 "interface/stlink-v2.cfg",
@@ -70,30 +53,11 @@
             "cwd": "${workspaceRoot}"
         },
         {
-            // For the Cortex-Debug extension
-            // ssh -t odrv4 -L3333:localhost:3333 bash -c "\"openocd '-f' 'interface/stlink.cfg' '-f' 'target/stm32f7x.cfg' -c 'reset_config none separate'\""
-            "type": "cortex-debug",
-            "servertype": "external",
-            "gdbTarget": "localhost:3333",
-            "preLaunchCommands": [
-                "load"
-            ],
-            "request": "launch",
-            "name": "Debug ODrive v4.x - Remote",
-            "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
-            "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32f7x.cfg",
-            ],
-            "svdFile": "${workspaceRoot}/Private/v4/STM32F722.svd",
-            "cwd": "${workspaceRoot}"
-        },
-        {
             // For the Cortex-Debug extensions
             "type": "cortex-debug",
             "servertype": "bmp",
             "request": "launch",
-            "name": "Debug ODrive v3.x - Black Magic Probe",
+            "name": "Debug ODrive v3.6-56V - Black Magic Probe",
             "executable": "${workspaceRoot}/../build/firmware/ODriveFirmware.elf",
             "device": "STM32F4xx",
             "BMPGDBSerialPort": "${env:BMP_PORT}",

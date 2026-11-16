@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [ValidateSet('v3.1', 'v3.2', 'v3.3', 'v3.4-24V', 'v3.4-48V', 'v3.5-24V', 'v3.5-48V', 'v3.6-24V', 'v3.6-56V', 'v4.0-56V', 'v4.1-58V')]
+    [ValidateSet('v3.6-56V')]
     [string]$BoardVersion,
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
