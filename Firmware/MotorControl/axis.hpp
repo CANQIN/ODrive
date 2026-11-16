@@ -132,6 +132,18 @@ public:
         float t_ = 0.0f;
     };
 
+    // Port freshness and hardware timestamps belong to the control loop.
+    struct OpenLoopControl_t {
+        OpenLoopController algorithm_;
+        float initial_phase_ = 0.0f;
+        uint32_t timestamp_ = 0;
+        OutputPort<float2D> Idq_setpoint_ = {{0.0f, 0.0f}};
+        OutputPort<float2D> Vdq_setpoint_ = {{0.0f, 0.0f}};
+        OutputPort<float> phase_ = 0.0f;
+        OutputPort<float> phase_vel_ = 0.0f;
+        OutputPort<float> total_distance_ = 0.0f;
+    };
+
     Axis(int axis_num,
             uint16_t default_step_gpio_pin,
             uint16_t default_dir_gpio_pin,
@@ -170,6 +182,7 @@ public:
                 std::function<bool(bool)> loop_cb = {} );
     bool run_closed_loop_control_loop();
     bool update_encoder();
+    void update_open_loop_controller(uint32_t timestamp);
     bool run_index_search();
     bool run_direction_find();
     bool run_hall_polarity_calibration();
@@ -195,7 +208,7 @@ public:
     AcimEstimator acim_estimator_;
     SensorlessEstimator& sensorless_estimator_;
     Controller& controller_;
-    OpenLoopController open_loop_controller_;
+    OpenLoopControl_t open_loop_controller_;
     Motor& motor_;
     TrapTrajectory_t trap_traj_;
     Endstop& min_endstop_;

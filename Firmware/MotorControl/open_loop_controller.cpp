@@ -1,30 +1,24 @@
-
 #include "open_loop_controller.hpp"
-#include <board.h>
 
-void OpenLoopController::update(uint32_t timestamp) {
-    auto [prev_Id, prev_Iq] = Idq_setpoint_.previous().value_or(float2D{0.0f, 0.0f});
-    auto [prev_Vd, prev_Vq] = Vdq_setpoint_.previous().value_or(float2D{0.0f, 0.0f});
-    float phase = phase_.previous().value_or(initial_phase_);
-    float phase_vel = phase_vel_.previous().value_or(0.0f);
+#include <algorithm>
+#include <cmath>
 
-    (void)prev_Iq; // unused
-    (void)prev_Vq; // unused
+OpenLoopController::State OpenLoopController::update(const State& previous, float dt) const {
+    State next;
+    next.current = std::clamp(target_current_,
+                             previous.current - max_current_ramp_ * dt,
+                             previous.current + max_current_ramp_ * dt);
+    next.voltage = std::clamp(target_voltage_,
+                             previous.voltage - max_voltage_ramp_ * dt,
+                             previous.voltage + max_voltage_ramp_ * dt);
+    next.phase_vel = std::clamp(target_vel_,
+                               previous.phase_vel - max_phase_vel_ramp_ * dt,
+                               previous.phase_vel + max_phase_vel_ramp_ * dt);
 
-    float dt = (float)(timestamp - timestamp_) / (float)TIM_1_8_CLOCK_HZ;
-    
-    Idq_setpoint_ = {
-        std::clamp(target_current_, prev_Id - max_current_ramp_ * dt, prev_Id + max_current_ramp_ * dt),
-        0.0f
-    };
-    Vdq_setpoint_ = {
-        std::clamp(target_voltage_, prev_Vd - max_voltage_ramp_ * dt, prev_Vd + max_voltage_ramp_ * dt),
-        0.0f
-    };
-    
-    phase_vel = std::clamp(target_vel_, phase_vel - max_phase_vel_ramp_ * dt, phase_vel + max_phase_vel_ramp_ * dt);
-    phase_vel_ = phase_vel;
-    phase_ = wrap_pm_pi(phase + phase_vel * dt);
-    total_distance_ = total_distance_.previous().value_or(0.0f) + phase_vel * dt;
-    timestamp_ = timestamp;
+    // Preserve the existing integration order: use the updated velocity.
+    const float phase = previous.phase + next.phase_vel * dt;
+    constexpr float two_pi = 2.0f * 3.14159265358979323846f;
+    next.phase = phase - std::nearbyint(phase / two_pi) * two_pi;
+    next.total_distance = previous.total_distance + next.phase_vel * dt;
+    return next;
 }

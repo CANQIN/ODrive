@@ -418,7 +418,7 @@ void ODrive::control_loop_cb(uint32_t timestamp) {
         }
 
         MEASURE_TIME(axis.task_times_.open_loop_controller_update)
-            axis.open_loop_controller_.update(timestamp);
+            axis.update_open_loop_controller(timestamp);
 
         MEASURE_TIME(axis.task_times_.motor_update)
             axis.motor_.update(timestamp); // uses torque from controller and phase_vel from encoder
